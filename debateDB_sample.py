@@ -64,8 +64,8 @@ def add_voteMap(tx, votemapID):
 
 ### ARGUMENT ###
 
-def add_argument(tx, argumentID):
-    tx.run("MERGE (a:Argument {name: $argumentID})", argumentID=argumentID)
+def add_argument(tx, argumentID, argumentContent):
+    tx.run("MERGE (a:Argument {id: $argumentID, content: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
 
 
 ############################################
@@ -100,13 +100,13 @@ def add_gives_comment(tx, userName, commentID):
            "MERGE (a)-[:GIVES_COMMENT]->(b)", userName=userName, commentID=commentID)
 
 
-### User-Category ###
+'''### User-Category ###
 
 def add_has_stance(tx, userName, categoryName):
     tx.run("MATCH (a:User {name: $userName}) \n" +
            "MATCH (b:Category {name: $categoryName}) \n" +
            "MERGE (a)-[:HAS_STANCE]->(b)", userName=userName, categoryName=categoryName) # pro/con
-
+'''
 
 ### User-Argument ###
 
@@ -238,14 +238,29 @@ def read_friendship(tx):
 def read_gives_comment(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_COMMENT]->(b:Comment) RETURN a.name, b.commentID, b.commentContent")
     for record in result:
-        print("{} gives comment {} with content {}".format(record["a.name"], record["b.commentID"], record["b.commentContent"]))
+        #print("{} gives comment {} with content {}".format(record["a.name"], record["b.commentID"], record["b.commentContent"]))
+        print(record)
 
+def read_has_comment(tx):
+    result = tx.run("MATCH (a:Debate)-[rel:HAS_COMMENT]->(b:Comment) RETURN a.title, b.commentID, b.commentContent")
+    for record in result:
+        print("{} has comment {} with content {}".format(record["a.title"], record["b.commentID"], record["b.commentContent"]))
+        #print(record)
 
-
+def read_argument(tx):
+    result = tx.run("MATCH (n:Argument) \n" +
+           "RETURN n.id, n.content")
+    for record in result:
+        print(record["n.id"], record['n.content'])
+        category_distri.append(record['n.category'])
+        #print(record)
 
 ########################
 ### Sessions - write ###
 ########################
+
+sample = 1
+
 
 with driver.session() as session:
 
@@ -268,14 +283,14 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 1:
+        if c >= sample:
             break
 
     print("-- user nodes done --")
 
     ### user edges - friendship ###
 
-    c = 0
+    '''c = 0
     for i in users_data:
         c = c + 1
 
@@ -291,10 +306,10 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 1:
+        if c >= sample:
             break
 
-    print("-- user edges - friendship done --")
+    print("-- user edges - friendship done --")'''
 
     ### debate nodes ###
 
@@ -307,13 +322,13 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 300:
+        if c >= sample:
             break
     print("-- debate nodes done --")
 
     ### user edges - debates ###
 
-    c = 0
+    '''c = 0
     for i in debates_data:
         c = c + 1
         forfeit_bool1 = False
@@ -343,10 +358,10 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 10:
+        if c >= sample:
             break
 
-    print("-- user edges - debates_in done --")
+    print("-- user edges - debates_in done --")'''
 
     ### comment nodes ###
 
@@ -364,30 +379,72 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 10:
+        if c >= sample:
             break
     print("-- comment nodes done --")
 
-
-    ### user edge - gives_comment ###
+     ### user edge - gives_comment ###
 
     c = 0
     for i in debates_data:
         c = c + 1
-
+        c2 = 0
         for k in debates_data[i]['comments']:
-            #c2 = c2 + 1
-            #commentID = str(str(i) + '_Comment_' + str(c2))
-            #session.write_transaction(add_comment, commentID, k['comment_text'])
-            print(k)
+            c2 = c2 + 1
+            commentID = str(str(i) + '_Comment_' + str(c2))
+            session.write_transaction(add_gives_comment, k['user_name'], commentID)
+            #print(k)
             #print(k['comment_text'])
         if c % 100 == 0:
             print(c)
-        if c >= 1:
+        if c >= sample:
             break
 
     print("-- user edge - gives_comment done --")
 
+
+    ### debate edge - has_comment ###
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+        c2 = 0
+        for k in debates_data[i]['comments']:
+            c2 = c2 + 1
+            commentID = str(str(i) + '_Comment_' + str(c2))
+            session.write_transaction(add_has_comment, i, commentID)
+            #print(k)
+            #print(k['comment_text'])
+        if c % 100 == 0:
+            print(c)
+        if c >= sample:
+            break
+
+    print("-- debate edge - has_comment done --")
+
+
+    ### argument nodes ###
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+        c2 = 0
+        for k in debates_data[i]['rounds']:
+            c2 = c2 + 1
+            for p in k:
+                argumentID = str(str(i) + "_round_" + str(c2) + "_"+ str(p['side']))
+                #print(i, p['text'])
+                #commentID = str(str(i) + '_Comment_' + str(c2))
+                session.write_transaction(add_argument, argumentID, p['text'])
+                #print(argumentID, p['text'])
+                #print(k['comment_text'])
+
+
+        if c % 100 == 0:
+            print(c)
+        if c >= 10:
+            break
+    print("-- comment nodes done --")
 
     print("-- write done --")
 
@@ -400,7 +457,9 @@ with driver.session() as session:
     #session.read_transaction(read_friendship)
     #session.read_transaction(read_debate)
     #session.read_transaction(read_debates_in)
-    session.read_transaction(read_gives_comment)
+    #session.read_transaction(read_gives_comment)
+    #session.read_transaction(read_has_comment)
+    session.read_transaction(read_has_comment)
 
     print("-- read done --")
 
