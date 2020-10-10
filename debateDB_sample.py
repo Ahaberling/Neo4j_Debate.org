@@ -1,6 +1,6 @@
 from neo4j import GraphDatabase
 import json
-import collections
+#import collections
 
 ######################
 ### Initialization ###
@@ -58,8 +58,14 @@ def add_category(tx, categoryName):
 
 ### VOTEMAP ###
 
-def add_voteMap(tx, votemapID):
-    tx.run("MERGE (a:VoteMap {name: $votemapID})", votemapID=votemapID)
+def add_voteMap(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
+                reliableSources, pointsParticipant1, pointsParticipant2):
+    tx.run("MERGE (a:VoteMap {name: $votemapID, aggredBeforeDebate: $beforeDebate, aggredAfterDebate: $afterDebate, " +
+           "betterConduct: $betterConduct, betterSpellingGrammar: $betterSpellingGrammar, convincingArguments: $convincingArguments, " +
+           "reliableSources: $reliableSources, pointsParticipant1: $pointsParticipant1, pointsParticipant2: $pointsParticipant2})",
+           votemapID=votemapID, beforeDebate=beforeDebate, afterDebate=afterDebate, betterConduct=betterConduct,
+           betterSpellingGrammar=betterSpellingGrammar, convincingArguments=convincingArguments, reliableSources=reliableSources,
+           pointsParticipant1=pointsParticipant1, pointsParticipant2=pointsParticipant2)
 
 
 ### ARGUMENT ###
@@ -90,7 +96,6 @@ def add_debates_in(tx, userName, debateName, debateForfeit, debateWinning, debat
            "MATCH (b:Debate {name: $debateName}) \n" +
            "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, winning: $debateWinning, position: $debatePosition }]->(b)",
            userName=userName, debateName=debateName, debateForfeit=debateForfeit, debateWinning=debateWinning, debatePosition=debatePosition)
-    #print(userName, debateName, debateForfeit)
 
 ### User-Comment ###
 
@@ -112,9 +117,9 @@ def add_has_stance(tx, userName, categoryName):
 
 def add_gives_argument(tx, userName, argumentID):
     tx.run("MATCH (a:User {name: $userName}) \n" +
-           "MATCH (b:Argument {name: $argumentID}) \n" +
+           "MATCH (b:Argument {id: $argumentID}) \n" +
            "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userName=userName, argumentID=argumentID)
-
+    #print(userName, '-----', argumentID)
 
 ### User-VoteMap ###
 
@@ -155,7 +160,7 @@ def add_has_voteMap(tx, debateName, votemapID):
 
 def add_round(tx, debateName, argumentID):
     tx.run("MATCH (a:Debate {name: $debateName}) \n" +
-           "MATCH (b:Argument {name: $argumentID}) \n" +
+           "MATCH (b:Argument {id: $argumentID}) \n" +
            "MERGE (a)-[:ROUND]->(b)", debateName=debateName, argumentID=argumentID)
 
 
@@ -206,11 +211,11 @@ def read_user(tx):
     result = tx.run("MATCH (n:User) \n" +
            "RETURN n.name, n.birthday, n.last_online, n.interested,n.income")
     for record in result:
-        #print(record["n.interested"]) #, record['n.last_online'])
+        print(record["n.name"]) #, record['n.last_online'])
         #last_online_distri.append(record['n.last_online'])
-        interested_distri.append(record['n.interested'])
+        #interested_distri.append(record['n.interested'])
         #income_distri.append(record['n.income'])
-        print(record)
+        #print(record)
 
 
 def read_debate(tx):
@@ -255,12 +260,61 @@ def read_argument(tx):
         category_distri.append(record['n.category'])
         #print(record)
 
+def read_gives_argument(tx):
+    result = tx.run("MATCH (a:User)-[:GIVES_ARGUMENT]->(b:Argument) RETURN a.name, b.id, b.content")
+    print('I am called')
+    #print('this is the result: --- ', result)
+    d = 0
+    for record in result:
+        #d = d + 1
+        print("{} has argued in {} with content {}".format(record["a.name"], record["b.id"], record["b.content"]))
+        #print(record)
+        #print('I am called in loop')
+    #print('Number of iterations', d)
+
+'''def read_friendship(tx):
+    result = tx.run("MATCH (a:User)-[:FRIENDS_WITH]->(b:User) RETURN a.name, b.name")
+    for record in result:
+        print("{} nominated {}".format(record["a.name"], record["b.name"]))
+        #print('Here should be the friendships: ', record)'''
+
+def read_round(tx):
+    result = tx.run("MATCH (a:Debate)-[:ROUND]->(b:Argument) RETURN a.title, b.id, b.content")
+    #d = 0
+    for record in result:
+        #d = d + 1
+        print("{} has argument {} with content {}".format(record["a.title"], record["b.id"], record["b.content"]))
+        #print(record)
+        #print('Im called in a loop')
+    #print('number of iterations', d)
+
 ########################
 ### Sessions - write ###
 ########################
 
-sample = 1
+sample = 100
 
+
+# valid cypher:
+# MATCH (a:User { name: '000ike' })<-[:FRIENDS_WITH]-(b:User)
+# RETURN a.name
+
+# MATCH (a:User { name: '000ike' })
+# Match (b:User { name: '00003'})
+# Merge (a)-[:FRIENDS_WITH]->(b)
+
+# MATCH (a:User { name: '000ike' })-[:FRIENDS_WITH]->(b:User)
+# return b.name
+
+# MATCH (a:User { name: '000ike' })
+# Match (b:Argument { id: '.999...-is-equal-to-one./1/_round_4_Pro'})
+# Merge (a)-[:GIVES_ARGUMENT]->(b)
+
+# Match (a:User {name: '000ike'})-[:GIVES_ARGUMENT]->(b:Argument)
+# return b.id
+
+# MATCH (:User {name: '000ike'})-[r]-()
+# RETURN r
 
 with driver.session() as session:
 
@@ -290,7 +344,8 @@ with driver.session() as session:
 
     ### user edges - friendship ###
 
-    '''c = 0
+
+    c = 0
     for i in users_data:
         c = c + 1
 
@@ -309,7 +364,8 @@ with driver.session() as session:
         if c >= sample:
             break
 
-    print("-- user edges - friendship done --")'''
+    print("-- user edges - friendship done --")
+
 
     ### debate nodes ###
 
@@ -361,7 +417,7 @@ with driver.session() as session:
         if c >= sample:
             break
 
-    print("-- user edges - debates_in done --")'''
+    print("-- user edges - debates_in done --")
 
     ### comment nodes ###
 
@@ -442,9 +498,92 @@ with driver.session() as session:
 
         if c % 100 == 0:
             print(c)
-        if c >= 10:
+        if c >= sample:
             break
-    print("-- comment nodes done --")
+    print("-- argument nodes done --")'''
+
+    '''### user edge - gives_argument ###
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+        c2 = 0
+        for k in debates_data[i]['rounds']:
+            c2 = c2 + 1
+            for p in k:
+                argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
+
+                #print(p['side'], '----1----', debates_data[i]['participant_1_name'] )
+                #print(p['side'], '----2----', debates_data[i]['participant_2_name'] )
+                if p['side'] == "Pro":
+                    UserID = debates_data[i]['participant_1_name']  # participant_1_position is always "Pro"
+                else:
+                    UserID = debates_data[i]['participant_2_name']
+
+                session.write_transaction(add_gives_argument, UserID, argumentID)
+                #print(UserID, argumentID)
+                #print(UserID, "------", argumentID)
+
+        if c % 100 == 0:
+            print(c)
+        if c >= sample:
+            break
+    print("-- user edge - gives_argument done --")'''
+
+
+    '''### Debate edge - has_round ###
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+        c2 = 0
+        for k in debates_data[i]['rounds']:
+            c2 = c2 + 1
+            for p in k:
+                UserID = ""
+                argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
+
+                session.write_transaction(add_round, i, argumentID)
+
+        if c % 100 == 0:
+            print(c)
+        if c >= sample:
+            break
+
+
+    #def add_round(tx, debateName, argumentID)
+
+    print("-- debate edge - round done --")'''
+
+    ### voteMap nodes ###
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+        c2 = 0
+        for k in debates_data[i]['votes']:
+            c2 = c2 + 1
+            for p in k:
+                for maps in p['vote_maps']:
+                    argumentID = str(str(i) + "_round_" + str(c2) + "_"+ str(p['side']))
+                    #print(i, p['text'])
+                    #commentID = str(str(i) + '_Comment_' + str(c2))
+                    session.write_transaction(add_voteMap(), argumentID, p['text'])
+                    #print(argumentID, p['text'])
+                    #print(k['comment_text'])
+
+
+        def add_voteMap(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar,
+                        convincingArguments,
+                        reliableSources, pointsParticipant1, pointsParticipant2)
+
+
+        if c % 100 == 0:
+            print(c)
+        if c >= sample:
+            break
+    print("-- voteMap nodes done --")
+
 
     print("-- write done --")
 
@@ -459,7 +598,10 @@ with driver.session() as session:
     #session.read_transaction(read_debates_in)
     #session.read_transaction(read_gives_comment)
     #session.read_transaction(read_has_comment)
-    session.read_transaction(read_has_comment)
+    #session.read_transaction(read_gives_argument)
+    #print("-- read_gives_argument done --")
+    #session.read_transaction(read_round)
+    print("-- read_round done --")
 
     print("-- read done --")
 
@@ -471,6 +613,7 @@ with driver.session() as session:
 
 driver.close()
 f.close()
+g.close()
 
 #print(interested_distri)
 #counter = collections.Counter(category_distri)
