@@ -43,13 +43,13 @@ def add_argument(tx, argumentID, argumentContent):
     tx.run("MERGE (a:Argument {argumentID: $argumentID, content: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
 
 def add_voteMap(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
-                reliableSources, pointsParticipant1, pointsParticipant2):
-    tx.run("MERGE (a:VoteMap {voteMapID: $votemapID, aggredBeforeDebate: $beforeDebate, aggredAfterDebate: $afterDebate, " +
+                reliableSources, totalPoints):
+    tx.run("MERGE (a:VoteMap {votemapID: $votemapID, beforeDebate: $beforeDebate, afterDebate: $afterDebate, " +
            "betterConduct: $betterConduct, betterSpellingGrammar: $betterSpellingGrammar, convincingArguments: $convincingArguments, " +
-           "reliableSources: $reliableSources, pointsParticipant1: $pointsParticipant1, pointsParticipant2: $pointsParticipant2})",
+           "reliableSources: $reliableSources, totalPoints: $totalPoints})",
            votemapID=votemapID, beforeDebate=beforeDebate, afterDebate=afterDebate, betterConduct=betterConduct,
            betterSpellingGrammar=betterSpellingGrammar, convincingArguments=convincingArguments, reliableSources=reliableSources,
-           pointsParticipant1=pointsParticipant1, pointsParticipant2=pointsParticipant2)
+           totalPoints=totalPoints)
 
 
 ### User Edges ###
@@ -77,7 +77,7 @@ def add_gives_argument(tx, userName, argumentID):
 
 def add_gives_voteMap(tx, userName, votemapID):
     tx.run("MATCH (a:User {userID: $userName}) \n" +
-           "MATCH (b:VoteMap {voteMapID: $votemapID}) \n" +
+           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
            "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userName=userName, votemapID=votemapID)
 
 def add_user_timeline(tx):
@@ -93,7 +93,7 @@ def add_has_comment(tx, debateName, commentID):
 
 def add_has_voteMap(tx, debateName, votemapID):
     tx.run("MATCH (a:Debate {debateID: $debateName}) \n" +
-           "MATCH (b:VoteMap {voteMapID: $votemapID}) \n" +
+           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
            "MERGE (a)-[:HAS_VOTEMAP]->(b)", debateName=debateName, votemapID=votemapID)
 
 def add_has_round(tx, debateName, argumentID):
@@ -151,11 +151,15 @@ def read_comment(tx):
     result = tx.run("MATCH (n:Comment) \n" +
                     "RETURN n.commentID, n.content")
     for record in result:
-        #print(record["n.commentID"])
         print("{} has content {}".format(record["n.commentID"], record["n.content"]))
 
 def read_voteMap(tx):
-    result = tx.run(''' insert ''')
+    result = tx.run("MATCH (n:VoteMap) \n" +
+                    "RETURN n.votemapID, n.beforeDebate, n.afterDebate, n.betterConduct, n.betterSpellingGrammar, n.convincingArguments, \n" +
+                    "n.reliableSources, n.totalPoints")
+    for record in result:
+        print("{} has agreed before debate: {}, and overall: {}".format(record["n.votemapID"], record["n.beforeDebate"], record["n.totalPoints"]))
+
 
 
 ### User Edges ###
@@ -284,8 +288,6 @@ with driver.session() as session:
             c2 = c2 + 1
             commentID = str(str(i) + '_Comment_' + str(c2))
             session.write_transaction(add_comment, commentID, k['comment_text'])
-            #print(k['comment_text'])
-            #print(' \n ---------------------------------- comment_text--------------------------------------')
         if c % 100 == 0:
             print(c)
         if c >= sample:
@@ -323,15 +325,12 @@ with driver.session() as session:
             for p in k['votes_map']:
                 if c3 == 2:                               # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
                     break
-                voteMapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
-
-                '''session.write_transaction(add_voteMap, voteMapID, )
-                    
-                votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar,
-                convincingArguments, reliableSources, pointsParticipant1, pointsParticipant2'''
-
+                votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
+                #print(votemapID)
+                session.write_transaction(add_voteMap, votemapID, k['votes_map'][p]['Agreed with before the debate'], k['votes_map'][p]['Agreed with after the debate'],
+                                          k['votes_map'][p]['Who had better conduct'],k['votes_map'][p]['Had better spelling and grammar'],k['votes_map'][p]['Made more convincing arguments'],
+                                          k['votes_map'][p]['Used the most reliable sources'],k['votes_map'][p]['Total points awarded']) # "Total points awarded" kinda redundant
                 c3 = c3 + 1
-
         if c % 100 == 0:
             print(c)
         if c >= sample:
@@ -522,7 +521,7 @@ with driver.session() as session:
     #session.read_transaction(read_debate)                       # ok
     #session.read_transaction(read_comment)                     # ok
     #session.read_transaction(read_argument)                    # ok
-    #session.read_transaction(read_voteMap)                     # todo
+    session.read_transaction(read_voteMap)                     # todo
 
     #session.read_transaction(read_friends_with)                # ok
     #session.read_transaction(read_debates_in)                  # ok
