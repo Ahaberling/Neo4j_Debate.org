@@ -14,6 +14,31 @@ debates_data = json.load(g)
 
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
+
+user_bool = True
+debate_bool = False
+comment_bool = False
+argument_bool = False
+votemap_bool = True
+
+friends_with_bool = False
+debates_in_bool = False
+gives_comment_bool = False
+gives_argument_bool = False
+gives_votemap_bool = False
+user_timeline_bool = False
+
+has_comment_bool = False
+has_votemap_bool = False
+has_round_bool = False
+debate_timeline_bool = False
+
+comment_timeline_bool = False
+
+refers_to_bool = True
+
+sample = 300
+
 #####################################
 ### Functions: Write Transactions ###
 #####################################
@@ -42,7 +67,7 @@ def add_comment(tx, commentID, commentContent):
 def add_argument(tx, argumentID, argumentContent):
     tx.run("MERGE (a:Argument {argumentID: $argumentID, content: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
 
-def add_voteMap(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
+def add_voteMap_extended(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
                 reliableSources, totalPoints):
     tx.run("MERGE (a:VoteMap {votemapID: $votemapID, beforeDebate: $beforeDebate, afterDebate: $afterDebate, " +
            "betterConduct: $betterConduct, betterSpellingGrammar: $betterSpellingGrammar, convincingArguments: $convincingArguments, " +
@@ -51,6 +76,9 @@ def add_voteMap(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterS
            betterSpellingGrammar=betterSpellingGrammar, convincingArguments=convincingArguments, reliableSources=reliableSources,
            totalPoints=totalPoints)
 
+def add_voteMap_reduced(tx, votemapID, won):
+    tx.run("MERGE (a:VoteMap {votemapID: $votemapID, won: $won})",
+           votemapID=votemapID, won=won)
 
 ### User Edges ###
 
@@ -113,8 +141,10 @@ def add_comment_timeline(tx):
 
 ### VoteMap Edges ###
 
-def add_refers_to(tx):
-    tx.run( ''' insert ''')
+def add_refers_to(tx, votemapID, userID):
+    tx.run("MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
+           "MATCH (b:User {userID: $userID}) \n" +
+           "MERGE (a)-[:REFERS_TO]->(b)", votemapID=votemapID, userID=userID)
 
 
 ### Miscellaneous ###
@@ -156,9 +186,9 @@ def read_comment(tx):
 def read_voteMap(tx):
     result = tx.run("MATCH (n:VoteMap) \n" +
                     "RETURN n.votemapID, n.beforeDebate, n.afterDebate, n.betterConduct, n.betterSpellingGrammar, n.convincingArguments, \n" +
-                    "n.reliableSources, n.totalPoints")
+                    "n.reliableSources, n.totalPoints, n.won")
     for record in result:
-        print("{} has agreed before debate: {}, and overall: {}".format(record["n.votemapID"], record["n.beforeDebate"], record["n.totalPoints"]))
+        print("{} has agreed before debate: {}, and overall: {} - {}".format(record["n.votemapID"], record["n.beforeDebate"], record["n.totalPoints"], record["n.won"]))
 
 
 
@@ -213,12 +243,16 @@ def read_debate_timeline(tx):
 
 ### Comment Edges ###
 
-''' insert '''
+def read_comment_timeline(tx):
+    result = tx.run(''' inster ''')
 
 
 ### VoteMap Edges ###
 
-''' insert '''
+def read_refers_to(tx):
+    result = tx.run("MATCH (a:VoteMap)-[:REFERS_TO]->(b:User) RETURN a.votemapID, b.userID")
+    for record in result:
+        print("{} with {} points refers to {}".format(record["a.votemapID"], record["b.userID"]))
 
 
 ### Miscellaneous ###
@@ -230,7 +264,6 @@ def read_all(tx):
 ########################
 ### Sessions - write ###
 ########################
-sample = 100
 
 with driver.session() as session:
 
@@ -248,94 +281,101 @@ with driver.session() as session:
     ###-------###
 
     ### User Node ###
+    if user_bool == True:
 
-    userList = []
-    c = 0
-    for i in users_data:
-        c = c + 1
-        userList.append(i)
-        session.write_transaction(add_user, i, users_data[i]['birthday'], users_data[i]['description'], users_data[i]['education'],
-                                  users_data[i]['elo_ranking'], users_data[i]['email'], users_data[i]['ethnicity'], users_data[i]['gender'],
-                                  users_data[i]['interested'], users_data[i]['income'], users_data[i]['joined'], users_data[i]['last_online'], users_data[i]['last_updated'],
-                                  users_data[i]['looking'], users_data[i]['party'], users_data[i]['political_ideology'], users_data[i]['president'],
-                                  users_data[i]['relationship'], users_data[i]['religious_ideology'], users_data[i]['url'], users_data[i]['win_ratio'])
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- user nodes done --")
+        userList = []
+        c = 0
+        for i in users_data:
+            c = c + 1
+            userList.append(i)
+            session.write_transaction(add_user, i, users_data[i]['birthday'], users_data[i]['description'], users_data[i]['education'],
+                                      users_data[i]['elo_ranking'], users_data[i]['email'], users_data[i]['ethnicity'], users_data[i]['gender'],
+                                      users_data[i]['interested'], users_data[i]['income'], users_data[i]['joined'], users_data[i]['last_online'], users_data[i]['last_updated'],
+                                      users_data[i]['looking'], users_data[i]['party'], users_data[i]['political_ideology'], users_data[i]['president'],
+                                      users_data[i]['relationship'], users_data[i]['religious_ideology'], users_data[i]['url'], users_data[i]['win_ratio'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- user nodes done --")
 
 
     ### Debate Node ###
+    if debate_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'])
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- debate nodes done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- debate nodes done --")
 
     ### Comment Nodes ###
+    if comment_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['comments']:
-            c2 = c2 + 1
-            commentID = str(str(i) + '_Comment_' + str(c2))
-            session.write_transaction(add_comment, commentID, k['comment_text'])
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- comment nodes done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+                session.write_transaction(add_comment, commentID, k['comment_text'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- comment nodes done --")
 
 
     ### Argument Nodes ###
+    if argument_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['rounds']:
-            c2 = c2 + 1
-            for p in k:
-                argumentID = str(str(i) + "_round_" + str(c2) + "_"+ str(p['side']))
-                session.write_transaction(add_argument, argumentID, p['text'])
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- argument nodes done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['rounds']:
+                c2 = c2 + 1
+                for p in k:
+                    argumentID = str(str(i) + "_round_" + str(c2) + "_"+ str(p['side']))
+                    session.write_transaction(add_argument, argumentID, p['text'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- argument nodes done --")
 
 
     ### VoteMap Nodes ###
+    if votemap_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['votes']:
-            c2 = c2 + 1
-            c3 = 0
-            for p in k['votes_map']:
-                if c3 == 2:                               # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
-                    break
-                votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
-                #print(votemapID)
-                session.write_transaction(add_voteMap, votemapID, k['votes_map'][p]['Agreed with before the debate'], k['votes_map'][p]['Agreed with after the debate'],
-                                          k['votes_map'][p]['Who had better conduct'],k['votes_map'][p]['Had better spelling and grammar'],k['votes_map'][p]['Made more convincing arguments'],
-                                          k['votes_map'][p]['Used the most reliable sources'],k['votes_map'][p]['Total points awarded']) # "Total points awarded" kinda redundant
-                c3 = c3 + 1
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- voteMap nodes done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['votes']:
+                c2 = c2 + 1
+                c3 = 0
+                for p in k['votes_map']:
+                    if c3 == 2:                               # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                        break
+                    votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
+                    if 'Agreed with before the debate' in k['votes_map'][p]:
+                        session.write_transaction(add_voteMap_extended, votemapID, k['votes_map'][p]['Agreed with before the debate'], k['votes_map'][p]['Agreed with after the debate'],
+                                              k['votes_map'][p]['Who had better conduct'],k['votes_map'][p]['Had better spelling and grammar'],k['votes_map'][p]['Made more convincing arguments'],
+                                              k['votes_map'][p]['Used the most reliable sources'],k['votes_map'][p]['Total points awarded']) # "Total points awarded" kinda redundant
+                    else:
+                        session.write_transaction(add_voteMap_reduced, votemapID, k['votes_map'][p]['Who won the debate'])
+                    c3 = c3 + 1
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- voteMap nodes done --")
 
     print("-- Nodes done --")
 
@@ -345,100 +385,106 @@ with driver.session() as session:
     ###------------###
 
     ### User Edge - friends_with ###
+    if friends_with_bool == True:
 
-    c = 0
-    for i in users_data:
-        c = c + 1
-        if (users_data[i]['friends'] != []):
-            if (users_data[i]['friends'] != "private"):                         #todo represent them in the database as node feature friendship: private
-                for k in users_data[i]['friends']:
-                    if k in userList:
-                        session.write_transaction(add_friends_with, i, k)
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- user edges - friends_with done --")
+        c = 0
+        for i in users_data:
+            c = c + 1
+            if (users_data[i]['friends'] != []):
+                if (users_data[i]['friends'] != "private"):                         #todo represent them in the database as node feature friendship: private
+                    for k in users_data[i]['friends']:
+                        if k in userList:
+                            session.write_transaction(add_friends_with, i, k)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- user edges - friends_with done --")
 
 
     ### User Edges - debates_in ###
+    if debates_in_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        forfeit_bool1 = False
-        winning_bool1 = False
-        forfeit_bool2 = False
-        winning_bool2 = False
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            forfeit_bool1 = False
+            winning_bool1 = False
+            forfeit_bool2 = False
+            winning_bool2 = False
 
-        if debates_data[i]['participant_1_name'] in userList:
-            if debates_data[i]['forfeit_side'] == debates_data[i]['participant_1_name']:
-                forfeit_bool1 = True
-            if debates_data[i]['participant_1_status'] == "Winning":
-                winning_bool1 = True
-            session.write_transaction(add_debates_in, debates_data[i]['participant_1_name'], i, forfeit_bool1, winning_bool1, debates_data[i]['participant_1_position'])     #todo check if there is inconsistency in participants and user.json
+            if debates_data[i]['participant_1_name'] in userList:
+                if debates_data[i]['forfeit_side'] == debates_data[i]['participant_1_name']:
+                    forfeit_bool1 = True
+                if debates_data[i]['participant_1_status'] == "Winning":
+                    winning_bool1 = True
+                session.write_transaction(add_debates_in, debates_data[i]['participant_1_name'], i, forfeit_bool1, winning_bool1, debates_data[i]['participant_1_position'])     #todo check if there is inconsistency in participants and user.json
 
-        if debates_data[i]['participant_2_name'] in userList:
-            if debates_data[i]['forfeit_side'] == debates_data[i]['participant_2_name']:
-                forfeit_bool2 = True
-            if debates_data[i]['participant_2_status'] == "Winning":
-                winning_bool2 = True
-            session.write_transaction(add_debates_in, debates_data[i]['participant_2_name'], i, forfeit_bool2, winning_bool2, debates_data[i]['participant_2_position'])     #todo check if there is inconsistency in participants and user.json
+            if debates_data[i]['participant_2_name'] in userList:
+                if debates_data[i]['forfeit_side'] == debates_data[i]['participant_2_name']:
+                    forfeit_bool2 = True
+                if debates_data[i]['participant_2_status'] == "Winning":
+                    winning_bool2 = True
+                session.write_transaction(add_debates_in, debates_data[i]['participant_2_name'], i, forfeit_bool2, winning_bool2, debates_data[i]['participant_2_position'])     #todo check if there is inconsistency in participants and user.json
 
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- user edges - debates_in done --")
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- user edges - debates_in done --")
 
 
     ### User Edge - gives_comment ###
+    if gives_comment_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['comments']:
-            c2 = c2 + 1
-            commentID = str(str(i) + '_Comment_' + str(c2))
-            session.write_transaction(add_gives_comment, k['user_name'], commentID)
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- user edge - gives_comment done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+                session.write_transaction(add_gives_comment, k['user_name'], commentID)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- user edge - gives_comment done --")
 
 
     ### User Edge - gives_argument ###
+    if gives_argument_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['rounds']:
-            c2 = c2 + 1
-            for p in k:
-                argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
-                if p['side'] == "Pro":
-                    UserID = debates_data[i]['participant_1_name']  # participant_1_position is always "Pro"
-                else:
-                    UserID = debates_data[i]['participant_2_name']
-                session.write_transaction(add_gives_argument, UserID, argumentID)
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- user edge - gives_argument done --")
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['rounds']:
+                c2 = c2 + 1
+                for p in k:
+                    argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
+                    if p['side'] == "Pro":
+                        UserID = debates_data[i]['participant_1_name']  # participant_1_position is always "Pro"
+                    else:
+                        UserID = debates_data[i]['participant_2_name']
+                    session.write_transaction(add_gives_argument, UserID, argumentID)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- user edge - gives_argument done --")
 
 
     ### User Edge - gives_voteMap ###
+    #if gives_votemap_bool == True:
 
-    ''' insert '''
+        ''' insert '''
 
 
     ### User Edge - user_timeline ###
+    #if user_timeline_bool == True:
 
-    ''' insert '''
+        ''' insert '''
 
 
     ###--------------###
@@ -446,49 +492,52 @@ with driver.session() as session:
     ###--------------###
 
     ### Debate Edge - has_comment ###
+    if has_comment_bool == True:
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['comments']:
-            c2 = c2 + 1
-            commentID = str(str(i) + '_Comment_' + str(c2))
-            session.write_transaction(add_has_comment, i, commentID)
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- debate edge - has_comment done --")
-
-
-    ### Debate Edge - has_round ###
-
-    ''' insert '''
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+                session.write_transaction(add_has_comment, i, commentID)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- debate edge - has_comment done --")
 
 
     ### Debate Edge - has_round ###
+    #if has_votemap_bool == True:
+        ''' insert '''
 
-    c = 0
-    for i in debates_data:
-        c = c + 1
-        c2 = 0
-        for k in debates_data[i]['rounds']:
-            c2 = c2 + 1
-            for p in k:
-                UserID = ""
-                argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
-                session.write_transaction(add_has_round, i, argumentID)
-        if c % 100 == 0:
-            print(c)
-        if c >= sample:
-            break
-    print("-- debate edge - round done --")
+
+    ### Debate Edge - has_round ###
+    if has_round_bool == True:
+
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['rounds']:
+                c2 = c2 + 1
+                for p in k:
+                    UserID = ""
+                    argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
+                    session.write_transaction(add_has_round, i, argumentID)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- debate edge - has_round done --")
 
 
     ### Debate Edge - debate_timeline ###
+    #if debate_timeline_bool == True:
 
-    ''' insert '''
+        ''' insert '''
 
 
     ###---------------###
@@ -496,8 +545,9 @@ with driver.session() as session:
     ###---------------###
 
     ### Comment Edge - comment_timeline ###
+    #if comment_timeline_bool == True:
 
-    ''' insert '''
+        ''' insert '''
 
 
     ###---------------###
@@ -505,8 +555,28 @@ with driver.session() as session:
     ###---------------###
 
     ### VoteMap Edge - refers_to ###
+    if refers_to_bool == True:
 
-    ''' insert '''
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['votes']:
+                c2 = c2 + 1
+                c3 = 0
+                for p in k['votes_map']:
+                    if c3 == 2:                               # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                        break
+                    votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
+                    #print(votemapID, p)
+                    session.write_transaction(add_refers_to, votemapID, p)
+                    c3 = c3 + 1
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- votemap edge - refers_to done --")
+
 
 
     print("-- write done --")

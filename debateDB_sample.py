@@ -2,6 +2,29 @@ from neo4j import GraphDatabase
 import json
 #import collections
 
+user_bool = False
+debate_bool = False
+comment_bool = False
+argument_bool = False
+votemap_bool = False
+
+friends_with_bool = False
+debates_in_bool = False
+gives_comment_bool = False
+gives_argument_bool = False
+gives_votemap_bool = False
+user_timeline_bool = False
+
+has_comment_bool = False
+has_votemap_bool = False
+has_round_bool = False
+debate_timeline_bool = False
+
+comment_timeline_bool = False
+
+refers_to_bool = False
+
+
 ######################
 ### Initialization ###
 ######################
