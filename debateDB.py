@@ -15,11 +15,11 @@ debates_data = json.load(g)
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
-user_bool = True
-debate_bool = False
+user_bool = False
+debate_bool = True
 comment_bool = False
-argument_bool = False
-votemap_bool = True
+argument_bool = True
+votemap_bool = False
 
 friends_with_bool = False
 debates_in_bool = False
@@ -30,14 +30,14 @@ user_timeline_bool = False
 
 has_comment_bool = False
 has_votemap_bool = False
-has_round_bool = False
+has_argument_bool = True
 debate_timeline_bool = False
 
 comment_timeline_bool = False
 
-refers_to_bool = True
+refers_to_bool = False
 
-sample = 300
+sample = 100
 
 #####################################
 ### Functions: Write Transactions ###
@@ -65,7 +65,7 @@ def add_comment(tx, commentID, commentContent):
     tx.run("MERGE (a:Comment {commentID: $commentID, content: $commentContent})", commentID=commentID, commentContent=commentContent)
 
 def add_argument(tx, argumentID, argumentContent):
-    tx.run("MERGE (a:Argument {argumentID: $argumentID, content: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
+    tx.run("MERGE (a:Argument {argumentID: $argumentID, argumentContent: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
 
 def add_voteMap_extended(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
                 reliableSources, totalPoints):
@@ -98,15 +98,17 @@ def add_gives_comment(tx, userName, commentID):
            "MATCH (b:Comment {commentID: $commentID}) \n" +
            "MERGE (a)-[:GIVES_COMMENT]->(b)", userName=userName, commentID=commentID)
 
-def add_gives_argument(tx, userName, argumentID):
-    tx.run("MATCH (a:User {userID: $userName}) \n" +
+def add_gives_argument(tx, userID, argumentID):
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
            "MATCH (b:Argument {argumentID: $argumentID}) \n" +
-           "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userName=userName, argumentID=argumentID)
+           "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userID=userID, argumentID=argumentID)
 
-def add_gives_voteMap(tx, userName, votemapID):
-    tx.run("MATCH (a:User {userID: $userName}) \n" +
+def add_gives_voteMap(tx, userID, votemapID):
+    #print('called in write function with: ', userID, votemapID)
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
            "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
-           "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userName=userName, votemapID=votemapID)
+           "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userID=userID, votemapID=votemapID)
+
 
 def add_user_timeline(tx):
     tx.run(''' insert ''')
@@ -119,15 +121,15 @@ def add_has_comment(tx, debateName, commentID):
            "MATCH (b:Comment {commentID: $commentID}) \n" +
            "MERGE (a)-[:HAS_COMMENT]->(b)", debateName=debateName, commentID=commentID)
 
-def add_has_voteMap(tx, debateName, votemapID):
-    tx.run("MATCH (a:Debate {debateID: $debateName}) \n" +
+def add_has_voteMap(tx, debateID, votemapID):
+    tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
            "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
-           "MERGE (a)-[:HAS_VOTEMAP]->(b)", debateName=debateName, votemapID=votemapID)
+           "MERGE (a)-[:HAS_VOTEMAP]->(b)", debateID=debateID, votemapID=votemapID)
 
-def add_has_round(tx, debateName, argumentID):
-    tx.run("MATCH (a:Debate {debateID: $debateName}) \n" +
+def add_has_argument(tx, debateID, argumentID):
+    tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
            "MATCH (b:Argument {argumentID: $argumentID}) \n" +
-           "MERGE (a)-[:HAS_ROUND]->(b)", debateName=debateName, argumentID=argumentID)
+           "MERGE (a)-[:HAS_ARGUMENT]->(b)", debateID=debateID, argumentID=argumentID)
 
 def add_debate_timeline(tx):
     tx.run( ''' insert ''')
@@ -173,9 +175,9 @@ def read_debate(tx):
 
 def read_argument(tx):
     result = tx.run("MATCH (n:Argument) \n" +
-           "RETURN n.argumentID, n.content")
+           "RETURN n.argumentID, n.argumentContent")
     for record in result:
-        print(record["n.argumentID"], record['n.content'])
+        print(record["n.argumentID"], record['n.argumentContent'])
 
 def read_comment(tx):
     result = tx.run("MATCH (n:Comment) \n" +
@@ -211,12 +213,19 @@ def read_gives_comment(tx):
         #print(record)
 
 def read_gives_argument(tx):
-    result = tx.run("MATCH (a:User)-[:GIVES_ARGUMENT]->(b:Argument) RETURN a.userID, b.argumentID, b.content")
+    result = tx.run("MATCH (a:User)-[:GIVES_ARGUMENT]->(b:Argument) RETURN a.userID, b.argumentID, b.argumentContent")
     for record in result:
-        print("{} has argued in {} with content {}".format(record["a.userID"], record["b.argumentID"], record["b.content"]))
+        print("{} has argued in {} with content {}".format(record["a.userID"], record["b.argumentID"], record["b.argumentContent"]))
+        #print("called in read")
+        #print(record)
 
 def read_gives_voteMap(tx):
-    result = tx.run(''' inster ''')
+    result = tx.run("MATCH (a:User)-[:GIVES_VOTEMAP]->(b:VoteMap) RETURN a.userID, b.votemapID")
+    for record in result:
+        #print('called in read function: ')
+        #print(record)
+        print("{} gives votemap {}".format(record["a.userID"], record["b.votemapID"]))
+
 
 def read_user_timeline(tx):
     result = tx.run(''' inster ''')
@@ -230,12 +239,14 @@ def read_has_comment(tx):
         print("{} has comment {} with content {}".format(record["a.debateID"], record["b.commentID"], record["b.content"]))
 
 def read_has_voteMap(tx):
-    result = tx.run(''' insert ''')
-
-def read_has_round(tx):
-    result = tx.run("MATCH (a:Debate)-[:ROUND]->(b:Argument) RETURN a.debateID, b.argumentID, b.content")
+    result = tx.run("MATCH (a:Debate)-[rel:HAS_VOTEMAP]->(b:VoteMap) RETURN a.debateID, b.votemapID, b.totalPoints")
     for record in result:
-        print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.content"]))
+        print("{} has votemap: {} with points: {}".format(record["a.debateID"], record["b.votemapID"], record["b.totalPoints"]))
+
+def read_has_argument(tx):
+    result = tx.run("MATCH (a:Debate)-[:HAS_ARGUMENT]->(b:Argument) RETURN a.debateID, b.argumentID, b.argumentContent")
+    for record in result:
+        print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.argumentContent"]))
 
 def read_debate_timeline(tx):
     result = tx.run(''' insert ''')
@@ -252,7 +263,7 @@ def read_comment_timeline(tx):
 def read_refers_to(tx):
     result = tx.run("MATCH (a:VoteMap)-[:REFERS_TO]->(b:User) RETURN a.votemapID, b.userID")
     for record in result:
-        print("{} with {} points refers to {}".format(record["a.votemapID"], record["b.userID"]))
+        print("{} refers to {}".format(record["a.votemapID"], record["b.userID"]))
 
 
 ### Miscellaneous ###
@@ -476,9 +487,28 @@ with driver.session() as session:
 
 
     ### User Edge - gives_voteMap ###
-    #if gives_votemap_bool == True:
+    if gives_votemap_bool == True:
 
-        ''' insert '''
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['votes']:
+                c2 = c2 + 1
+                c3 = 0
+                for p in k['votes_map']:
+                    if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                        break
+                    votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
+                    #print('called in extraction: ', k['user_name'], votemapID)
+                    session.write_transaction(add_gives_voteMap, k['user_name'], votemapID)
+                    c3 = c3 + 1
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- User Edge - gives_voteMap done --")
+
 
 
     ### User Edge - user_timeline ###
@@ -509,13 +539,33 @@ with driver.session() as session:
         print("-- debate edge - has_comment done --")
 
 
-    ### Debate Edge - has_round ###
-    #if has_votemap_bool == True:
-        ''' insert '''
+    ### Debate Edge - has_votemap ###
+    if has_votemap_bool == True:
+
+        c = 0
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['votes']:
+                c2 = c2 + 1
+                c3 = 0
+                for p in k['votes_map']:
+                    if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                        break
+                    votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
+                    print(i, votemapID)
+                    session.write_transaction(add_has_voteMap, i, votemapID)
+
+                    c3 = c3 + 1
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- Debate Edge - has_votemap done --")
 
 
-    ### Debate Edge - has_round ###
-    if has_round_bool == True:
+    ### Debate Edge - has_argument ###
+    if has_argument_bool == True:
 
         c = 0
         for i in debates_data:
@@ -526,12 +576,12 @@ with driver.session() as session:
                 for p in k:
                     UserID = ""
                     argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
-                    session.write_transaction(add_has_round, i, argumentID)
+                    session.write_transaction(add_has_argument, i, argumentID)
             if c % 100 == 0:
                 print(c)
             if c >= sample:
                 break
-        print("-- debate edge - has_round done --")
+        print("-- debate edge - has_argument done --")
 
 
     ### Debate Edge - debate_timeline ###
@@ -591,21 +641,21 @@ with driver.session() as session:
     #session.read_transaction(read_debate)                       # ok
     #session.read_transaction(read_comment)                     # ok
     #session.read_transaction(read_argument)                    # ok
-    session.read_transaction(read_voteMap)                     # todo
+    #session.read_transaction(read_voteMap)                     # ok
 
     #session.read_transaction(read_friends_with)                # ok
     #session.read_transaction(read_debates_in)                  # ok
     #session.read_transaction(read_gives_comment)               # ok i think
     #session.read_transaction(read_gives_argument)              # ok
-    #session.read_transaction(read_gives_voteMap)               # todo
+    #session.read_transaction(read_gives_voteMap)               # ok
     #session.read_transaction(read_user_timeline)               # todo
 
     #session.read_transaction(read_has_comment)                 # ok
-    #session.read_transaction(read_has_voteMap)                 # todo
-    #session.read_transaction(read_has_round)                   # todo
+    #session.read_transaction(read_has_voteMap)                 # ok
+    #session.read_transaction(read_has_argument)                # ok
     #session.read_transaction(read_debate_timeline)             # todo
 
     #session.read_transaction(read_comment_timeline)            # todo
-    #session.read_transaction(read_refers_to)                   # todo
+    #session.read_transaction(read_refers_to)                   # ok
 
     print("-- read done --")
