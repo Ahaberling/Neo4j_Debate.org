@@ -1,5 +1,8 @@
 from neo4j import GraphDatabase
 import json
+import numpy as np
+import datetime
+
 #import collections
 
 ######################
@@ -16,28 +19,34 @@ driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
 user_bool = False
-debate_bool = True
+debate_bool = False
 comment_bool = False
-argument_bool = True
+argument_bool = False
 votemap_bool = False
+opinion_bool = False
+poll_bool = False
 
 friends_with_bool = False
 debates_in_bool = False
 gives_comment_bool = False
 gives_argument_bool = False
 gives_votemap_bool = False
+gives_opinion_bool = False
+gives_pollvote_bool = False
 user_timeline_bool = False
 
 has_comment_bool = False
 has_votemap_bool = False
-has_argument_bool = True
-debate_timeline_bool = False
+has_argument_bool = False
+debate_timeline_bool = True
 
 comment_timeline_bool = False
 
 refers_to_bool = False
 
-sample = 100
+
+
+sample = 10
 
 #####################################
 ### Functions: Write Transactions ###
@@ -57,9 +66,9 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     userParty=userParty, userPoli=userPoli, userPresi=userPresi, userRels=userRels, userReli=userReli, userURL=userURL,
                     userWinR=userWinR)
 
-def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle):
-    tx.run("MERGE (a:Debate {debateID: $debateName, url: $debateUrl, category: $debateCategory, title: $debateTitle})",
-           debateName=debateName, debateUrl=debateUrl, debateCategory=debateCategory, debateTitle=debateTitle)
+def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_date):
+    tx.run("MERGE (a:Debate {debateID: $debateName, url: $debateUrl, category: $debateCategory, title: $debateTitle, start: $start_date})",
+           debateName=debateName, debateUrl=debateUrl, debateCategory=debateCategory, debateTitle=debateTitle, start_date=start_date)
 
 def add_comment(tx, commentID, commentContent):
     tx.run("MERGE (a:Comment {commentID: $commentID, content: $commentContent})", commentID=commentID, commentContent=commentContent)
@@ -79,6 +88,15 @@ def add_voteMap_extended(tx, votemapID, beforeDebate, afterDebate, betterConduct
 def add_voteMap_reduced(tx, votemapID, won):
     tx.run("MERGE (a:VoteMap {votemapID: $votemapID, won: $won})",
            votemapID=votemapID, won=won)
+
+def add_opinion(tx, opinionID, opinionLink):
+    tx.run("MERGE (a:Opinion {opinionID: $opinionID, opinionLink: $opinionLink})",
+           opinionID=opinionID, opinionLink=opinionLink)
+
+
+def add_poll(tx, pollID, pollLink):
+    tx.run("MERGE (a:Poll {pollID: $pollID, pollLink: $pollLink})",
+           pollID=pollID, pollLink=pollLink)
 
 ### User Edges ###
 
@@ -109,6 +127,16 @@ def add_gives_voteMap(tx, userID, votemapID):
            "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
            "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userID=userID, votemapID=votemapID)
 
+def add_gives_opinion(tx, userID, opinionID, opinionText):
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
+           "MATCH (b:Opinion {opinionID: $opinionID}) \n" +
+           "MERGE (a)-[rel:GIVES_OPINION {opinionText: $opinionText}]->(b)", userID=userID, opinionID=opinionID, opinionText=opinionText)
+
+def add_gives_pollvote(tx, userID, pollID, pollText, pollExplanation):
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
+           "MATCH (b:Poll {pollID: $pollID}) \n" +
+           "MERGE (a)-[rel:GIVES_POLLVOTE {pollText: $pollText, pollExplanation: $pollExplanation}]->(b)", userID=userID, pollID=pollID, pollText=pollText, pollExplanation=pollExplanation)
+
 
 def add_user_timeline(tx):
     tx.run(''' insert ''')
@@ -131,8 +159,10 @@ def add_has_argument(tx, debateID, argumentID):
            "MATCH (b:Argument {argumentID: $argumentID}) \n" +
            "MERGE (a)-[:HAS_ARGUMENT]->(b)", debateID=debateID, argumentID=argumentID)
 
-def add_debate_timeline(tx):
-    tx.run( ''' insert ''')
+def add_debate_timeline(tx, debateID, prevDebateID):
+    tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
+           "MATCH (b:Debate {debateID: $prevDebateID}) \n" +
+           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevDebateID=prevDebateID)
 
 
 ### Comment Edges ###
@@ -192,6 +222,17 @@ def read_voteMap(tx):
     for record in result:
         print("{} has agreed before debate: {}, and overall: {} - {}".format(record["n.votemapID"], record["n.beforeDebate"], record["n.totalPoints"], record["n.won"]))
 
+def read_opinion(tx):
+    result = tx.run("MATCH (n:Opinion) \n" +
+                    "RETURN n.opinionID, n.opinionLink, n.opinionText")
+    for record in result:
+        print("{} has link {} with text {}".format(record["n.opinionID"], record["n.opinionLink"], record["n.opinionText"]))
+
+def read_poll(tx):
+    result = tx.run("MATCH (n:Poll) \n" +
+                    "RETURN n.pollID, n.pollLink, n.pollText, n.pollExplanation")
+    for record in result:
+        print("{} has link {} with text {} and explanation: {}".format(record["n.pollID"], record["n.pollLink"], record["n.pollText"], record["n.pollExplanation"]))
 
 
 ### User Edges ###
@@ -227,6 +268,18 @@ def read_gives_voteMap(tx):
         print("{} gives votemap {}".format(record["a.userID"], record["b.votemapID"]))
 
 
+def read_gives_opinion(tx):
+    result = tx.run("MATCH (a:User)-[rel:GIVES_OPINION]->(b:Opinion) RETURN a.userID, b.opinionID, rel.opinionText")
+    for record in result:
+        print("{} gives opinion {} with value {}".format(record["a.userID"], record["b.opinionID"], record["rel.opinionText"]))
+
+
+def read_gives_pollvote(tx):
+    result = tx.run("MATCH (a:User)-[rel:GIVES_POLLVOTE]->(b:Poll) RETURN a.userID, b.pollID, rel.pollText, rel.pollExplanation")
+    for record in result:
+        print("{} gives pollvote {} with value {} and explanation {} ".format(record["a.userID"], record["b.pollID"], record["rel.pollText"], record["rel.pollExplanation"]))
+
+
 def read_user_timeline(tx):
     result = tx.run(''' inster ''')
 
@@ -249,7 +302,9 @@ def read_has_argument(tx):
         print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.argumentContent"]))
 
 def read_debate_timeline(tx):
-    result = tx.run(''' insert ''')
+    result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.debateID, a.start , b.debateID, b.start")
+    for record in result:
+        print("{} with {} took place before {} with {}".format(record["a.debateID"], record["a.start"], record["b.debateID"], record["b.start"]))
 
 
 ### Comment Edges ###
@@ -388,6 +443,35 @@ with driver.session() as session:
                 break
         print("-- voteMap nodes done --")
 
+    ### Opinion Nodes ###
+    if opinion_bool == True:
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            for k in users_data[i]['opinion_arguments']:
+                session.write_transaction(add_opinion, k['opinion title'], k['opinion link'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- opinion nodes done --")
+
+    ### Poll Nodes ###
+    if poll_bool == True:
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            for k in users_data[i]['poll_votes']:
+                session.write_transaction(add_poll, k['vote title'], k['vote link'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- poll nodes done --")
+
+
     print("-- Nodes done --")
 
 
@@ -509,6 +593,34 @@ with driver.session() as session:
                 break
         print("-- User Edge - gives_voteMap done --")
 
+    ### User Edge - gives_opinion ###
+    if gives_opinion_bool == True:
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            for k in users_data[i]['opinion_arguments']:
+                session.write_transaction(add_gives_opinion, i, k['opinion title'], k['opinion text'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- User Edge - gives_opinion done --")
+
+
+    ### User Edge - gives_pollvote ###
+    if gives_pollvote_bool == True:
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            for k in users_data[i]['poll_votes']:
+                session.write_transaction(add_gives_pollvote, i, k['vote title'], k['vote text'], k['vote explanation'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- User Edge - gives_pollvote done --")
 
 
     ### User Edge - user_timeline ###
@@ -585,10 +697,36 @@ with driver.session() as session:
 
 
     ### Debate Edge - debate_timeline ###
-    #if debate_timeline_bool == True:
+    if debate_timeline_bool == True:
+        c = 0
+        #debate_timeline_array = np.array([[], []])
+        debate_day_array = np.array([], dtype='datetime64')
+        debate_title_array = np.array([])
 
-        ''' insert '''
+        for i in debates_data:
+            c = c + 1
+            #debate_timeline_array = np.append(debate_timeline_array, [np.datetime64([debates_data[i]['start_date']]), [i]], axis=1)
+            debate_day_array = np.append(debate_day_array, debates_data[i]['start_date'])
+            debate_title_array = np.append(debate_title_array, [i])
 
+            #sort_order_array = np.argsort(debate_timeline_array)
+
+
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+
+    #date_time_array =
+
+    #print(debate_day_array)
+    #print(debate_title_array)
+
+    #print(debate_timeline_array)
+    #print(sort_order_array)
+
+    #print(debate_timeline_array[0][sort_order_array[0]])
+    #print(debate_timeline_array[1][sort_order_array[0]])
 
     ###---------------###
     ### Comment Edges ###
@@ -597,7 +735,7 @@ with driver.session() as session:
     ### Comment Edge - comment_timeline ###
     #if comment_timeline_bool == True:
 
-        ''' insert '''
+        #''' insert '''
 
 
     ###---------------###
@@ -637,17 +775,21 @@ with driver.session() as session:
 
     #session.read_transaction(read_all)
 
-    #session.read_transaction(read_user)                         # ok
-    #session.read_transaction(read_debate)                       # ok
+    #session.read_transaction(read_user)                        # ok
+    #session.read_transaction(read_debate)                      # ok
     #session.read_transaction(read_comment)                     # ok
     #session.read_transaction(read_argument)                    # ok
     #session.read_transaction(read_voteMap)                     # ok
+    #session.read_transaction(read_opinion)                     # ok
+    #session.read_transaction(read_poll)                        # ok
 
     #session.read_transaction(read_friends_with)                # ok
     #session.read_transaction(read_debates_in)                  # ok
-    #session.read_transaction(read_gives_comment)               # ok i think
+    #session.read_transaction(read_gives_comment)               # ok
     #session.read_transaction(read_gives_argument)              # ok
     #session.read_transaction(read_gives_voteMap)               # ok
+    #session.read_transaction(read_gives_opinion)               # ok
+    #session.read_transaction(read_gives_pollvote)              # ok
     #session.read_transaction(read_user_timeline)               # todo
 
     #session.read_transaction(read_has_comment)                 # ok
