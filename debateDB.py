@@ -1,7 +1,7 @@
 from neo4j import GraphDatabase
 import json
 import numpy as np
-import datetime
+from datetime import datetime
 
 #import collections
 
@@ -706,7 +706,10 @@ with driver.session() as session:
         for i in debates_data:
             c = c + 1
             #debate_timeline_array = np.append(debate_timeline_array, [np.datetime64([debates_data[i]['start_date']]), [i]], axis=1)
-            debate_day_array = np.append(debate_day_array, debates_data[i]['start_date'])
+
+            debate_day = datetime.strptime((debates_data[i]['start_date']), '%m/%d/%Y').date()
+            debate_day_array = np.append(debate_day_array, debate_day)
+
             debate_title_array = np.append(debate_title_array, [i])
 
             #sort_order_array = np.argsort(debate_timeline_array)
@@ -717,16 +720,16 @@ with driver.session() as session:
             if c >= sample:
                 break
 
-    #date_time_array =
+        #date_time_array =
 
-    #print(debate_day_array)
-    #print(debate_title_array)
+        print(debate_day_array)
+        print(debate_title_array)
 
-    #print(debate_timeline_array)
-    #print(sort_order_array)
+        #print(debate_timeline_array)
+        #print(sort_order_array)
 
-    #print(debate_timeline_array[0][sort_order_array[0]])
-    #print(debate_timeline_array[1][sort_order_array[0]])
+        #print(debate_timeline_array[0][sort_order_array[0]])
+        #print(debate_timeline_array[1][sort_order_array[0]])
 
     ###---------------###
     ### Comment Edges ###
