@@ -19,7 +19,7 @@ driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
 user_bool = False
-debate_bool = False
+debate_bool = True
 comment_bool = False
 argument_bool = False
 votemap_bool = False
@@ -46,7 +46,7 @@ refers_to_bool = False
 
 
 
-sample = 10
+sample = 100
 
 #####################################
 ### Functions: Write Transactions ###
@@ -160,6 +160,8 @@ def add_has_argument(tx, debateID, argumentID):
            "MERGE (a)-[:HAS_ARGUMENT]->(b)", debateID=debateID, argumentID=argumentID)
 
 def add_debate_timeline(tx, debateID, prevDebateID):
+    #print('add_debate_timeline is called with \n')
+    #print(debateID, prevDebateID)
     tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
            "MATCH (b:Debate {debateID: $prevDebateID}) \n" +
            "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevDebateID=prevDebateID)
@@ -303,6 +305,7 @@ def read_has_argument(tx):
 
 def read_debate_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.debateID, a.start , b.debateID, b.start")
+    print('read_debate_timeline is called')
     for record in result:
         print("{} with {} took place before {} with {}".format(record["a.debateID"], record["a.start"], record["b.debateID"], record["b.start"]))
 
@@ -372,7 +375,7 @@ with driver.session() as session:
         c = 0
         for i in debates_data:
             c = c + 1
-            session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'])
+            session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'], debates_data[i]['start_date'])
             if c % 100 == 0:
                 print(c)
             if c >= sample:
@@ -705,25 +708,60 @@ with driver.session() as session:
 
         for i in debates_data:
             c = c + 1
-            #debate_timeline_array = np.append(debate_timeline_array, [np.datetime64([debates_data[i]['start_date']]), [i]], axis=1)
 
             debate_day = datetime.strptime((debates_data[i]['start_date']), '%m/%d/%Y').date()
             debate_day_array = np.append(debate_day_array, debate_day)
-
             debate_title_array = np.append(debate_title_array, [i])
+            sort_order_array = np.argsort(debate_day_array)
 
-            #sort_order_array = np.argsort(debate_timeline_array)
-
+            sorted_debate_day_array = debate_day_array[sort_order_array]
+            sorted_debate_day_array_unique = np.unique(debate_day_array[sort_order_array])
+            sorted_debate_title_array = debate_title_array[sort_order_array]
 
             if c % 100 == 0:
                 print(c)
             if c >= sample:
                 break
 
-        #date_time_array =
+        for i in len(range(sorted_debate_title_array)):
 
-        print(debate_day_array)
-        print(debate_title_array)
+
+        '''print(sorted_debate_day_array)
+        print(len(sorted_debate_day_array))
+        print(sorted_debate_day_array_unique)
+        print(len(sorted_debate_day_array_unique))'''
+
+
+        '''for i in range(1, len(debate_day_array)+1):
+
+            debateID = sorted_debate_title_array[-i]
+
+            for k in range(1, (len(debate_day_array)+1)-i):
+
+                if sorted_debate_day_array[-i] != sorted_debate_day_array[-(i+k)]:
+                    prevDebateID = sorted_debate_title_array[-(i+k)]
+
+                    #if sorted_debate_title_array[-(i+k)] == sorted_debate_title_array[-(i+k+1)]
+
+                    session.write_transaction(add_debate_timeline, debateID, prevDebateID)  # -[Before]->
+                    #print('!=!=!=!=!=!=!=!=', sorted_debate_day_array[-i], sorted_debate_day_array[-(i+k)])
+                    break
+                #else:
+                    #print('================', sorted_debate_day_array[-i], sorted_debate_day_array[-(i+k)])'''
+
+
+        #print(debate_day_array)
+        '''print(debate_title_array)
+        print(debate_title_array[0])
+        print(debate_title_array[1])
+        print(debate_title_array[-0])
+        print(debate_title_array[-1])'''
+
+        #print(sort_order_array)
+
+        #print(debate_day_array[sort_order_array])
+        #print(debate_title_array[sort_order_array])
+
 
         #print(debate_timeline_array)
         #print(sort_order_array)
@@ -798,7 +836,7 @@ with driver.session() as session:
     #session.read_transaction(read_has_comment)                 # ok
     #session.read_transaction(read_has_voteMap)                 # ok
     #session.read_transaction(read_has_argument)                # ok
-    #session.read_transaction(read_debate_timeline)             # todo
+    session.read_transaction(read_debate_timeline)             # todo
 
     #session.read_transaction(read_comment_timeline)            # todo
     #session.read_transaction(read_refers_to)                   # ok
