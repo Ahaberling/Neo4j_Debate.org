@@ -714,40 +714,128 @@ with driver.session() as session:
             debate_title_array = np.append(debate_title_array, [i])
             sort_order_array = np.argsort(debate_day_array)
 
-            sorted_debate_day_array = debate_day_array[sort_order_array]
-            sorted_debate_day_array_unique = np.unique(debate_day_array[sort_order_array])
-            sorted_debate_title_array = debate_title_array[sort_order_array]
+            sorted_day_array = debate_day_array[sort_order_array]
+            sorted_day_array_unique = np.unique(debate_day_array[sort_order_array])
+            sorted_title_array = debate_title_array[sort_order_array]
+
+            print(sorted_day_array)
 
             if c % 100 == 0:
                 print(c)
             if c >= sample:
                 break
 
-        for i in len(range(sorted_debate_title_array)):
+        for i in range(1, len(sorted_title_array) + 1):
+
+            debateID = sorted_title_array[-i]
+            #print('debateID: ', debateID)
+
+            for k in range(1, (len(debate_day_array)+1)-i):
+
+                if sorted_day_array[-i] != sorted_day_array[-(i + k)]:
+                    prevDebateID = sorted_title_array[-(i + k)]
+                    session.write_transaction(add_debate_timeline, debateID, prevDebateID)  # -[Before]->
+                    break
+
+                else:
+                    j = 1
+                    '''while sorted_title_array[-(i + k)] == sorted_title_array[-(i + k) + j]:
+                        print(sorted_day_array[-(i + k)], sorted_day_array[-(i + k) + j])
+                        j = j + 1'''
+                    debateID = sorted_title_array[-(i + k) + j]
+                    prevDebateID = sorted_title_array[-(i + k)]
+                    #print(sorted_day_array[-(i + k)], sorted_day_array[-(i + k) + j])
+                    session.write_transaction(add_debate_timeline, debateID, prevDebateID)  # -[Before]->
 
 
-        '''print(sorted_debate_day_array)
-        print(len(sorted_debate_day_array))
-        print(sorted_debate_day_array_unique)
-        print(len(sorted_debate_day_array_unique))'''
+            '''while sorted_day_array[-(i + 1)] == sorted_day_array[-(i + j)]:
+                j = j +1
+                prevDebateID = sorted_day_array[-(i + k + j)]
+                session.write_transaction(add_debate_timeline, debateID, prevDebateID)  # -[Before]->
+
+                break'''
+
+
+
+
+
+            '''#print(sorted_day_array_unique)
+            #index_focal_date_unique = sorted_day_array_unique.index(sorted_day_array[-i])
+            print('focal title', sorted_title_array[-i])
+            print('focal date', sorted_day_array[-i])
+
+            index_focal_date_unique = np.where(sorted_day_array_unique == sorted_day_array[-i]) # find my focal debate date in the unique array
+            index_focal_date_unique = list(index_focal_date_unique)                             # cast it as list to manipulate the index
+            print('index focal date in unique', index_focal_date_unique)
+            index_next_date_unique = index_focal_date_unique                             # manipulate the index to the nearest timestamp before
+            index_next_date_unique[0] = index_next_date_unique[0] - 1                             # manipulate the index to the nearest timestamp before
+            index_next_date_unique = tuple(index_next_date_unique)                              # cast it back to tuple to make numpy functions happy
+            print('index next date in unique', index_next_date_unique)
+
+            next_date_unique = sorted_day_array_unique[index_next_date_unique]
+            print('next date', next_date_unique)
+
+            #print('index_focal_date_unique: ', sorted_day_array_unique[index_focal_date_unique])
+            #print(index_focal_date_unique)
+            #index_focal_date_unique[0] = index_focal_date_unique[0] - 1
+
+            #helper = list(index_focal_date_unique)
+            #helper[0] = helper[0] - 1
+            #print(helper)
+
+            #helper2 = tuple(helper)
+            #print(helper2)
+
+            #index_focal_date_unique2 = index_focal_date_unique[index_focal_date_unique[0]]
+
+            #next_date_unique = sorted_day_array_unique[index_focal_date_unique - 1]
+            #next_date_unique = sorted_day_array_unique[index_focal_date_unique - 1]
+            #print('next_date_unique: ', next_date_unique)
+
+            index_next_date = np.where(sorted_day_array_unique == next_date_unique)
+            print('index next date in sorted', index_next_date)
+
+            next_date_debates = sorted_title_array[index_next_date]
+            print('respective index next date in debate sorted', next_date_debates)
+
+            #index_next_date_debates = sorted_title_array.index(next_date_unique)
+            #print('index_next_date_debates: ', index_next_date_debates)
+
+            for prevDebateID in next_date_debates:
+
+                #print('THIS IS J: ', j)
+
+                #prevDebateID = sorted_title_array[j]
+                print('prevDebateID: ', prevDebateID, ' debateID: ', debateID)
+
+                session.write_transaction(add_debate_timeline, debateID, prevDebateID)'''
+
+
+
+
+
+        '''print(sorted_day_array)
+        print(len(sorted_day_array))
+        print(sorted_day_array_unique)
+        print(len(sorted_day_array_unique))'''
 
 
         '''for i in range(1, len(debate_day_array)+1):
 
-            debateID = sorted_debate_title_array[-i]
+            debateID = sorted_title_array[-i]
 
             for k in range(1, (len(debate_day_array)+1)-i):
 
-                if sorted_debate_day_array[-i] != sorted_debate_day_array[-(i+k)]:
-                    prevDebateID = sorted_debate_title_array[-(i+k)]
+                if sorted_day_array[-i] != sorted_day_array[-(i + k)]:
+                    prevDebateID = sorted_title_array[-(i + k)]
 
-                    #if sorted_debate_title_array[-(i+k)] == sorted_debate_title_array[-(i+k+1)]
+                    #if sorted_title_array[-(i+k)] == sorted_title_array[-(i+k+1)]
 
                     session.write_transaction(add_debate_timeline, debateID, prevDebateID)  # -[Before]->
-                    #print('!=!=!=!=!=!=!=!=', sorted_debate_day_array[-i], sorted_debate_day_array[-(i+k)])
+                    #print('!=!=!=!=!=!=!=!=', sorted_day_array[-i], sorted_day_array[-(i+k)])
                     break
                 #else:
-                    #print('================', sorted_debate_day_array[-i], sorted_debate_day_array[-(i+k)])'''
+                    #print('================', sorted_day_array[-i], sorted_day_array[-(i+k)])'''
 
 
         #print(debate_day_array)
