@@ -19,22 +19,22 @@ driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
 user_bool = True
-debate_bool = False
+debate_bool = True
 comment_bool = False
 argument_bool = False
 votemap_bool = False
 opinion_bool = False
 poll_bool = False
-issues_bool = True
+issues_bool = False
 
 friends_with_bool = False
-debates_in_bool = False
+debates_in_bool = True
 gives_comment_bool = False
 gives_argument_bool = False
 gives_votemap_bool = False
 gives_opinion_bool = False
 gives_pollvote_bool = False
-gives_issues_bool = True
+gives_issues_bool = False
 user_timeline_bool = False
 
 has_comment_bool = False
@@ -57,21 +57,77 @@ sample = 100
 ### Nodes ###
 
 def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, userEthni, userSex, userInterest, userInc,
-                    userJoin, userOn, userUpd, userLook, userParty, userPoli, userPresi, userRels, userReli,
-                    userURL, userWinR):
-    tx.run("MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo," +
-                    "email: $userEmail, ethnicity: $userEthni, gender: $userSex, interested: $userInterest,income: $userInc, joined: $userJoin, last_online: $userOn," +
-                    "last_updated: $userUpd, looking: $userLook, party: $userParty, political_ideology: $userPoli, president: $userPresi, relationship: $userRels," +
-                    "religious_ideology: $userReli, url: $userURL, win_ratio: $userWinR})",
+                    userJoin, userOn, userUpd, userLook, userParty, userPercentile, userPoli, userPresi, userRels, userReli,
+                    userURL, userWinR,
+                    number_all_deb, number_lost_deb, number_tied_deb, number_won_deb, number_friends, number_opinion_arg, number_opinion_ques, number_poll_topics,
+                    number_poll_votes, number_voted_deb):
+    tx.run("MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, " +
+                    "email: $userEmail, ethnicity: $userEthni, gender: $userSex, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, " +
+                    "last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, " +
+                    "religious_ideology: $userReli, url: $userURL, win_ratio: $userWinR," +
+                    "number_all_deb: $number_all_deb, number_lost_deb:$number_lost_deb, number_tied_deb: $number_tied_deb, number_won_deb: $number_won_deb, number_friends: $number_friends, " +
+                    "number_opinion_arg: $number_opinion_arg, number_opinion_ques: $number_opinion_ques, number_poll_topics: $number_poll_topics, number_poll_votes: $number_poll_votes, " +
+                    "number_voted_deb: $number_voted_deb})",
                     userName=userName, userBirth=userBirth, userDescr=userDescr, userEduc=userEduc, userElo=userElo, userEmail=userEmail,
-                    userEthni=userEthni, userSex=userSex, userInterest=userInterest, userInc=userInc, userJoin=userJoin, userOn=userOn, userUpd=userUpd, userLook=userLook,
-                    userParty=userParty, userPoli=userPoli, userPresi=userPresi, userRels=userRels, userReli=userReli, userURL=userURL,
-                    userWinR=userWinR)
-    # 'all_debates' excluded due to redundancy
+                    userEthni=userEthni, userSex=userSex, userInc=userInc, userInterest=userInterest, userJoin=userJoin, userOn=userOn, userUpd=userUpd, userLook=userLook,
+                    userParty=userParty, userPercentile=userPercentile, userPoli=userPoli, userPresi=userPresi, userRels=userRels, userReli=userReli, userURL=userURL,
+                    userWinR=userWinR,
+                    number_all_deb=number_all_deb, number_lost_deb=number_lost_deb, number_tied_deb=number_tied_deb, number_won_deb=number_won_deb, number_friends=number_friends,
+                    number_opinion_arg=number_opinion_arg, number_opinion_ques=number_opinion_ques, number_poll_topics=number_poll_topics, number_poll_votes=number_poll_votes,
+                    number_voted_deb=number_voted_deb)
+    # 'all_debates'
+    # 'lost_debates'
+    # 'opinion_arguments'
+    # 'opinion_questions'
+    # 'poll_topics'
+    # 'poll_votes'
+    # 'voted_debates'
+    # 'won_debates'
+    # 'tied_debates'
+    # excluded due to redundancy
 
-def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_date):
-    tx.run("MERGE (a:Debate {debateID: $debateName, url: $debateUrl, category: $debateCategory, title: $debateTitle, start: $start_date})",
-           debateName=debateName, debateUrl=debateUrl, debateCategory=debateCategory, debateTitle=debateTitle, start_date=start_date)
+    # 'number_of_all_debates'
+    # 'number_of_lost_debates'
+    # 'number_of_tied_debates'
+    # 'number_of_won_debates'
+    # 'number_of_friends'
+    # 'number_of_opinion_arguments'
+    # 'number_of_opinion_questions'
+    # 'number_of_poll_topics'
+    # 'number_of_poll_votes'
+    # 'number_of_voted_debates'
+    # might be excluded in future
+
+def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_date, update_date, voting_style, debate_status, number_comments,
+               number_views, number_rounds, number_votes):
+    tx.run("MERGE (a:Debate {debateID: $debateName, url: $debateUrl, category: $debateCategory, title: $debateTitle, start: $start_date,"
+           "update_date: $update_date, voting_style: $voting_style, debate_status: $debate_status, number_views: $number_views,"
+           "number_comments: $number_comments, number_rounds: $number_rounds, number_votes: $number_votes})",
+           debateName=debateName, debateUrl=debateUrl, debateCategory=debateCategory, debateTitle=debateTitle, start_date=start_date,
+           update_date=update_date, voting_style=voting_style, debate_status=debate_status, number_comments=number_comments,
+           number_views=number_views, number_rounds=number_rounds, number_votes=number_votes)
+
+    # 'comments'
+    # 'votes'
+    # 'rounds'
+    # 'forfeit_label'
+    # 'forfeit_side'
+    # 'participant_1_link'
+    # 'participant_1_name'
+    # 'participant_1_points'
+    # 'participant_1_position'
+    # 'participant_1_status'
+    # 'participant_2_link'
+    # 'participant_2_name'
+    # 'participant_2_points'
+    # 'participant_2_position'
+    # 'participant_2_status'
+    # excluded due to redundancy
+
+    # 'number_of_comments'
+    # 'number_of_rounds'
+    # 'number_of_votes'
+    # might be excluded in future
 
 def add_comment(tx, commentID, commentTime, commentContent):
     tx.run("MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})", commentID=commentID, commentTime=commentTime, commentContent=commentContent)
@@ -132,11 +188,12 @@ def add_friends_with(tx, userName, friendName):
            "MATCH (b:User {userID: $friendName}) \n" +
            "MERGE (a)-[:FRIENDS_WITH]->(b)", userName=userName, friendName=friendName)
 
-def add_debates_in(tx, userName, debateName, debateForfeit, debateWinning, debatePosition):
+def add_debates_in(tx, userName, debateName, debateForfeit, debatePoints, debatePosition, debateWinning):
     tx.run("MATCH (a:User {userID: $userName}) \n" +
            "MATCH (b:Debate {debateID: $debateName}) \n" +
-           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, winning: $debateWinning, position: $debatePosition }]->(b)",
-           userName=userName, debateName=debateName, debateForfeit=debateForfeit, debateWinning=debateWinning, debatePosition=debatePosition)
+           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)",
+           userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning)
+
 
 def add_gives_comment(tx, userName, commentID):
     tx.run("MATCH (a:User {userID: $userName}) \n" +
@@ -164,9 +221,11 @@ def add_gives_pollvote(tx, userID, pollID, pollText, pollExplanation):
            "MATCH (b:Poll {pollID: $pollID}) \n" +
            "MERGE (a)-[rel:GIVES_POLLVOTE {pollText: $pollText, pollExplanation: $pollExplanation}]->(b)", userID=userID, pollID=pollID, pollText=pollText, pollExplanation=pollExplanation)
 
-def add_gives_issues(tx,):
-    tx.run()
-    '''insert'''
+def add_gives_issues(tx,userID, issuesID):
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
+           "MATCH (b:Issues {issuesID: $issuesID}) \n" +
+           "MERGE (a)-[rel:GIVES_ISSUES]->(b)", userID=userID, issuesID=issuesID)
+
 
 def add_user_timeline(tx, prevUserID, debateID):
     tx.run("MATCH (a:User {userID: $debateID}) \n" +
@@ -227,9 +286,9 @@ def delete_all(tx):
 
 def read_user(tx):
     result = tx.run("MATCH (n:User) \n" +
-           "RETURN n.userID, n.birthday, n.last_online, n.interested,n.income")
+           "RETURN n.userID, n.birthday, n.last_online, n.income, n.interested")
     for record in result:
-        print(record["n.userID"])
+        print(record["n.userID"], record["n.birthday"], record["n.income"], record["n.interested"])
 
 def read_debate(tx):
     result = tx.run("MATCH (n:Debate) \n" +
@@ -284,9 +343,9 @@ def read_friends_with(tx):
         print("{} nominated {}".format(record["a.userID"], record["b.userID"]))
 
 def read_debates_in(tx):
-    result = tx.run("MATCH (a:User)-[rel:DEBATES_IN]->(b:Debate) RETURN a.userID, b.debateID, rel.forfeit ,rel.winning, rel.position")
+    result = tx.run("MATCH (a:User)-[rel:DEBATES_IN]->(b:Debate) RETURN a.userID, b.debateID, rel.forfeit, rel.debatePoints, rel.position ,rel.winning")
     for record in result:
-        print("{} debated in {} and has ff-value {}".format(record["a.userID"], record["b.debateID"], record["rel.forfeit"]))
+        print("{} debated in {} and has ff-value {} and points {}".format(record["a.userID"], record["b.debateID"], record["rel.forfeit"], record["rel.debatePoints"]))
 
 def read_gives_comment(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_COMMENT]->(b:Comment) RETURN a.userID, b.commentID, b.content")
@@ -323,7 +382,7 @@ def read_gives_pollvote(tx):
 def read_gives_issues(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_ISSUES]->(b:Issues) RETURN a.userID, b.issuesID, b.abortion")
     for record in result:
-        print("{} gives Issues {} with abortion value {} ".format(record["a.userID"], record["b.issuesID"], record["rel.abortion"]))
+        print("{} gives Issues {} with abortion value {} ".format(record["a.userID"], record["b.issuesID"], record["b.abortion"]))
 
 def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
@@ -406,9 +465,13 @@ with driver.session() as session:
             userList.append(i)
             session.write_transaction(add_user, i, users_data[i]['birthday'], users_data[i]['description'], users_data[i]['education'],
                                       users_data[i]['elo_ranking'], users_data[i]['email'], users_data[i]['ethnicity'], users_data[i]['gender'],
-                                      users_data[i]['interested'], users_data[i]['income'], users_data[i]['joined'], users_data[i]['last_online'], users_data[i]['last_updated'],
-                                      users_data[i]['looking'], users_data[i]['party'], users_data[i]['political_ideology'], users_data[i]['president'],
-                                      users_data[i]['relationship'], users_data[i]['religious_ideology'], users_data[i]['url'], users_data[i]['win_ratio'])
+                                      users_data[i]['income'], users_data[i]['interested'], users_data[i]['joined'], users_data[i]['last_online'], users_data[i]['last_updated'],
+                                      users_data[i]['looking'], users_data[i]['party'], users_data[i]['percentile'], users_data[i]['political_ideology'], users_data[i]['president'],
+                                      users_data[i]['relationship'], users_data[i]['religious_ideology'], users_data[i]['url'], users_data[i]['win_ratio'],
+                                      users_data[i]['number_of_all_debates'], users_data[i]['number_of_lost_debates'], users_data[i]['number_of_tied_debates'],
+                                      users_data[i]['number_of_won_debates'], users_data[i]['number_of_friends'], users_data[i]['number_of_opinion_arguments'],
+                                      users_data[i]['number_of_opinion_questions'], users_data[i]['number_of_poll_topics'], users_data[i]['number_of_poll_votes'],
+                                      users_data[i]['number_of_voted_debates'])
             if c % 100 == 0:
                 print(c)
             if c >= sample:
@@ -422,12 +485,15 @@ with driver.session() as session:
         c = 0
         for i in debates_data:
             c = c + 1
-            session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'], debates_data[i]['start_date'])
+            session.write_transaction(add_debate, i, debates_data[i]['url'], debates_data[i]['category'], debates_data[i]['title'], debates_data[i]['start_date'],
+                                      debates_data[i]['update_date'], debates_data[i]['voting_style'], debates_data[i]['debate_status'], debates_data[i]['number_of_comments'],
+                                      debates_data[i]['number_of_views'], debates_data[i]['number_of_rounds'], debates_data[i]['number_of_votes'])
             if c % 100 == 0:
                 print(c)
             if c >= sample:
                 break
         print("-- debate nodes done --")
+
 
     ### Comment Nodes ###
     if comment_bool == True:
@@ -584,14 +650,14 @@ with driver.session() as session:
                     forfeit_bool1 = True
                 if debates_data[i]['participant_1_status'] == "Winning":
                     winning_bool1 = True
-                session.write_transaction(add_debates_in, debates_data[i]['participant_1_name'], i, forfeit_bool1, winning_bool1, debates_data[i]['participant_1_position'])     #todo check if there is inconsistency in participants and user.json
+                session.write_transaction(add_debates_in, debates_data[i]['participant_1_name'], i, forfeit_bool1, debates_data[i]['participant_1_points'], debates_data[i]['participant_1_position'], winning_bool1)     #todo check if there is inconsistency in participants and user.json
 
             if debates_data[i]['participant_2_name'] in userList:
                 if debates_data[i]['forfeit_side'] == debates_data[i]['participant_2_name']:
                     forfeit_bool2 = True
                 if debates_data[i]['participant_2_status'] == "Winning":
                     winning_bool2 = True
-                session.write_transaction(add_debates_in, debates_data[i]['participant_2_name'], i, forfeit_bool2, winning_bool2, debates_data[i]['participant_2_position'])     #todo check if there is inconsistency in participants and user.json
+                session.write_transaction(add_debates_in, debates_data[i]['participant_2_name'], i, forfeit_bool2, debates_data[i]['participant_2_points'], debates_data[i]['participant_2_position'], winning_bool2)     #todo check if there is inconsistency in participants and user.json
 
             if c % 100 == 0:
                 print(c)
@@ -696,7 +762,21 @@ with driver.session() as session:
 
     ### User Edge - gives_issues ###
     if gives_issues_bool == True:
-        '''insert'''
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            issuesID = i + '_issues'
+
+            session.write_transaction(add_gives_issues, i, issuesID)
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+
+        print("-- User Edge - gives_issues_bool done --")
+
+
 
     ### User Edge - user_timeline ###
     if user_timeline_bool == True:
@@ -1013,7 +1093,7 @@ with driver.session() as session:
 
     #session.read_transaction(read_all)
 
-    #session.read_transaction(read_user)                        # ok
+    session.read_transaction(read_user)                        # ok
     #session.read_transaction(read_debate)                      # ok
     #session.read_transaction(read_comment)                     # ok
     #session.read_transaction(read_argument)                    # ok
@@ -1023,13 +1103,13 @@ with driver.session() as session:
     #session.read_transaction(read_issues)                      # ok
 
     #session.read_transaction(read_friends_with)                # ok
-    #session.read_transaction(read_debates_in)                  # ok
+    session.read_transaction(read_debates_in)                  # ok
     #session.read_transaction(read_gives_comment)               # ok
     #session.read_transaction(read_gives_argument)              # ok
     #session.read_transaction(read_gives_voteMap)               # ok
     #session.read_transaction(read_gives_opinion)               # ok
     #session.read_transaction(read_gives_pollvote)              # ok
-    session.read_transaction(read_gives_issues)                # todo
+    #session.read_transaction(read_gives_issues)                # ok
     #session.read_transaction(read_user_timeline)               # ok
 
     #session.read_transaction(read_has_comment)                 # ok
