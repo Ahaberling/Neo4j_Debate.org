@@ -18,8 +18,8 @@ debates_data = json.load(g)
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
-user_bool = False
-debate_bool = True
+user_bool = True
+debate_bool = False
 comment_bool = False
 argument_bool = False
 votemap_bool = False
@@ -33,12 +33,12 @@ gives_argument_bool = False
 gives_votemap_bool = False
 gives_opinion_bool = False
 gives_pollvote_bool = False
-user_timeline_bool = False
+user_timeline_bool = True
 
 has_comment_bool = False
 has_votemap_bool = False
 has_argument_bool = False
-debate_timeline_bool = True
+debate_timeline_bool = False
 
 comment_timeline_bool = False
 
@@ -283,7 +283,10 @@ def read_gives_pollvote(tx):
 
 
 def read_user_timeline(tx):
-    result = tx.run(''' inster ''')
+    result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
+    print('read_debate_timeline is called')
+    for record in result:
+        print("User {} joined on {} before User {} joined on {}".format(record["a.userID"], record["a.joined"], record["b.userID"], record["b.joined"]))
 
 
 ### Debate Edges ###
@@ -304,7 +307,7 @@ def read_has_argument(tx):
         print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.argumentContent"]))
 
 def read_debate_timeline(tx):
-    result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.debateID, a.start , b.debateID, b.start")
+    result = tx.run("MATCH (a:Debate)-[:BEFORE]->(b:Debate) RETURN a.debateID, a.start , b.debateID, b.start")
     print('read_debate_timeline is called')
     for record in result:
         print("{} with {} took place before {} with {}".format(record["a.debateID"], record["a.start"], record["b.debateID"], record["b.start"]))
@@ -627,10 +630,72 @@ with driver.session() as session:
 
 
     ### User Edge - user_timeline ###
-    #if user_timeline_bool == True:
+    if user_timeline_bool == True:
+        c = 0
 
-        ''' insert '''
+        joined_array = np.array([])
+        userID_array = np.array([])
 
+        for i in users_data:
+            c = c + 1
+
+            #print(users_data[i]['joined'])
+
+            if 'Years' or 'Year' in users_data[i]['joined']:
+                joined_days = int(users_data[i]['joined'][0]) * 365
+            elif 'Months' or 'Month' in users_data[i]['joined']:
+                joined_days = int(users_data[i]['joined'][0]) * 30
+            elif 'Weeks' or 'Week' in users_data[i]['joined']:
+                joined_days = int(users_data[i]['joined'][0]) * 7
+            elif 'Days' or 'Day' in users_data[i]['joined']:
+                joined_days = int(users_data[i]['joined'][0])
+            else:
+                joined_days = 'unidentified joined period'
+
+            joined_array = np.append(joined_array, joined_days)
+            UserID = np.append(UserID, i)
+
+            #joined_day = users_data[i]['joined']
+            #print(joined_days)
+            #sort_order_array = np.argsort(debate_day_array)
+
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+
+
+        #joined_array = np.sort(joined_array)
+        #joined_array = np.unique(joined_array)
+
+
+        print(joined_array)
+        '''sort_order_array = np.argsort(debate_day_array)
+
+        sorted_title_array = debate_title_array[sort_order_array]
+        sorted_day_array = debate_day_array[sort_order_array]
+        sorted_day_array_unique = np.unique(debate_day_array[sort_order_array])
+        #print(sorted_day_array_unique)
+        #print(sorted_day_array_unique[0])
+
+        for i in range(len(sorted_day_array_unique)-1):
+
+            focal_date = sorted_day_array_unique[i]
+            next_date = sorted_day_array_unique[i+1]
+
+            focal_date_index = np.where(sorted_day_array == sorted_day_array_unique[i])
+            next_date_index = np.where(sorted_day_array == sorted_day_array_unique[i+1])
+
+            #print(i)
+            #print(focal_date_index)
+
+            #print(sorted_day_array[focal_date_index])
+            #print(sorted_title_array[focal_date_index])
+
+            for debateID in sorted_title_array[focal_date_index]:
+                for prevdebateID in sorted_title_array[next_date_index]:
+                    #print('focal: ', sorted_day_array[focal_date_index], 'next: ', sorted_day_array[next_date_index])
+                    session.write_transaction(add_debate_timeline, prevdebateID, debateID)  # -[Before]->'''
 
     ###--------------###
     ### Debate Edges ###
@@ -817,7 +882,7 @@ with driver.session() as session:
     #session.read_transaction(read_has_comment)                 # ok
     #session.read_transaction(read_has_voteMap)                 # ok
     #session.read_transaction(read_has_argument)                # ok
-    session.read_transaction(read_debate_timeline)             # todo
+    #session.read_transaction(read_debate_timeline)             # ok
 
     #session.read_transaction(read_comment_timeline)            # todo
     #session.read_transaction(read_refers_to)                   # ok
