@@ -18,7 +18,7 @@ debates_data = json.load(g)
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
-user_bool = False
+user_bool = True
 debate_bool = False
 comment_bool = False
 argument_bool = False
@@ -34,7 +34,7 @@ gives_argument_bool = False
 gives_votemap_bool = False
 gives_opinion_bool = False
 gives_pollvote_bool = False
-gives_issues_bool = False
+gives_issues_bool = True
 user_timeline_bool = False
 
 has_comment_bool = False
@@ -321,8 +321,9 @@ def read_gives_pollvote(tx):
         print("{} gives pollvote {} with value {} and explanation {} ".format(record["a.userID"], record["b.pollID"], record["rel.pollText"], record["rel.pollExplanation"]))
 
 def read_gives_issues(tx):
-    result = tx.run()
-    '''insert'''
+    result = tx.run("MATCH (a:User)-[rel:GIVES_ISSUES]->(b:Issues) RETURN a.userID, b.issuesID, b.abortion")
+    for record in result:
+        print("{} gives Issues {} with abortion value {} ".format(record["a.userID"], record["b.issuesID"], record["rel.abortion"]))
 
 def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
@@ -541,16 +542,6 @@ with driver.session() as session:
             if c >= sample:
                 break
         print("-- issues nodes done --")
-
-        '''def add_issues(tx, issuesID, abortion, affirmative_a, animal_rights, obama, border, capitalism, civil_unions,
-                       death_penalty, drug_legaliz, electoral_college, enviro_prot,
-                       estate_tax, eu, euthanasia, federal_reserve, flat_tax, free_trade, gay_marriage, global_warming,
-                       globalization, gold_standard, gun_rights, homeschooling,
-                       internet_censor, iran_iraq_war, labor_union, legal_prostit, medicaid_care, medical_marijuana,
-                       military_interv, minimum_wage, national_health_care,
-                       nat_ret_sales_tax, occupy_movement, progressive_tax, racial_profiling, redistribution,
-                       smoking_ban, social_programs, social_security, socialism, stimulus_spending,
-                       term_limits, torture, united_nations, war_afghanistan, war_terror, welfare):'''
 
     print("-- Nodes done --")
 
@@ -1029,7 +1020,7 @@ with driver.session() as session:
     #session.read_transaction(read_voteMap)                     # ok
     #session.read_transaction(read_opinion)                     # ok
     #session.read_transaction(read_poll)                        # ok
-    session.read_transaction(read_issues)                      # todo
+    #session.read_transaction(read_issues)                      # ok
 
     #session.read_transaction(read_friends_with)                # ok
     #session.read_transaction(read_debates_in)                  # ok
@@ -1038,7 +1029,7 @@ with driver.session() as session:
     #session.read_transaction(read_gives_voteMap)               # ok
     #session.read_transaction(read_gives_opinion)               # ok
     #session.read_transaction(read_gives_pollvote)              # ok
-    #session.read_transaction(read_gives_issues)                # todo
+    session.read_transaction(read_gives_issues)                # todo
     #session.read_transaction(read_user_timeline)               # ok
 
     #session.read_transaction(read_has_comment)                 # ok
