@@ -18,13 +18,14 @@ debates_data = json.load(g)
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 
-user_bool = True
+user_bool = False
 debate_bool = False
 comment_bool = False
 argument_bool = False
 votemap_bool = False
 opinion_bool = False
 poll_bool = False
+issues_bool = True
 
 friends_with_bool = False
 debates_in_bool = False
@@ -33,7 +34,8 @@ gives_argument_bool = False
 gives_votemap_bool = False
 gives_opinion_bool = False
 gives_pollvote_bool = False
-user_timeline_bool = True
+gives_issues_bool = False
+user_timeline_bool = False
 
 has_comment_bool = False
 has_votemap_bool = False
@@ -65,13 +67,14 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     userEthni=userEthni, userSex=userSex, userInterest=userInterest, userInc=userInc, userJoin=userJoin, userOn=userOn, userUpd=userUpd, userLook=userLook,
                     userParty=userParty, userPoli=userPoli, userPresi=userPresi, userRels=userRels, userReli=userReli, userURL=userURL,
                     userWinR=userWinR)
+    # 'all_debates' excluded due to redundancy
 
 def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_date):
     tx.run("MERGE (a:Debate {debateID: $debateName, url: $debateUrl, category: $debateCategory, title: $debateTitle, start: $start_date})",
            debateName=debateName, debateUrl=debateUrl, debateCategory=debateCategory, debateTitle=debateTitle, start_date=start_date)
 
-def add_comment(tx, commentID, commentContent):
-    tx.run("MERGE (a:Comment {commentID: $commentID, content: $commentContent})", commentID=commentID, commentContent=commentContent)
+def add_comment(tx, commentID, commentTime, commentContent):
+    tx.run("MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})", commentID=commentID, commentTime=commentTime, commentContent=commentContent)
 
 def add_argument(tx, argumentID, argumentContent):
     tx.run("MERGE (a:Argument {argumentID: $argumentID, argumentContent: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
@@ -97,6 +100,30 @@ def add_opinion(tx, opinionID, opinionLink):
 def add_poll(tx, pollID, pollLink):
     tx.run("MERGE (a:Poll {pollID: $pollID, pollLink: $pollLink})",
            pollID=pollID, pollLink=pollLink)
+
+def add_issues(tx, issuesID, abortion, affirmative_a, animal_rights, obama, border, capitalism, civil_unions, death_penalty, drug_legaliz, electoral_college, enviro_prot,
+               estate_tax, eu, euthanasia, federal_reserve, flat_tax, free_trade, gay_marriage, global_warming, globalization, gold_standard, gun_rights, homeschooling,
+               internet_censor, iran_iraq_war, labor_union, legal_prostit, medicaid_care, medical_marijuana, military_interv, minimum_wage, national_health_care,
+               nat_ret_sales_tax, occupy_movement, progressive_tax, racial_profiling, redistribution, smoking_ban, social_programs, social_security, socialism, stimulus_spending,
+               term_limits, torture, united_nations, war_afghanistan, war_terror, welfare):
+    tx.run("MERGE (a:Issues {issuesID: $issuesID, abortion: $abortion, affirmative_a: $affirmative_a, animal_rights: $animal_rights, obama: $obama, border: $border, capitalism: $capitalism, " +
+           "civil_unions: $civil_unions, death_penalty: $death_penalty, drug_legaliz: $drug_legaliz, electoral_college: $electoral_college, enviro_prot: $enviro_prot, estate_tax: $estate_tax, " +
+           "eu: $eu, euthanasia: $euthanasia, federal_reserve: $federal_reserve, flat_tax: $flat_tax, free_trade: $free_trade, gay_marriage: $gay_marriage, global_warming: $global_warming, " +
+           "globalization: $globalization, gold_standard: $gold_standard, gun_rights: $gun_rights, homeschooling: $homeschooling, internet_censor: $internet_censor, iran_iraq_war: $iran_iraq_war, " +
+           "labor_union: $labor_union, legal_prostit: $legal_prostit, medicaid_care: $medicaid_care, medical_marijuana: $medical_marijuana, military_interv: $military_interv, " +
+           "minimum_wage: $minimum_wage, national_health_care: $national_health_care, nat_ret_sales_tax: $nat_ret_sales_tax, occupy_movement: $occupy_movement, progressive_tax: $progressive_tax, " +
+           "racial_profiling: $racial_profiling, redistribution: $redistribution, smoking_ban: $smoking_ban, social_programs: $social_programs, social_security: $social_security, " +
+           "socialism: $socialism, stimulus_spending: $stimulus_spending, term_limits: $term_limits, torture: $torture, united_nations: $united_nations, war_afghanistan: $war_afghanistan, " +
+           "war_terror: $war_terror, welfare: $welfare})",
+           issuesID=issuesID, abortion=abortion, affirmative_a=affirmative_a, animal_rights=animal_rights, obama=obama, border=border, capitalism=capitalism, civil_unions=civil_unions,
+           death_penalty=death_penalty, drug_legaliz=drug_legaliz, electoral_college=electoral_college, enviro_prot=enviro_prot, estate_tax=estate_tax, eu=eu, euthanasia=euthanasia,
+           federal_reserve=federal_reserve, flat_tax=flat_tax, free_trade=free_trade, gay_marriage=gay_marriage, global_warming=global_warming, globalization=globalization,
+           gold_standard=gold_standard, gun_rights=gun_rights, homeschooling=homeschooling, internet_censor=internet_censor, iran_iraq_war=iran_iraq_war,
+           labor_union=labor_union, legal_prostit=legal_prostit, medicaid_care=medicaid_care, medical_marijuana=medical_marijuana, military_interv=military_interv,
+           minimum_wage=minimum_wage, national_health_care=national_health_care, nat_ret_sales_tax=nat_ret_sales_tax, occupy_movement=occupy_movement, progressive_tax=progressive_tax,
+           racial_profiling=racial_profiling, redistribution=redistribution, smoking_ban=smoking_ban, social_programs=social_programs, social_security=social_security,
+           socialism=socialism, stimulus_spending=stimulus_spending, term_limits=term_limits, torture=torture, united_nations=united_nations, war_afghanistan=war_afghanistan,
+           war_terror=war_terror, welfare=welfare)
 
 ### User Edges ###
 
@@ -137,10 +164,14 @@ def add_gives_pollvote(tx, userID, pollID, pollText, pollExplanation):
            "MATCH (b:Poll {pollID: $pollID}) \n" +
            "MERGE (a)-[rel:GIVES_POLLVOTE {pollText: $pollText, pollExplanation: $pollExplanation}]->(b)", userID=userID, pollID=pollID, pollText=pollText, pollExplanation=pollExplanation)
 
+def add_gives_issues(tx,):
+    tx.run()
+    '''insert'''
 
-def add_user_timeline(tx):
-    tx.run(''' insert ''')
-
+def add_user_timeline(tx, prevUserID, debateID):
+    tx.run("MATCH (a:User {userID: $debateID}) \n" +
+           "MATCH (b:User {userID: $prevUserID}) \n" +
+           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevUserID=prevUserID)
 
 ### Debate Edges ###
 
@@ -169,9 +200,10 @@ def add_debate_timeline(tx, debateID, prevDebateID):
 
 ### Comment Edges ###
 
-def add_comment_timeline(tx):
-    tx.run( ''' insert ''')
-
+def add_comment_timeline(tx, prevCommentID, commentID):
+    tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
+           "MATCH (b:Comment {commentID: $prevCommentID}) \n" +
+           "MERGE (b)-[:BEFORE]->(a)", commentID=commentID, prevCommentID=prevCommentID)
 
 ### VoteMap Edges ###
 
@@ -236,6 +268,13 @@ def read_poll(tx):
     for record in result:
         print("{} has link {} with text {} and explanation: {}".format(record["n.pollID"], record["n.pollLink"], record["n.pollText"], record["n.pollExplanation"]))
 
+def read_issues(tx):
+    result = tx.run("MATCH (n:Issues) \n" +
+                    "RETURN n.issuesID, n.abortion, n.affirmative_a, n.animal_rights")
+    for record in result:
+        print("issuesID: {}, abortion: {}, affirmative_a: {},animal_rights: {}".format(record["n.issuesID"], record["n.abortion"], record["n.affirmative_a"], record["n.animal_rights"]))
+
+
 
 ### User Edges ###
 
@@ -281,10 +320,12 @@ def read_gives_pollvote(tx):
     for record in result:
         print("{} gives pollvote {} with value {} and explanation {} ".format(record["a.userID"], record["b.pollID"], record["rel.pollText"], record["rel.pollExplanation"]))
 
+def read_gives_issues(tx):
+    result = tx.run()
+    '''insert'''
 
 def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
-    print('read_debate_timeline is called')
     for record in result:
         print("User {} joined on {} before User {} joined on {}".format(record["a.userID"], record["a.joined"], record["b.userID"], record["b.joined"]))
 
@@ -308,7 +349,7 @@ def read_has_argument(tx):
 
 def read_debate_timeline(tx):
     result = tx.run("MATCH (a:Debate)-[:BEFORE]->(b:Debate) RETURN a.debateID, a.start , b.debateID, b.start")
-    print('read_debate_timeline is called')
+    #print('read_debate_timeline is called')
     for record in result:
         print("{} with {} took place before {} with {}".format(record["a.debateID"], record["a.start"], record["b.debateID"], record["b.start"]))
 
@@ -316,7 +357,9 @@ def read_debate_timeline(tx):
 ### Comment Edges ###
 
 def read_comment_timeline(tx):
-    result = tx.run(''' inster ''')
+    result = tx.run("MATCH (a:Comment)-[:BEFORE]->(b:Comment) RETURN a.commentID, a.commentTime , b.commentID, b.commentTime")
+    for record in result:
+        print("Comment {} with date {} was created before comment {} with date {}".format(record["a.commentID"], record["a.commentTime"], record["b.commentID"], record["b.commentTime"]))
 
 
 ### VoteMap Edges ###
@@ -395,7 +438,7 @@ with driver.session() as session:
             for k in debates_data[i]['comments']:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
-                session.write_transaction(add_comment, commentID, k['comment_text'])
+                session.write_transaction(add_comment, commentID, k['time'], k['comment_text'])
             if c % 100 == 0:
                 print(c)
             if c >= sample:
@@ -477,6 +520,37 @@ with driver.session() as session:
                 break
         print("-- poll nodes done --")
 
+    ### Issues Nodes ###
+    if issues_bool == True:
+
+        c = 0
+        for i in users_data:
+            c = c + 1
+            issuesID = i + '_issues'
+            k = users_data[i]['big_issues_dict']
+            #print(issuesID, k['Abortion'])
+            session.write_transaction(add_issues, issuesID, k['Abortion'], k['Affirmative Action'], k['Animal Rights'], k['Barack Obama'], k['Border Fence'], k['Capitalism'], k['Civil Unions'],
+                                      k['Death Penalty'], k['Drug Legalization'], k['Electoral College'], k['Environmental Protection'], k['Estate Tax'], k['European Union'], k['Euthanasia'],
+                                      k['Federal Reserve'], k['Flat Tax'], k['Free Trade'], k['Gay Marriage'], k['Global Warming Exists'], k['Globalization'], k['Gold Standard'], k['Gun Rights'],
+                                      k['Homeschooling'], k['Internet Censorship'], k['Iran-Iraq War'], k['Labor Union'], k['Legalized Prostitution'], k['Medicaid & Medicare'], k['Medical Marijuana'],
+                                      k['Military Intervention'], k['Minimum Wage'], k['National Health Care'], k['National Retail Sales Tax'], k['Occupy Movement'], k['Progressive Tax'],
+                                      k['Racial Profiling'], k['Redistribution'], k['Smoking Ban'], k['Social Programs'], k['Social Security'], k['Socialism'], k['Stimulus Spending'], k['Term Limits'],
+                                      k['Torture'], k['United Nations'], k['War in Afghanistan'], k['War on Terror'], k['Welfare'])
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+        print("-- issues nodes done --")
+
+        '''def add_issues(tx, issuesID, abortion, affirmative_a, animal_rights, obama, border, capitalism, civil_unions,
+                       death_penalty, drug_legaliz, electoral_college, enviro_prot,
+                       estate_tax, eu, euthanasia, federal_reserve, flat_tax, free_trade, gay_marriage, global_warming,
+                       globalization, gold_standard, gun_rights, homeschooling,
+                       internet_censor, iran_iraq_war, labor_union, legal_prostit, medicaid_care, medical_marijuana,
+                       military_interv, minimum_wage, national_health_care,
+                       nat_ret_sales_tax, occupy_movement, progressive_tax, racial_profiling, redistribution,
+                       smoking_ban, social_programs, social_security, socialism, stimulus_spending,
+                       term_limits, torture, united_nations, war_afghanistan, war_terror, welfare):'''
 
     print("-- Nodes done --")
 
@@ -629,6 +703,10 @@ with driver.session() as session:
         print("-- User Edge - gives_pollvote done --")
 
 
+    ### User Edge - gives_issues ###
+    if gives_issues_bool == True:
+        '''insert'''
+
     ### User Edge - user_timeline ###
     if user_timeline_bool == True:
         c = 0
@@ -641,23 +719,40 @@ with driver.session() as session:
 
             #print(users_data[i]['joined'])
 
-            if 'Years' or 'Year' in users_data[i]['joined']:
-                joined_days = int(users_data[i]['joined'][0]) * 365
-            elif 'Months' or 'Month' in users_data[i]['joined']:
-                joined_days = int(users_data[i]['joined'][0]) * 30
-            elif 'Weeks' or 'Week' in users_data[i]['joined']:
-                joined_days = int(users_data[i]['joined'][0]) * 7
-            elif 'Days' or 'Day' in users_data[i]['joined']:
-                joined_days = int(users_data[i]['joined'][0])
+            if 'Years'      in users_data[i]['joined'] or 'Year'    in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_days = int(users_data[i]['joined'][0:2]) * 365
+                    #print('yes')
+                    #print(int(users_data[i]['joined'][0:2]))
+                else:
+                    joined_days = int(users_data[i]['joined'][0]) * 365
+                    #print('no')
+
+            elif 'Months'   in users_data[i]['joined'] or 'Month'   in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_days = int(users_data[i]['joined'][0:2]) * 30
+                else:
+                    joined_days = int(users_data[i]['joined'][0]) * 30
+
+            elif 'Weeks'    in users_data[i]['joined'] or 'Week'    in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_days = int(users_data[i]['joined'][0:2]) * 7
+                else:
+                    joined_days = int(users_data[i]['joined'][0]) * 7
+
+            elif 'Days'     in users_data[i]['joined'] or 'Day'     in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_days = int(users_data[i]['joined'][0:2])
+                else:
+                    joined_days = int(users_data[i]['joined'][0])
+
             else:
                 joined_days = 'unidentified joined period'
 
-            joined_array = np.append(joined_array, joined_days)
-            UserID = np.append(UserID, i)
-
-            #joined_day = users_data[i]['joined']
             #print(joined_days)
-            #sort_order_array = np.argsort(debate_day_array)
+
+            userID_array = np.append(userID_array, i)
+            joined_array = np.append(joined_array, joined_days)
 
             if c % 100 == 0:
                 print(c)
@@ -665,37 +760,25 @@ with driver.session() as session:
                 break
 
 
-        #joined_array = np.sort(joined_array)
-        #joined_array = np.unique(joined_array)
+        sort_joined_array_index = np.argsort(joined_array)
 
+        sort_joined_array = joined_array[sort_joined_array_index]
+        sort_userID_array = userID_array[sort_joined_array_index]
 
-        print(joined_array)
-        '''sort_order_array = np.argsort(debate_day_array)
+        sort_joined_array_unique = np.unique(sort_joined_array)
 
-        sorted_title_array = debate_title_array[sort_order_array]
-        sorted_day_array = debate_day_array[sort_order_array]
-        sorted_day_array_unique = np.unique(debate_day_array[sort_order_array])
-        #print(sorted_day_array_unique)
-        #print(sorted_day_array_unique[0])
+        for i in range(len(sort_joined_array_unique)-1):
 
-        for i in range(len(sorted_day_array_unique)-1):
+            focal_date = sort_joined_array_unique[i]
+            next_date = sort_joined_array_unique[i+1]
 
-            focal_date = sorted_day_array_unique[i]
-            next_date = sorted_day_array_unique[i+1]
+            focal_date_index = np.where(sort_joined_array == sort_joined_array_unique[i])
+            next_date_index = np.where(sort_joined_array == sort_joined_array_unique[i+1])
 
-            focal_date_index = np.where(sorted_day_array == sorted_day_array_unique[i])
-            next_date_index = np.where(sorted_day_array == sorted_day_array_unique[i+1])
-
-            #print(i)
-            #print(focal_date_index)
-
-            #print(sorted_day_array[focal_date_index])
-            #print(sorted_title_array[focal_date_index])
-
-            for debateID in sorted_title_array[focal_date_index]:
-                for prevdebateID in sorted_title_array[next_date_index]:
+            for userID in sort_userID_array[focal_date_index]:
+                for prevuserID in sort_userID_array[next_date_index]:
                     #print('focal: ', sorted_day_array[focal_date_index], 'next: ', sorted_day_array[next_date_index])
-                    session.write_transaction(add_debate_timeline, prevdebateID, debateID)  # -[Before]->'''
+                    session.write_transaction(add_user_timeline, prevuserID, userID)  # -[Before]->
 
     ###--------------###
     ### Debate Edges ###
@@ -820,9 +903,86 @@ with driver.session() as session:
     ###---------------###
 
     ### Comment Edge - comment_timeline ###
-    #if comment_timeline_bool == True:
+    if comment_timeline_bool == True:
 
-        #''' insert '''
+        c = 0
+        created_array = np.array([])
+        commentID_array = np.array([])
+
+        for i in debates_data:
+            c = c + 1
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+
+                print(k['time'])
+
+                if 'years'      in k['time'] or 'year'    in k['time']:
+                    if k['time'][1] != ' ':
+                        created_days = int(k['time'][0:2]) * 365
+                        #print('yes')
+                        #print(int(users_data[i]['joined'][0:2]))
+                    else:
+                        created_days = int(k['time'][0]) * 365
+                        #print('no')
+
+                elif 'months'   in k['time'] or 'month'   in k['time']:
+                    if k['time'][1] != ' ':
+                        created_days = int(k['time'][0:2]) * 30
+                    else:
+                        created_days = int(k['time'][0]) * 30
+
+                elif 'weeks'    in k['time'] or 'week'    in k['time']:
+                    if k['time'][1] != ' ':
+                        created_days = int(k['time'][0:2]) * 7
+                    else:
+                        created_days = int(k['time'][0]) * 7
+
+                elif 'days'     in k['time'] or 'day'     in k['time']:
+                    if k['time'][1] != ' ':
+                        created_days = int(k['time'][0:2])
+                    else:
+                        created_days = int(k['time'][0])
+
+                else:
+                    created_days = 'unidentified created period'
+
+                #print(joined_days)
+
+                commentID_array = np.append(commentID_array, commentID)
+                created_array = np.append(created_array, created_days)
+
+            if c % 100 == 0:
+                print(c)
+            if c >= sample:
+                break
+
+
+        sort_created_array_index = np.argsort(created_array)
+
+        sort_created_array = created_array[sort_created_array_index]
+        sort_comment_array = commentID_array[sort_created_array_index]
+
+        sort_created_array_unique = np.unique(sort_created_array)
+
+        print(sort_created_array)
+        print(sort_comment_array)
+
+        for i in range(len(sort_created_array_unique)-1):
+
+            focal_date = sort_created_array_unique[i]
+            next_date = sort_created_array_unique[i+1]
+
+            focal_date_index = np.where(sort_created_array == sort_created_array_unique[i])
+            next_date_index = np.where(sort_created_array == sort_created_array_unique[i+1])
+
+            for commentID in sort_comment_array[focal_date_index]:
+                for prevcommentID in sort_comment_array[next_date_index]:
+                    #print('focal: ', sorted_day_array[focal_date_index], 'next: ', sorted_day_array[next_date_index])
+                    session.write_transaction(add_comment_timeline, prevcommentID, commentID)  # -[Before]->
+                    print(prevcommentID, commentID)
+
 
 
     ###---------------###
@@ -869,6 +1029,7 @@ with driver.session() as session:
     #session.read_transaction(read_voteMap)                     # ok
     #session.read_transaction(read_opinion)                     # ok
     #session.read_transaction(read_poll)                        # ok
+    session.read_transaction(read_issues)                      # todo
 
     #session.read_transaction(read_friends_with)                # ok
     #session.read_transaction(read_debates_in)                  # ok
@@ -877,14 +1038,15 @@ with driver.session() as session:
     #session.read_transaction(read_gives_voteMap)               # ok
     #session.read_transaction(read_gives_opinion)               # ok
     #session.read_transaction(read_gives_pollvote)              # ok
-    #session.read_transaction(read_user_timeline)               # todo
+    #session.read_transaction(read_gives_issues)                # todo
+    #session.read_transaction(read_user_timeline)               # ok
 
     #session.read_transaction(read_has_comment)                 # ok
     #session.read_transaction(read_has_voteMap)                 # ok
     #session.read_transaction(read_has_argument)                # ok
     #session.read_transaction(read_debate_timeline)             # ok
 
-    #session.read_transaction(read_comment_timeline)            # todo
+    #session.read_transaction(read_comment_timeline)            # ok
     #session.read_transaction(read_refers_to)                   # ok
 
     print("-- read done --")
