@@ -20,35 +20,35 @@ driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
 
 user_bool = True
 debate_bool = True
-comment_bool = False
-argument_bool = False
-votemap_bool = False
-opinion_bool = False
-poll_bool = False
-issues_bool = False
+comment_bool = True
+argument_bool = True
+votemap_bool = True
+opinion_bool = True
+poll_bool = True
+issues_bool = True
 
-friends_with_bool = False
+friends_with_bool = True
 debates_in_bool = True
-gives_comment_bool = False
-gives_argument_bool = False
-gives_votemap_bool = False
-gives_opinion_bool = False
-gives_pollvote_bool = False
-gives_issues_bool = False
-user_timeline_bool = False
+gives_comment_bool = True
+gives_argument_bool = True
+gives_votemap_bool = True
+gives_opinion_bool = True
+gives_pollvote_bool = True
+gives_issues_bool = True
+user_timeline_bool = True
 
-has_comment_bool = False
-has_votemap_bool = False
-has_argument_bool = False
-debate_timeline_bool = False
+has_comment_bool = True
+has_votemap_bool = True
+has_argument_bool = True
+debate_timeline_bool = True
 
-comment_timeline_bool = False
+comment_timeline_bool = True
 
-refers_to_bool = False
+refers_to_bool = True
 
 
 
-sample = 100
+sample = 300
 
 #####################################
 ### Functions: Write Transactions ###
@@ -887,7 +887,7 @@ with driver.session() as session:
                     if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
                         break
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
-                    print(i, votemapID)
+                    #print(i, votemapID)
                     session.write_transaction(add_has_voteMap, i, votemapID)
 
                     c3 = c3 + 1
@@ -987,7 +987,7 @@ with driver.session() as session:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
 
-                print(k['time'])
+                #print(k['time'])
 
                 if 'years'      in k['time'] or 'year'    in k['time']:
                     if k['time'][1] != ' ':
@@ -1037,8 +1037,8 @@ with driver.session() as session:
 
         sort_created_array_unique = np.unique(sort_created_array)
 
-        print(sort_created_array)
-        print(sort_comment_array)
+        #print(sort_created_array)
+        #print(sort_comment_array)
 
         for i in range(len(sort_created_array_unique)-1):
 
@@ -1052,7 +1052,7 @@ with driver.session() as session:
                 for prevcommentID in sort_comment_array[next_date_index]:
                     #print('focal: ', sorted_day_array[focal_date_index], 'next: ', sorted_day_array[next_date_index])
                     session.write_transaction(add_comment_timeline, prevcommentID, commentID)  # -[Before]->
-                    print(prevcommentID, commentID)
+                    #print(prevcommentID, commentID)
 
 
 
@@ -1093,7 +1093,7 @@ with driver.session() as session:
 
     #session.read_transaction(read_all)
 
-    session.read_transaction(read_user)                        # ok
+    #session.read_transaction(read_user)                        # ok
     #session.read_transaction(read_debate)                      # ok
     #session.read_transaction(read_comment)                     # ok
     #session.read_transaction(read_argument)                    # ok
@@ -1103,7 +1103,7 @@ with driver.session() as session:
     #session.read_transaction(read_issues)                      # ok
 
     #session.read_transaction(read_friends_with)                # ok
-    session.read_transaction(read_debates_in)                  # ok
+    #session.read_transaction(read_debates_in)                  # ok
     #session.read_transaction(read_gives_comment)               # ok
     #session.read_transaction(read_gives_argument)              # ok
     #session.read_transaction(read_gives_voteMap)               # ok
