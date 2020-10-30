@@ -14,8 +14,8 @@ debates_data = True
 
 ### Nodes ###
 user_bool = False
-debate_bool = True
-comment_bool = False
+debate_bool = False
+comment_bool = True
 argument_bool = False
 votemap_bool = False
 opinion_bool = False
@@ -54,7 +54,7 @@ sample_bool = True
 ######################
 
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
-sample = 100
+sample = 2
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -299,7 +299,6 @@ def add_debate_timeline(tx, debateID, year):
            "MERGE (b)-[:BEFORE]->(a)", commentID=commentID, prevCommentID=prevCommentID)'''
 
 def add_comment_timeline(tx, commentID, year):
-    print(commentID, year)
     tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
            "MATCH (b:Timeline {year: $year}) \n" +
            "MERGE (a)-[:IN_TIMELINE]->(b)", commentID=commentID, year=year)
@@ -677,7 +676,7 @@ with driver.session() as session:
 
     if timeline_bool == True:
         for i in range(2007, 2019):
-            session.write_transaction(add_timeline, str(i)) # neo4j cares about the type that is submitted, wow
+            session.write_transaction(add_timeline, i) # neo4j cares about the type that is submitted, wow
         print("-- Nodes - Timeline done --")
 
 
@@ -883,7 +882,7 @@ with driver.session() as session:
                 joined_year = 2017
 
             #print(i, joined_year)
-            session.write_transaction(add_debate_timeline, i, joined_year)  # -[IN_TIMELINE]->
+            session.write_transaction(add_user_timeline, i, joined_year)  # -[IN_TIMELINE]->
 
             if c % 100 == 0:
                 print('Edges - user_timeline: ', c)
@@ -973,7 +972,7 @@ with driver.session() as session:
         ### Debate Edge - debate_timeline ###
         if debate_timeline_bool == True:
 
-            session.write_transaction(add_debate_timeline, i, debates_data[i]['start_date'][-4:])  # -[IN_TIMELINE]->
+            session.write_transaction(add_debate_timeline, i, int(debates_data[i]['start_date'][-4:]))  # -[IN_TIMELINE]->
 
             #2018 er node hinzufügen
 
@@ -999,7 +998,7 @@ with driver.session() as session:
                 else:
                     created_year = 2017
 
-            session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
+                session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
 
             if c % 100 == 0:
                 print('Edges - comment_timeline: ', c)
@@ -1151,7 +1150,7 @@ with driver.session() as session:
     # session.read_transaction(read_has_argument)                # ok
     # session.read_transaction(read_debate_timeline)             # ok
 
-    session.read_transaction(read_comment_timeline)            # ok
+    # session.read_transaction(read_comment_timeline)            # ok
 
     # session.read_transaction(read_refers_to)                   # ok
 
