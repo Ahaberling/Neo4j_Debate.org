@@ -4,54 +4,57 @@ import numpy as np
 from datetime import datetime
 
 
-#############
-### Scope ###
-#############
+#################
+### Selection ###
+#################
 
 ### Data ###
 users_data_bool = True
 debates_data = True
 
 ### Nodes ###
-user_bool = True
+user_bool = False
 debate_bool = True
-comment_bool = True
-argument_bool = True
-votemap_bool = True
-opinion_bool = True
-poll_bool = True
-issues_bool = True
+comment_bool = False
+argument_bool = False
+votemap_bool = False
+opinion_bool = False
+poll_bool = False
+issues_bool = False
+timeline_bool = True
 
 ### User Edges ###
-friends_with_bool = True
-debates_in_bool = True
-gives_comment_bool = True
-gives_argument_bool = True
-gives_votemap_bool = True
-gives_opinion_bool = True
-gives_pollvote_bool = True
-gives_issues_bool = True
-user_timeline_bool = True
+friends_with_bool = False
+debates_in_bool = False
+gives_comment_bool = False
+gives_argument_bool = False
+gives_votemap_bool = False
+gives_opinion_bool = False
+gives_pollvote_bool = False
+gives_issues_bool = False
+user_timeline_bool = False
 
 ### Debate Edges ###
-has_comment_bool = True
-has_votemap_bool = True
-has_argument_bool = True
-debate_timeline_bool = True
+has_comment_bool = False
+has_votemap_bool = False
+has_argument_bool = False
+debate_timeline_bool = False
 
 ### Comment Edges ###
 comment_timeline_bool = True
 
 ### VoteMap Edges ###
-refers_to_bool = True
+refers_to_bool = False
 
+### sampling ###
+sample_bool = True
 
 ######################
 ### Initialization ###
 ######################
 
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
-sample = 300
+sample = 100
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -68,20 +71,20 @@ if debates_data == True:
 
 ### Nodes ###
 
-def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, userEthni, userSex, userInterest, userInc,
+def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, userEthni, userSex, friend_privacy, userInterest, userInc,
                     userJoin, userOn, userUpd, userLook, userParty, userPercentile, userPoli, userPresi, userRels, userReli,
                     userURL, userWinR,
                     number_all_deb, number_lost_deb, number_tied_deb, number_won_deb, number_friends, number_opinion_arg, number_opinion_ques, number_poll_topics,
                     number_poll_votes, number_voted_deb):
     tx.run("MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, " +
-                    "email: $userEmail, ethnicity: $userEthni, gender: $userSex, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, " +
+                    "email: $userEmail, ethnicity: $userEthni, gender: $userSex, friend_privacy: $friend_privacy, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, " +
                     "last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, " +
                     "religious_ideology: $userReli, url: $userURL, win_ratio: $userWinR," +
                     "number_all_deb: $number_all_deb, number_lost_deb:$number_lost_deb, number_tied_deb: $number_tied_deb, number_won_deb: $number_won_deb, number_friends: $number_friends, " +
                     "number_opinion_arg: $number_opinion_arg, number_opinion_ques: $number_opinion_ques, number_poll_topics: $number_poll_topics, number_poll_votes: $number_poll_votes, " +
                     "number_voted_deb: $number_voted_deb})",
                     userName=userName, userBirth=userBirth, userDescr=userDescr, userEduc=userEduc, userElo=userElo, userEmail=userEmail,
-                    userEthni=userEthni, userSex=userSex, userInc=userInc, userInterest=userInterest, userJoin=userJoin, userOn=userOn, userUpd=userUpd, userLook=userLook,
+                    userEthni=userEthni, userSex=userSex, friend_privacy=friend_privacy, userInc=userInc, userInterest=userInterest, userJoin=userJoin, userOn=userOn, userUpd=userUpd, userLook=userLook,
                     userParty=userParty, userPercentile=userPercentile, userPoli=userPoli, userPresi=userPresi, userRels=userRels, userReli=userReli, userURL=userURL,
                     userWinR=userWinR,
                     number_all_deb=number_all_deb, number_lost_deb=number_lost_deb, number_tied_deb=number_tied_deb, number_won_deb=number_won_deb, number_friends=number_friends,
@@ -193,6 +196,11 @@ def add_issues(tx, issuesID, abortion, affirmative_a, animal_rights, obama, bord
            socialism=socialism, stimulus_spending=stimulus_spending, term_limits=term_limits, torture=torture, united_nations=united_nations, war_afghanistan=war_afghanistan,
            war_terror=war_terror, welfare=welfare)
 
+
+def add_timeline(tx, year):
+    tx.run("MERGE (a:Timeline {year: $year})",
+           year=year)
+
 ### User Edges ###
 
 def add_friends_with(tx, userName, friendName):
@@ -239,10 +247,17 @@ def add_gives_issues(tx,userID, issuesID):
            "MERGE (a)-[rel:GIVES_ISSUES]->(b)", userID=userID, issuesID=issuesID)
 
 
-def add_user_timeline(tx, prevUserID, debateID):
+'''def add_user_timeline(tx, prevUserID, debateID):
     tx.run("MATCH (a:User {userID: $debateID}) \n" +
            "MATCH (b:User {userID: $prevUserID}) \n" +
-           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevUserID=prevUserID)
+           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevUserID=prevUserID)'''
+
+def add_user_timeline(tx, userID, year):
+    #print("In add_user_timeline", userID, year)
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
+           "MATCH (b:Timeline {year: $year}) \n" +
+           "MERGE (a)-[:IN_TIMELINE]->(b)", userID=userID, year=year)
+
 
 ### Debate Edges ###
 
@@ -261,20 +276,33 @@ def add_has_argument(tx, debateID, argumentID):
            "MATCH (b:Argument {argumentID: $argumentID}) \n" +
            "MERGE (a)-[:HAS_ARGUMENT]->(b)", debateID=debateID, argumentID=argumentID)
 
-def add_debate_timeline(tx, debateID, prevDebateID):
+'''def add_debate_timeline(tx, debateID, prevDebateID):
     #print('add_debate_timeline is called with \n')
     #print(debateID, prevDebateID)
     tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
            "MATCH (b:Debate {debateID: $prevDebateID}) \n" +
-           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevDebateID=prevDebateID)
+           "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevDebateID=prevDebateID)'''
+
+def add_debate_timeline(tx, debateID, year):
+    #print("THIS IS BULLSHIT", debateID, year)
+    tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
+           "MATCH (b:Timeline {year: $year}) \n" +
+           "MERGE (a)-[:IN_TIMELINE]->(b)", debateID=debateID, year=year)
+           #"MERGE (a)-[:bla]->(a)", debateID=debateID, year=year)
 
 
 ### Comment Edges ###
 
-def add_comment_timeline(tx, prevCommentID, commentID):
+'''def add_comment_timeline(tx, prevCommentID, commentID):
     tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
            "MATCH (b:Comment {commentID: $prevCommentID}) \n" +
-           "MERGE (b)-[:BEFORE]->(a)", commentID=commentID, prevCommentID=prevCommentID)
+           "MERGE (b)-[:BEFORE]->(a)", commentID=commentID, prevCommentID=prevCommentID)'''
+
+def add_comment_timeline(tx, commentID, year):
+    print(commentID, year)
+    tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
+           "MATCH (b:Timeline {year: $year}) \n" +
+           "MERGE (a)-[:IN_TIMELINE]->(b)", commentID=commentID, year=year)
 
 ### VoteMap Edges ###
 
@@ -298,9 +326,9 @@ def delete_all(tx):
 
 def read_user(tx):
     result = tx.run("MATCH (n:User) \n" +
-           "RETURN n.userID, n.birthday, n.last_online, n.income, n.interested")
+           "RETURN n.userID, n.birthday, n.last_online, n.income, n.interested, n.friend_privacy")
     for record in result:
-        print(record["n.userID"], record["n.birthday"], record["n.income"], record["n.interested"])
+        print(record["n.userID"], record["n.birthday"], record["n.income"], record["n.interested"], record["n.friend_privacy"])
 
 def read_debate(tx):
     result = tx.run("MATCH (n:Debate) \n" +
@@ -345,6 +373,12 @@ def read_issues(tx):
     for record in result:
         print("issuesID: {}, abortion: {}, affirmative_a: {},animal_rights: {}".format(record["n.issuesID"], record["n.abortion"], record["n.affirmative_a"], record["n.animal_rights"]))
 
+
+def read_timeline(tx):
+    result = tx.run("MATCH (n:Timeline) \n" +
+                        "RETURN n.year")
+    for record in result:
+        print("year node: {}".format(record["n.year"]))
 
 
 ### User Edges ###
@@ -396,10 +430,17 @@ def read_gives_issues(tx):
     for record in result:
         print("{} gives Issues {} with abortion value {} ".format(record["a.userID"], record["b.issuesID"], record["b.abortion"]))
 
-def read_user_timeline(tx):
+'''def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
     for record in result:
         print("User {} joined on {} before User {} joined on {}".format(record["a.userID"], record["a.joined"], record["b.userID"], record["b.joined"]))
+'''
+
+def read_user_timeline(tx):
+    result = tx.run("MATCH (a:User)-[:IN_TIMELINE]->(b:Timeline) RETURN a.userID, a.joined, b.year")
+    for record in result:
+        print("User {} joined on {} and is in timeline {}".format(record["a.userID"], record["a.joined"], record["b.year"]))
+        #print(record)
 
 
 ### Debate Edges ###
@@ -419,19 +460,31 @@ def read_has_argument(tx):
     for record in result:
         print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.argumentContent"]))
 
-def read_debate_timeline(tx):
+'''def read_debate_timeline(tx):
     result = tx.run("MATCH (a:Debate)-[:BEFORE]->(b:Debate) RETURN a.debateID, a.start , b.debateID, b.start")
     #print('read_debate_timeline is called')
     for record in result:
         print("{} with {} took place before {} with {}".format(record["a.debateID"], record["a.start"], record["b.debateID"], record["b.start"]))
+'''
+
+def read_debate_timeline(tx):
+    result = tx.run("MATCH (a:Debate)-[:IN_TIMELINE]->(b:Timeline) RETURN a.debateID, a.start , b.year")
+    for record in result:
+        print("{} with {} is in Timeline {}".format(record["a.debateID"], record["a.start"], record["b.year"]))
 
 
 ### Comment Edges ###
 
-def read_comment_timeline(tx):
+'''def read_comment_timeline(tx):
     result = tx.run("MATCH (a:Comment)-[:BEFORE]->(b:Comment) RETURN a.commentID, a.commentTime , b.commentID, b.commentTime")
     for record in result:
         print("Comment {} with date {} was created before comment {} with date {}".format(record["a.commentID"], record["a.commentTime"], record["b.commentID"], record["b.commentTime"]))
+'''
+
+def read_comment_timeline(tx):
+    result = tx.run("MATCH (a:Comment)-[:IN_TIMELINE]->(b:Timeline) RETURN a.commentID, a.commentTime , b.year")
+    for record in result:
+        print("Comment {} with date {} is in Timeline {}".format(record["a.commentID"], record["a.commentTime"], record["b.year"]))
 
 
 ### VoteMap Edges ###
@@ -476,9 +529,14 @@ with driver.session() as session:
         ### User Node ###
         if user_bool == True:
 
-            userList.append(i)
+            userList.append(i)                          # created for "DEBATES_IN" and "FRIENDS_WITH"-relations later
+            if users_data[i]['friends'] == 'private':
+                friend_privacy = True
+            else:
+                friend_privacy = False
+
             session.write_transaction(add_user, i, users_data[i]['birthday'], users_data[i]['description'], users_data[i]['education'],
-                                      users_data[i]['elo_ranking'], users_data[i]['email'], users_data[i]['ethnicity'], users_data[i]['gender'],
+                                      users_data[i]['elo_ranking'], users_data[i]['email'], users_data[i]['ethnicity'], users_data[i]['gender'], friend_privacy,
                                       users_data[i]['income'], users_data[i]['interested'], users_data[i]['joined'], users_data[i]['last_online'], users_data[i]['last_updated'],
                                       users_data[i]['looking'], users_data[i]['party'], users_data[i]['percentile'], users_data[i]['political_ideology'], users_data[i]['president'],
                                       users_data[i]['relationship'], users_data[i]['religious_ideology'], users_data[i]['url'], users_data[i]['win_ratio'],
@@ -531,8 +589,8 @@ with driver.session() as session:
 
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Nodes - users_data: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Nodes - users_data done --")
             break
 
@@ -607,10 +665,20 @@ with driver.session() as session:
 
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Nodes - debates_data: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Nodes - debates_data done --")
             break
+
+
+    ###------------------###
+    ### Nodes - Timeline ###
+    ###------------------###
+
+    if timeline_bool == True:
+        for i in range(2007, 2018):
+            session.write_transaction(add_timeline, str(i)) # neo4j cares about the type that is submitted, wow
+        print("-- Nodes - Timeline done --")
 
 
     ###--------------------###
@@ -625,8 +693,7 @@ with driver.session() as session:
         if friends_with_bool == True:
 
             if (users_data[i]['friends'] != []):
-                if (users_data[i][
-                    'friends'] != "private"):  # todo represent them in the database as node feature friendship: private
+                if (users_data[i]['friends'] != "private"):
                     for k in users_data[i]['friends']:
                         if k in userList:
                             session.write_transaction(add_friends_with, i, k)
@@ -653,8 +720,8 @@ with driver.session() as session:
 
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Edges - users_data: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Edges - users_data done --")
             break
 
@@ -787,8 +854,8 @@ with driver.session() as session:
 
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Edges - debates_data: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Edges - debates_data done --")
             break
 
@@ -797,6 +864,34 @@ with driver.session() as session:
     ### Timeline - users_data ###
     ###-----------------------###
 
+
+
+    c = 0
+    for i in users_data:
+        c = c + 1
+
+        ### Extraction on November 2017 ###
+        ### User Edge - user_timeline ###
+        if user_timeline_bool == True:
+
+            if 'Years' in users_data[i]['joined'] or 'Year' in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_year = 2017 - int(users_data[i]['joined'][0:2])
+                else:
+                    joined_year = 2017 - int(users_data[i]['joined'][0])
+            else:
+                joined_year = 2017
+
+            #print(i, joined_year)
+            session.write_transaction(add_debate_timeline, i, joined_year)  # -[IN_TIMELINE]->
+
+            if c % 100 == 0:
+                print('Edges - user_timeline: ', c)
+            if sample_bool == True and c >= sample:
+                print("-- Edges - user_timeline done --")
+                break
+
+    '''
     joined_array = np.array([])
     userID_array = np.array([])
     c = 0
@@ -811,7 +906,6 @@ with driver.session() as session:
                     joined_days = int(users_data[i]['joined'][0:2]) * 365
                 else:
                     joined_days = int(users_data[i]['joined'][0]) * 365
-
             elif 'Months' in users_data[i]['joined'] or 'Month' in users_data[i]['joined']:
                 if users_data[i]['joined'][1] != ' ':
                     joined_days = int(users_data[i]['joined'][0:2]) * 30
@@ -837,8 +931,8 @@ with driver.session() as session:
             joined_array = np.append(joined_array, joined_days)
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Timeline - users_data Part1: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Timeline - users_data Part1 done --")
             break
 
@@ -865,13 +959,57 @@ with driver.session() as session:
                     session.write_transaction(add_user_timeline, prevuserID, userID)  # -[Before]->
 
     print("-- Timeline - users_data Part2 done --")
-
+    '''
 
     ###-------------------------###
     ### Timeline - debates_data ###
     ###-------------------------###
 
-    debate_day_array = np.array([], dtype='datetime64')
+
+    c = 0
+    for i in debates_data:
+        c = c + 1
+
+        ### Debate Edge - debate_timeline ###
+        if debate_timeline_bool == True:
+
+            session.write_transaction(add_debate_timeline, i, debates_data[i]['start_date'][-4:])  # -[IN_TIMELINE]->
+
+            #2018 er node hinzufügen
+
+            if c % 100 == 0:
+                print('Edges - debate_timeline: ', c)
+            if sample_bool == True and c >= sample:
+                print("-- Edges - debate_timeline done --")
+                break
+
+        ### Debate Edge - comment_timeline ###
+        if comment_timeline_bool == True:
+
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+
+                if 'years' in k['time'] or 'year' in k['time']:
+                    if k['time'][1] != ' ':
+                        created_year = 2017 - int(k['time'][0:2])
+                    else:
+                        created_year = 2017 - int(k['time'][0])
+                else:
+                    created_year = 2017
+
+            session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
+
+            if c % 100 == 0:
+                print('Edges - comment_timeline: ', c)
+            if sample_bool == True and c >= sample:
+                print("-- Edges - comment_timeline done --")
+                break
+
+
+
+    '''debate_day_array = np.array([], dtype='datetime64')
     debate_title_array = np.array([])
 
     created_array = np.array([])
@@ -928,8 +1066,8 @@ with driver.session() as session:
                 created_array = np.append(created_array, created_days)
 
         if c % 100 == 0:
-            print(c)
-        if c >= sample:
+            print('Timeline - debates_data Part1: ', c)
+        if sample_bool == True and c >= sample:
             print("-- Timeline - debates_data Part1 done --")
             break
 
@@ -978,7 +1116,7 @@ with driver.session() as session:
                 for prevcommentID in sort_comment_array[next_date_index]:
                     session.write_transaction(add_comment_timeline, prevcommentID, commentID)  # -[Before]->
 
-    print("-- Timeline - debates_data Part2 done --")
+    print("-- Timeline - debates_data Part2 done --")'''
 
     print("-- write done --")
 
@@ -996,6 +1134,7 @@ with driver.session() as session:
     # session.read_transaction(read_opinion)                     # ok
     # session.read_transaction(read_poll)                        # ok
     # session.read_transaction(read_issues)                      # ok
+    # session.read_transaction(read_timeline)                    # ok
 
     # session.read_transaction(read_friends_with)                # ok
     # session.read_transaction(read_debates_in)                  # ok
@@ -1012,7 +1151,8 @@ with driver.session() as session:
     # session.read_transaction(read_has_argument)                # ok
     # session.read_transaction(read_debate_timeline)             # ok
 
-    # session.read_transaction(read_comment_timeline)            # ok
+    session.read_transaction(read_comment_timeline)            # ok
+
     # session.read_transaction(read_refers_to)                   # ok
 
     print("-- read done --")
