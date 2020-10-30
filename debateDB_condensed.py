@@ -676,7 +676,7 @@ with driver.session() as session:
     ###------------------###
 
     if timeline_bool == True:
-        for i in range(2007, 2018):
+        for i in range(2007, 2019):
             session.write_transaction(add_timeline, str(i)) # neo4j cares about the type that is submitted, wow
         print("-- Nodes - Timeline done --")
 
