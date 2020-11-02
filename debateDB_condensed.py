@@ -1,60 +1,64 @@
 from neo4j import GraphDatabase
 import json
-import numpy as np
-from datetime import datetime
+#import numpy as np                 # Needed for timeline relation approach that deemed unfeasible
+#from datetime import datetime      # Needed for timeline relation approach that deemed unfeasible
 
 
 #################
 ### Selection ###
 #################
+# Selection of information that is supposed to be included in the database. Everything is set True, except "sample_bool"
+# for the final creation of the database
 
 ### Data ###
 users_data_bool = True
 debates_data = True
 
 ### Nodes ###
-user_bool = False
-debate_bool = False
+user_bool = True
+debate_bool = True
 comment_bool = True
-argument_bool = False
-votemap_bool = False
-opinion_bool = False
-poll_bool = False
-issues_bool = False
+argument_bool = True
+votemap_bool = True
+opinion_bool = True
+poll_bool = True
+issues_bool = True
 timeline_bool = True
 
 ### User Edges ###
-friends_with_bool = False
-debates_in_bool = False
-gives_comment_bool = False
-gives_argument_bool = False
-gives_votemap_bool = False
-gives_opinion_bool = False
-gives_pollvote_bool = False
-gives_issues_bool = False
-user_timeline_bool = False
+friends_with_bool = True
+debates_in_bool = True
+gives_comment_bool = True
+gives_argument_bool = True
+gives_votemap_bool = True
+gives_opinion_bool = True
+gives_pollvote_bool = True
+gives_issues_bool = True
+user_timeline_bool = True
 
 ### Debate Edges ###
-has_comment_bool = False
-has_votemap_bool = False
-has_argument_bool = False
-debate_timeline_bool = False
+has_comment_bool = True
+has_votemap_bool = True
+has_argument_bool = True
+debate_timeline_bool = True
 
 ### Comment Edges ###
 comment_timeline_bool = True
 
 ### VoteMap Edges ###
-refers_to_bool = False
+refers_to_bool = True
 
 ### sampling ###
 sample_bool = True
 
+
 ######################
 ### Initialization ###
 ######################
+# Specifying Neo4j access, sample size and data input
 
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
-sample = 2
+sample = 500
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -68,6 +72,7 @@ if debates_data == True:
 #####################################
 ### Functions: Write Transactions ###
 #####################################
+# All Neo4j edges and nodes are created by accessing the database via these write functions
 
 ### Nodes ###
 
@@ -90,28 +95,30 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     number_all_deb=number_all_deb, number_lost_deb=number_lost_deb, number_tied_deb=number_tied_deb, number_won_deb=number_won_deb, number_friends=number_friends,
                     number_opinion_arg=number_opinion_arg, number_opinion_ques=number_opinion_ques, number_poll_topics=number_poll_topics, number_poll_votes=number_poll_votes,
                     number_voted_deb=number_voted_deb)
-    # 'all_debates'
-    # 'lost_debates'
-    # 'opinion_arguments'
-    # 'opinion_questions'
-    # 'poll_topics'
-    # 'poll_votes'
-    # 'voted_debates'
-    # 'won_debates'
-    # 'tied_debates'
-    # excluded due to redundancy
 
-    # 'number_of_all_debates'
-    # 'number_of_lost_debates'
-    # 'number_of_tied_debates'
-    # 'number_of_won_debates'
-    # 'number_of_friends'
-    # 'number_of_opinion_arguments'
-    # 'number_of_opinion_questions'
-    # 'number_of_poll_topics'
-    # 'number_of_poll_votes'
-    # 'number_of_voted_debates'
-    # might be excluded in future
+                    # The following users.json entries are excluded from the User-node features, due to redundancy:
+                    # 'all_debates'
+                    # 'lost_debates'
+                    # 'opinion_arguments'
+                    # 'opinion_questions'
+                    # 'poll_topics'
+                    # 'poll_votes'
+                    # 'voted_debates'
+                    # 'won_debates'
+                    # 'tied_debates'
+
+                    # The following users.json entries are included to the User-node features, despite small redundancy:
+                    # 'number_of_all_debates'
+                    # 'number_of_lost_debates'
+                    # 'number_of_tied_debates'
+                    # 'number_of_won_debates'
+                    # 'number_of_friends'
+                    # 'number_of_opinion_arguments'
+                    # 'number_of_opinion_questions'
+                    # 'number_of_poll_topics'
+                    # 'number_of_poll_votes'
+                    # 'number_of_voted_debates'
+                    # might be excluded in future
 
 def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_date, update_date, voting_style, debate_status, number_comments,
                number_views, number_rounds, number_votes):
@@ -122,27 +129,27 @@ def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_dat
            update_date=update_date, voting_style=voting_style, debate_status=debate_status, number_comments=number_comments,
            number_views=number_views, number_rounds=number_rounds, number_votes=number_votes)
 
-    # 'comments'
-    # 'votes'
-    # 'rounds'
-    # 'forfeit_label'
-    # 'forfeit_side'
-    # 'participant_1_link'
-    # 'participant_1_name'
-    # 'participant_1_points'
-    # 'participant_1_position'
-    # 'participant_1_status'
-    # 'participant_2_link'
-    # 'participant_2_name'
-    # 'participant_2_points'
-    # 'participant_2_position'
-    # 'participant_2_status'
-    # excluded due to redundancy
+                    # The following users.json entries are excluded from the User-node features, due to redundancy:
+                    # 'comments'
+                    # 'votes'
+                    # 'rounds'
+                    # 'forfeit_label'
+                    # 'forfeit_side'
+                    # 'participant_1_link'
+                    # 'participant_1_name'
+                    # 'participant_1_points'
+                    # 'participant_1_position'
+                    # 'participant_1_status'
+                    # 'participant_2_link'
+                    # 'participant_2_name'
+                    # 'participant_2_points'
+                    # 'participant_2_position'
+                    # 'participant_2_status'
 
-    # 'number_of_comments'
-    # 'number_of_rounds'
-    # 'number_of_votes'
-    # might be excluded in future
+                    # The following users.json entries are included to the User-node features, despite small redundancy:
+                    # 'number_of_comments'
+                    # 'number_of_rounds'
+                    # 'number_of_votes'
 
 def add_comment(tx, commentID, commentTime, commentContent):
     tx.run("MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})", commentID=commentID, commentTime=commentTime, commentContent=commentContent)
@@ -150,8 +157,7 @@ def add_comment(tx, commentID, commentTime, commentContent):
 def add_argument(tx, argumentID, argumentContent):
     tx.run("MERGE (a:Argument {argumentID: $argumentID, argumentContent: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
 
-def add_voteMap_extended(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments,
-                reliableSources, totalPoints):
+def add_voteMap_extended(tx, votemapID, beforeDebate, afterDebate, betterConduct, betterSpellingGrammar, convincingArguments, reliableSources, totalPoints):
     tx.run("MERGE (a:VoteMap {votemapID: $votemapID, beforeDebate: $beforeDebate, afterDebate: $afterDebate, " +
            "betterConduct: $betterConduct, betterSpellingGrammar: $betterSpellingGrammar, convincingArguments: $convincingArguments, " +
            "reliableSources: $reliableSources, totalPoints: $totalPoints})",
@@ -166,7 +172,6 @@ def add_voteMap_reduced(tx, votemapID, won):
 def add_opinion(tx, opinionID, opinionLink):
     tx.run("MERGE (a:Opinion {opinionID: $opinionID, opinionLink: $opinionLink})",
            opinionID=opinionID, opinionLink=opinionLink)
-
 
 def add_poll(tx, pollID, pollLink):
     tx.run("MERGE (a:Poll {pollID: $pollID, pollLink: $pollLink})",
@@ -196,10 +201,10 @@ def add_issues(tx, issuesID, abortion, affirmative_a, animal_rights, obama, bord
            socialism=socialism, stimulus_spending=stimulus_spending, term_limits=term_limits, torture=torture, united_nations=united_nations, war_afghanistan=war_afghanistan,
            war_terror=war_terror, welfare=welfare)
 
-
 def add_timeline(tx, year):
     tx.run("MERGE (a:Timeline {year: $year})",
            year=year)
+
 
 ### User Edges ###
 
@@ -214,7 +219,6 @@ def add_debates_in(tx, userName, debateName, debateForfeit, debatePoints, debate
            "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)",
            userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning)
 
-
 def add_gives_comment(tx, userName, commentID):
     tx.run("MATCH (a:User {userID: $userName}) \n" +
            "MATCH (b:Comment {commentID: $commentID}) \n" +
@@ -226,7 +230,6 @@ def add_gives_argument(tx, userID, argumentID):
            "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userID=userID, argumentID=argumentID)
 
 def add_gives_voteMap(tx, userID, votemapID):
-    #print('called in write function with: ', userID, votemapID)
     tx.run("MATCH (a:User {userID: $userID}) \n" +
            "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
            "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userID=userID, votemapID=votemapID)
@@ -246,14 +249,13 @@ def add_gives_issues(tx,userID, issuesID):
            "MATCH (b:Issues {issuesID: $issuesID}) \n" +
            "MERGE (a)-[rel:GIVES_ISSUES]->(b)", userID=userID, issuesID=issuesID)
 
-
+# Alternative timeline appoach
 '''def add_user_timeline(tx, prevUserID, debateID):
     tx.run("MATCH (a:User {userID: $debateID}) \n" +
            "MATCH (b:User {userID: $prevUserID}) \n" +
            "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevUserID=prevUserID)'''
 
 def add_user_timeline(tx, userID, year):
-    #print("In add_user_timeline", userID, year)
     tx.run("MATCH (a:User {userID: $userID}) \n" +
            "MATCH (b:Timeline {year: $year}) \n" +
            "MERGE (a)-[:IN_TIMELINE]->(b)", userID=userID, year=year)
@@ -276,6 +278,7 @@ def add_has_argument(tx, debateID, argumentID):
            "MATCH (b:Argument {argumentID: $argumentID}) \n" +
            "MERGE (a)-[:HAS_ARGUMENT]->(b)", debateID=debateID, argumentID=argumentID)
 
+# Alternative timeline appoach
 '''def add_debate_timeline(tx, debateID, prevDebateID):
     #print('add_debate_timeline is called with \n')
     #print(debateID, prevDebateID)
@@ -284,15 +287,14 @@ def add_has_argument(tx, debateID, argumentID):
            "MERGE (b)-[:BEFORE]->(a)", debateID=debateID, prevDebateID=prevDebateID)'''
 
 def add_debate_timeline(tx, debateID, year):
-    #print("THIS IS BULLSHIT", debateID, year)
     tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
            "MATCH (b:Timeline {year: $year}) \n" +
            "MERGE (a)-[:IN_TIMELINE]->(b)", debateID=debateID, year=year)
-           #"MERGE (a)-[:bla]->(a)", debateID=debateID, year=year)
 
 
 ### Comment Edges ###
 
+# Alternative timeline appoach
 '''def add_comment_timeline(tx, prevCommentID, commentID):
     tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
            "MATCH (b:Comment {commentID: $prevCommentID}) \n" +
@@ -302,6 +304,7 @@ def add_comment_timeline(tx, commentID, year):
     tx.run("MATCH (a:Comment {commentID: $commentID}) \n" +
            "MATCH (b:Timeline {year: $year}) \n" +
            "MERGE (a)-[:IN_TIMELINE]->(b)", commentID=commentID, year=year)
+
 
 ### VoteMap Edges ###
 
@@ -320,6 +323,7 @@ def delete_all(tx):
 ####################################
 ### Functions: Read Transactions ###
 ####################################
+# All Neo4j edges and nodes are read by accessing the database via these write functions
 
 ### Nodes ###
 
@@ -396,28 +400,21 @@ def read_gives_comment(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_COMMENT]->(b:Comment) RETURN a.userID, b.commentID, b.content")
     for record in result:
         print("{} gives comment {} with content {}".format(record["a.userID"], record["b.commentID"], record["b.content"]))
-        #print(record)
 
 def read_gives_argument(tx):
     result = tx.run("MATCH (a:User)-[:GIVES_ARGUMENT]->(b:Argument) RETURN a.userID, b.argumentID, b.argumentContent")
     for record in result:
         print("{} has argued in {} with content {}".format(record["a.userID"], record["b.argumentID"], record["b.argumentContent"]))
-        #print("called in read")
-        #print(record)
 
 def read_gives_voteMap(tx):
     result = tx.run("MATCH (a:User)-[:GIVES_VOTEMAP]->(b:VoteMap) RETURN a.userID, b.votemapID")
     for record in result:
-        #print('called in read function: ')
-        #print(record)
         print("{} gives votemap {}".format(record["a.userID"], record["b.votemapID"]))
-
 
 def read_gives_opinion(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_OPINION]->(b:Opinion) RETURN a.userID, b.opinionID, rel.opinionText")
     for record in result:
         print("{} gives opinion {} with value {}".format(record["a.userID"], record["b.opinionID"], record["rel.opinionText"]))
-
 
 def read_gives_pollvote(tx):
     result = tx.run("MATCH (a:User)-[rel:GIVES_POLLVOTE]->(b:Poll) RETURN a.userID, b.pollID, rel.pollText, rel.pollExplanation")
@@ -429,6 +426,7 @@ def read_gives_issues(tx):
     for record in result:
         print("{} gives Issues {} with abortion value {} ".format(record["a.userID"], record["b.issuesID"], record["b.abortion"]))
 
+# Alternative timeline approach
 '''def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:BEFORE]->(b:User) RETURN a.userID, a.joined , b.userID, b.joined")
     for record in result:
@@ -439,7 +437,6 @@ def read_user_timeline(tx):
     result = tx.run("MATCH (a:User)-[:IN_TIMELINE]->(b:Timeline) RETURN a.userID, a.joined, b.year")
     for record in result:
         print("User {} joined on {} and is in timeline {}".format(record["a.userID"], record["a.joined"], record["b.year"]))
-        #print(record)
 
 
 ### Debate Edges ###
@@ -459,6 +456,7 @@ def read_has_argument(tx):
     for record in result:
         print("{} has argument {} with content {}".format(record["a.debateID"], record["b.argumentID"], record["b.argumentContent"]))
 
+# Alternative timeline approach
 '''def read_debate_timeline(tx):
     result = tx.run("MATCH (a:Debate)-[:BEFORE]->(b:Debate) RETURN a.debateID, a.start , b.debateID, b.start")
     #print('read_debate_timeline is called')
@@ -474,6 +472,7 @@ def read_debate_timeline(tx):
 
 ### Comment Edges ###
 
+# Alternative timeline approach
 '''def read_comment_timeline(tx):
     result = tx.run("MATCH (a:Comment)-[:BEFORE]->(b:Comment) RETURN a.commentID, a.commentTime , b.commentID, b.commentTime")
     for record in result:
@@ -503,6 +502,10 @@ def read_all(tx):
 ########################
 ### Sessions - write ###
 ########################
+# All neo4j node and edges are created in one session. At first "users_data" and "debates_data" are accessed and looped
+# over to extract all relevant information for node creation. At the same time the extracted information is feed via the
+# previously defined write-functions to the data base in order to create the respective node.
+# In a second step "users_data"
 
 with driver.session() as session:
 
@@ -884,11 +887,11 @@ with driver.session() as session:
             #print(i, joined_year)
             session.write_transaction(add_user_timeline, i, joined_year)  # -[IN_TIMELINE]->
 
-            if c % 100 == 0:
-                print('Edges - user_timeline: ', c)
-            if sample_bool == True and c >= sample:
-                print("-- Edges - user_timeline done --")
-                break
+        if c % 100 == 0:
+            print('Edges - user_timeline: ', c)
+        if sample_bool == True and c >= sample:
+            print("-- Edges - user_timeline done --")
+            break
 
     '''
     joined_array = np.array([])
@@ -976,11 +979,6 @@ with driver.session() as session:
 
             #2018 er node hinzufügen
 
-            if c % 100 == 0:
-                print('Edges - debate_timeline: ', c)
-            if sample_bool == True and c >= sample:
-                print("-- Edges - debate_timeline done --")
-                break
 
         ### Debate Edge - comment_timeline ###
         if comment_timeline_bool == True:
@@ -1000,11 +998,11 @@ with driver.session() as session:
 
                 session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
 
-            if c % 100 == 0:
-                print('Edges - comment_timeline: ', c)
-            if sample_bool == True and c >= sample:
-                print("-- Edges - comment_timeline done --")
-                break
+        if c % 100 == 0:
+            print('Timeline - debates_data: ', c)
+        if sample_bool == True and c >= sample:
+            print("-- Timeline - debates_data done --")
+            break
 
 
 
