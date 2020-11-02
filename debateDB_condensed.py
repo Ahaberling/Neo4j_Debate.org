@@ -504,8 +504,11 @@ def read_all(tx):
 ########################
 # All neo4j node and edges are created in one session. At first "users_data" and "debates_data" are accessed and looped
 # over to extract all relevant information for node creation. At the same time the extracted information is feed via the
-# previously defined write-functions to the data base in order to create the respective node.
-# In a second step "users_data"
+# previously defined write-functions to the data base in order to create the respective node. Additionally time line
+# nodes representing the year span of the data set are generated as well.
+# In a second step "users_data" and "debates_data" are traversed again to extract and feed edge relevant data. This way
+# neo4j edges are created as well (accessing the respective, previously defined write-functions)
+
 
 with driver.session() as session:
 
@@ -588,8 +591,6 @@ with driver.session() as session:
                                       k['War on Terror'], k['Welfare'])
 
 
-
-
         if c % 100 == 0:
             print('Nodes - users_data: ', c)
         if sample_bool == True and c >= sample:
@@ -645,7 +646,9 @@ with driver.session() as session:
                     c2 = c2 + 1
                     c3 = 0
                     for p in k['votes_map']:
-                        if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                        if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to
+                                     # participant2 and a redundant part 3 called "tied" with the same variables that
+                                     # are simply the first two variables connected with an logic AND
                             break
                         votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                         if 'Agreed with before the debate' in k['votes_map'][p]:
@@ -664,8 +667,6 @@ with driver.session() as session:
                         c3 = c3 + 1
 
 
-
-
         if c % 100 == 0:
             print('Nodes - debates_data: ', c)
         if sample_bool == True and c >= sample:
@@ -679,7 +680,7 @@ with driver.session() as session:
 
     if timeline_bool == True:
         for i in range(2007, 2019):
-            session.write_transaction(add_timeline, i) # neo4j cares about the type that is submitted, wow
+            session.write_transaction(add_timeline, i)# Notice that Neo4j cares about the type that is submitted (here int)
         print("-- Nodes - Timeline done --")
 
 
@@ -700,6 +701,7 @@ with driver.session() as session:
                         if k in userList:
                             session.write_transaction(add_friends_with, i, k)
 
+
         ### User Edge - gives_opinion ###
         if gives_opinion_bool == True:
 
@@ -719,6 +721,20 @@ with driver.session() as session:
 
             issuesID = i + '_issues'
             session.write_transaction(add_gives_issues, i, issuesID)
+
+
+        ### User Edge - user_timeline ###
+        ### Extraction on November 2017 ###
+        if user_timeline_bool == True:
+
+            if 'Years' in users_data[i]['joined'] or 'Year' in users_data[i]['joined']:
+                if users_data[i]['joined'][1] != ' ':
+                    joined_year = 2017 - int(users_data[i]['joined'][0:2])
+                else:
+                    joined_year = 2017 - int(users_data[i]['joined'][0])
+            else:
+                joined_year = 2017#
+            session.write_transaction(add_user_timeline, i, joined_year)  # -[IN_TIMELINE]->
 
 
         if c % 100 == 0:
@@ -799,7 +815,7 @@ with driver.session() as session:
                 c2 = c2 + 1
                 c3 = 0
                 for p in k['votes_map']:
-                    if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                    if c3 == 2:
                         break
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_gives_voteMap, k['user_name'], votemapID)
@@ -814,6 +830,7 @@ with driver.session() as session:
                 commentID = str(str(i) + '_Comment_' + str(c2))
                 session.write_transaction(add_has_comment, i, commentID)
 
+
         ### Debate Edge - has_votemap ###
         if has_votemap_bool == True:
 
@@ -822,7 +839,7 @@ with driver.session() as session:
                 c2 = c2 + 1
                 c3 = 0
                 for p in k['votes_map']:
-                    if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                    if c3 == 2:
                         break
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_has_voteMap, i, votemapID)
@@ -840,6 +857,7 @@ with driver.session() as session:
                     argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
                     session.write_transaction(add_has_argument, i, argumentID)
 
+
         ### VoteMap Edge - refers_to ###
         if refers_to_bool == True:
 
@@ -848,11 +866,36 @@ with driver.session() as session:
                 c2 = c2 + 1
                 c3 = 0
                 for p in k['votes_map']:
-                    if c3 == 2:  # VoteMaps consist of 3 parts. Bools of votes given to participant1, to participant2 and a redundant part 3 called tied with the same variables that are simply the first two variables connected with an logic AND
+                    if c3 == 2:
                         break
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_refers_to, votemapID, p)
                     c3 = c3 + 1
+
+
+        ### Debate Edge - debate_timeline ###
+        if debate_timeline_bool == True:
+            session.write_transaction(add_debate_timeline, i,
+                                      int(debates_data[i]['start_date'][-4:]))  # -[IN_TIMELINE]->
+
+
+        ### Debate Edge - comment_timeline ###
+        if comment_timeline_bool == True:
+
+            c2 = 0
+            for k in debates_data[i]['comments']:
+                c2 = c2 + 1
+                commentID = str(str(i) + '_Comment_' + str(c2))
+
+                if 'years' in k['time'] or 'year' in k['time']:
+                    if k['time'][1] != ' ':
+                        created_year = 2017 - int(k['time'][0:2])
+                    else:
+                        created_year = 2017 - int(k['time'][0])
+                else:
+                    created_year = 2017
+
+                session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
 
 
         if c % 100 == 0:
@@ -862,7 +905,7 @@ with driver.session() as session:
             break
 
 
-    ###-----------------------###
+    '''###-----------------------###
     ### Timeline - users_data ###
     ###-----------------------###
 
@@ -891,7 +934,7 @@ with driver.session() as session:
             print('Edges - user_timeline: ', c)
         if sample_bool == True and c >= sample:
             print("-- Edges - user_timeline done --")
-            break
+            break'''
 
     '''
     joined_array = np.array([])
@@ -963,7 +1006,7 @@ with driver.session() as session:
     print("-- Timeline - users_data Part2 done --")
     '''
 
-    ###-------------------------###
+    ''' ###-------------------------###
     ### Timeline - debates_data ###
     ###-------------------------###
 
@@ -976,9 +1019,7 @@ with driver.session() as session:
         if debate_timeline_bool == True:
 
             session.write_transaction(add_debate_timeline, i, int(debates_data[i]['start_date'][-4:]))  # -[IN_TIMELINE]->
-
-            #2018 er node hinzufügen
-
+            
 
         ### Debate Edge - comment_timeline ###
         if comment_timeline_bool == True:
@@ -1002,7 +1043,7 @@ with driver.session() as session:
             print('Timeline - debates_data: ', c)
         if sample_bool == True and c >= sample:
             print("-- Timeline - debates_data done --")
-            break
+            break'''
 
 
 
