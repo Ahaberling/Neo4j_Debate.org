@@ -51,6 +51,8 @@ refers_to_bool = True
 ### sampling ###
 sample_bool = True
 
+### indexing ###
+index_bool = False
 
 ######################
 ### Initialization ###
@@ -312,6 +314,36 @@ def add_refers_to(tx, votemapID, userID):
     tx.run("MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
            "MATCH (b:User {userID: $userID}) \n" +
            "MERGE (a)-[:REFERS_TO]->(b)", votemapID=votemapID, userID=userID)
+
+
+### Indexing ###
+
+def add_drop_index(tx):
+    tx.run("CREATE INDEX user_index FOR (n:User) ON (n.userID) ")
+
+def add_user_index(tx):
+    tx.run("CREATE INDEX user_index FOR (n:User) ON (n.userID) ")
+
+def add_debate_index(tx):
+    tx.run("CREATE INDEX debate_index FOR (n:Debate) ON (n.debateID) ")
+
+def add_comment_index(tx):
+    tx.run("CREATE INDEX comment_index FOR (n:Comment) ON (n.commentID) ")
+
+def add_argument_index(tx):
+    tx.run("CREATE INDEX argument_index FOR (n:Argument) ON (n.argumentID) ")
+
+def add_votemap_index(tx):
+    tx.run("CREATE INDEX votemap_index FOR (n:Votemap) ON (n.votemapID) ")
+
+def add_opinion_index(tx):
+    tx.run("CREATE INDEX opinion_index FOR (n:Opinion) ON (n.opinionID) ")
+
+def add_poll_index(tx):
+    tx.run("CREATE INDEX poll_index FOR (n:Poll) ON (n.pollID) ")
+
+def add_issues_index(tx):
+    tx.run("CREATE INDEX issues_index FOR (n:Issues) ON (n.issuesID) ")
 
 
 ### Miscellaneous ###
@@ -903,6 +935,22 @@ with driver.session() as session:
         if sample_bool == True and c >= sample:
             print("-- Edges - debates_data done --")
             break
+
+
+    ###----------###
+    ### Indexing ###
+    ###----------###
+
+    if index_bool == True:
+
+        session.write_transaction(add_user_index)
+        session.write_transaction(add_debate_index)
+        session.write_transaction(add_comment_index)
+        session.write_transaction(add_argument_index)
+        session.write_transaction(add_votemap_index)
+        session.write_transaction(add_opinion_index)
+        session.write_transaction(add_poll_index)
+        session.write_transaction(add_issues_index)
 
 
     '''###-----------------------###
