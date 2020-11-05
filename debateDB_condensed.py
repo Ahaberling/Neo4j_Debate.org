@@ -49,7 +49,7 @@ comment_timeline_bool = True
 refers_to_bool = True
 
 ### sampling ###
-sample_bool = True
+sample_bool = False
 
 ### indexing ###
 index_bool = False
