@@ -12,29 +12,29 @@ import json
 
 ### Data ###
 users_data_bool = True
-debates_data = True
+debates_data_bool = True
 
 ### Nodes ###
-user_bool = True
-debate_bool = True
-comment_bool = True
-argument_bool = True
-votemap_bool = True
-opinion_bool = True
-poll_bool = True
-issues_bool = True
-timeline_bool = True
+user_bool = False
+debate_bool = False
+comment_bool = False
+argument_bool = False
+votemap_bool = False
+opinion_bool = False
+poll_bool = False
+issues_bool = False
+timeline_bool = False
 
 ### User Edges ###
-friends_with_bool = True
+friends_with_bool = False
 debates_in_bool = True
 gives_comment_bool = True
 gives_argument_bool = True
 gives_votemap_bool = True
-gives_opinion_bool = True
-gives_pollvote_bool = True
-gives_issues_bool = True
-user_timeline_bool = True
+gives_opinion_bool = False
+gives_pollvote_bool = False
+gives_issues_bool = False
+user_timeline_bool = False
 
 ### Debate Edges ###
 has_comment_bool = True
@@ -52,7 +52,10 @@ refers_to_bool = True
 sample_bool = False
 
 ### indexing ###
-index_bool = False
+index_bool = True
+
+### Clear all ###
+clearAll_bool = False
 
 ######################
 ### Initialization ###
@@ -66,7 +69,7 @@ if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
     users_data = json.load(f)
 
-if debates_data == True:
+if debates_data_bool == True:
     g = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/debates.json', "r")
     debates_data = json.load(g)
 
@@ -550,7 +553,8 @@ with driver.session() as session:
 
     ### Cleaning ###
 
-    session.write_transaction(delete_all)
+    if clearAll_bool == True:
+        session.write_transaction(delete_all)
 
 
     ###--------------------###
@@ -563,7 +567,7 @@ with driver.session() as session:
     for i in users_data:
         c = c + 1
 
-        ### User Node ###
+        ### User Node ###5
         if user_bool == True:
 
             userList.append(i)                          # created for "DEBATES_IN" and "FRIENDS_WITH"-relations later
