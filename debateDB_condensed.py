@@ -2,6 +2,7 @@ from neo4j import GraphDatabase
 import json
 #import numpy as np                 # Needed for timeline relation approach that deemed unfeasible
 #from datetime import datetime      # Needed for timeline relation approach that deemed unfeasible
+from datetime import datetime
 
 
 #################
@@ -49,7 +50,7 @@ comment_timeline_bool = True
 refers_to_bool = True
 
 ### sampling ###
-sample_bool = False
+sample_bool = True
 
 ### indexing ###
 index_bool = True
@@ -63,7 +64,7 @@ clearAll_bool = False
 # Specifying Neo4j access, sample size and data input
 
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
-sample = 500
+sample = 10
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -785,9 +786,14 @@ with driver.session() as session:
     ### Edges - debates_data ###
     ###----------------------###
 
+    s0 = datetime.now()
+    print('iteration: start', 'Time: \t\t\t\t\t', s0.strftime("%H:%M:%S.%f"))
+
     c = 0
     for i in debates_data:
         c = c + 1
+
+        d0 = datetime.now()
 
         ### User Edges - debates_in ###
         if debates_in_bool == True:
@@ -816,7 +822,8 @@ with driver.session() as session:
                                           debates_data[i]['participant_2_points'],
                                           debates_data[i]['participant_2_position'],
                                           winning_bool2)  # todo check if there is inconsistency in participants and user.json
-
+            d1 = datetime.now()
+            print('iteration: ', c, ', debates_in, Time: \t\t', d1.strftime("%H:%M:%S.%f"), 'Delta: ', (d1-d0))
 
         ### User Edge - gives_comment ###
         if gives_comment_bool == True:
@@ -826,7 +833,8 @@ with driver.session() as session:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
                 session.write_transaction(add_gives_comment, k['user_name'], commentID)
-
+            d2 = datetime.now()
+            print('iteration: ', c, ', gives_comment, Time: \t', d2.strftime("%H:%M:%S.%f"), 'Delta: ', (d2-d1))
 
         ### User Edge - gives_argument ###
         if gives_argument_bool == True:
@@ -842,6 +850,8 @@ with driver.session() as session:
                         UserID = debates_data[i]['participant_2_name']
                     session.write_transaction(add_gives_argument, UserID, argumentID)
 
+            d3 = datetime.now()
+            print('iteration: ', c, ', gives_argument, Time: \t', d3.strftime("%H:%M:%S.%f"), 'Delta: ', (d3-d2))
 
         ### User Edge - gives_voteMap ###
         if gives_votemap_bool == True:
@@ -856,6 +866,8 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_gives_voteMap, k['user_name'], votemapID)
                     c3 = c3 + 1
+            d4 = datetime.now()
+            print('iteration: ', c, ', gives_votemap, Time: \t', d4.strftime("%H:%M:%S.%f"), 'Delta: ', (d4-d3))
 
         ### Debate Edge - has_comment ###
         if has_comment_bool == True:
@@ -865,7 +877,8 @@ with driver.session() as session:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
                 session.write_transaction(add_has_comment, i, commentID)
-
+            d5 = datetime.now()
+            print('iteration: ', c, ', has_comment, Time: \t\t', d5.strftime("%H:%M:%S.%f"), 'Delta: ', (d5-d4))
 
         ### Debate Edge - has_votemap ###
         if has_votemap_bool == True:
@@ -880,7 +893,8 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_has_voteMap, i, votemapID)
                     c3 = c3 + 1
-
+            d6 = datetime.now()
+            print('iteration: ', c, ', has_votemap, Time: \t\t', d6.strftime("%H:%M:%S.%f"), 'Delta: ', (d6-d5))
 
         ### Debate Edge - has_argument ###
         if has_argument_bool == True:
@@ -892,7 +906,8 @@ with driver.session() as session:
                     UserID = ""
                     argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
                     session.write_transaction(add_has_argument, i, argumentID)
-
+            d7 = datetime.now()
+            print('iteration: ', c, ', has_argument, Time: \t', d7.strftime("%H:%M:%S.%f"), 'Delta: ', (d7-d6))
 
         ### VoteMap Edge - refers_to ###
         if refers_to_bool == True:
@@ -907,13 +922,15 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_refers_to, votemapID, p)
                     c3 = c3 + 1
-
+            d8 = datetime.now()
+            print('iteration: ', c, ', refers_to, Time: \t\t', d8.strftime("%H:%M:%S.%f"), 'Delta: ', (d8-d7))
 
         ### Debate Edge - debate_timeline ###
         if debate_timeline_bool == True:
             session.write_transaction(add_debate_timeline, i,
                                       int(debates_data[i]['start_date'][-4:]))  # -[IN_TIMELINE]->
-
+            d9 = datetime.now()
+            print('iteration: ', c, ', debate_timeline, Time:\t', d9.strftime("%H:%M:%S.%f"), 'Delta: ', (d9-d8))
 
         ### Debate Edge - comment_timeline ###
         if comment_timeline_bool == True:
@@ -932,14 +949,15 @@ with driver.session() as session:
                     created_year = 2017
 
                 session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
-
+            d10 = datetime.now()
+            print('iteration: ', c, ', comment_timeline, Time:\t', d10.strftime("%H:%M:%S.%f"), 'Delta: ', (d10-d9))
 
         if c % 100 == 0:
             print('Edges - debates_data: ', c)
         if sample_bool == True and c >= sample:
             print("-- Edges - debates_data done --")
             break
-
+        print('iteration', c, 'Delta: ', (d1-d0)+(d2-d1)+(d3-d2)+(d4-d3)+(d5-d4)+(d6-d5)+(d7-d6)+(d8-d7)+(d9-d8)+(d10-d9))
 
     ###----------###
     ### Indexing ###
