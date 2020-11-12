@@ -53,7 +53,7 @@ refers_to_bool = True
 sample_bool = True
 
 ### indexing ###
-index_bool = True
+index_bool = False
 
 ### Clear all ###
 clearAll_bool = False
@@ -721,6 +721,22 @@ with driver.session() as session:
         print("-- Nodes - Timeline done --")
 
 
+    ###----------###
+    ### Indexing ###
+    ###----------###
+
+    if index_bool == True:
+
+        session.write_transaction(add_user_index)
+        session.write_transaction(add_debate_index)
+        session.write_transaction(add_comment_index)
+        session.write_transaction(add_argument_index)
+        session.write_transaction(add_votemap_index)
+        session.write_transaction(add_opinion_index)
+        session.write_transaction(add_poll_index)
+        session.write_transaction(add_issues_index)
+
+
     ###--------------------###
     ### Edges - users_data ###
     ###--------------------###
@@ -959,20 +975,6 @@ with driver.session() as session:
             break
         print('iteration', c, 'Delta: ', (d1-d0)+(d2-d1)+(d3-d2)+(d4-d3)+(d5-d4)+(d6-d5)+(d7-d6)+(d8-d7)+(d9-d8)+(d10-d9))
 
-    ###----------###
-    ### Indexing ###
-    ###----------###
-
-    if index_bool == True:
-
-        session.write_transaction(add_user_index)
-        session.write_transaction(add_debate_index)
-        session.write_transaction(add_comment_index)
-        session.write_transaction(add_argument_index)
-        session.write_transaction(add_votemap_index)
-        session.write_transaction(add_opinion_index)
-        session.write_transaction(add_poll_index)
-        session.write_transaction(add_issues_index)
 
 
     '''###-----------------------###
