@@ -220,10 +220,17 @@ def add_friends_with(tx, userName, friendName):
            "MERGE (a)-[:FRIENDS_WITH]->(b)", userName=userName, friendName=friendName)
 
 def add_debates_in(tx, userName, debateName, debateForfeit, debatePoints, debatePosition, debateWinning):
-    tx.run("MATCH (a:User {userID: $userName}) \n" +
+    tx.run(
+           '''
+           "MATCH (a:User {userID: $userName}) \n" +
            "MATCH (b:Debate {debateID: $debateName}) \n" +
-           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)",
-           userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning)
+           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)"
+           '''
+           
+           "CALL apoc.periodic.iterate(\"MATCH (a:User {userID: $userName}) MATCH (b:Debate {debateID: $debateName})\", \"MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)\", {batchSize:1000, iterateList:true, parallel:true})",
+           userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning
+           )
+
 
 def add_gives_comment(tx, userName, commentID):
     tx.run("MATCH (a:User {userID: $userName}) \n" +
@@ -236,9 +243,17 @@ def add_gives_argument(tx, userID, argumentID):
            "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userID=userID, argumentID=argumentID)
 
 def add_gives_voteMap(tx, userID, votemapID):
-    tx.run("MATCH (a:User {userID: $userID}) \n" +
-           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
-           "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userID=userID, votemapID=votemapID)
+    #tx.run("MATCH (a:User {userID: $userID}) RETURN a",userID=userID)
+    tx.run(
+           "CALL apoc.periodic.commit(\"MATCH (a:User {userID: $userID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:GIVES_VOTEMAP]->(b)\",{limit:1000})",
+           userID=userID, votemapID=votemapID
+           )
+
+'''
+"MATCH (a:User {userID: $userID}) \n" +
+"MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
+"MERGE (a)-[:GIVES_VOTEMAP]->(b)"
+'''
 
 def add_gives_opinion(tx, userID, opinionID, opinionText):
     tx.run("MATCH (a:User {userID: $userID}) \n" +
@@ -275,9 +290,13 @@ def add_has_comment(tx, debateName, commentID):
            "MERGE (a)-[:HAS_COMMENT]->(b)", debateName=debateName, commentID=commentID)
 
 def add_has_voteMap(tx, debateID, votemapID):
-    tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
-           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
-           "MERGE (a)-[:HAS_VOTEMAP]->(b)", debateID=debateID, votemapID=votemapID)
+    tx.run(
+           "CALL apoc.periodic.commit(\"MATCH (a:Debate {debateID: $debateID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:HAS_VOTEMAP]->(b)\",{limit:1000})",
+           debateID=debateID, votemapID=votemapID
+           )
+
+
+
 
 def add_has_argument(tx, debateID, argumentID):
     tx.run("MATCH (a:Debate {debateID: $debateID}) \n" +
@@ -315,9 +334,17 @@ def add_comment_timeline(tx, commentID, year):
 ### VoteMap Edges ###
 
 def add_refers_to(tx, votemapID, userID):
-    tx.run("MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
-           "MATCH (b:User {userID: $userID}) \n" +
-           "MERGE (a)-[:REFERS_TO]->(b)", votemapID=votemapID, userID=userID)
+    tx.run(
+           "CALL apoc.periodic.commit(\"MATCH (a:VoteMap {votemapID: $votemapID}) MATCH (b:User {userID: $userID}) with a limit $limit MERGE (a)-[:REFERS_TO]->(b)\",{limit:1000})",
+           votemapID=votemapID, userID=userID
+           )
+
+'''
+"MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
+"MATCH (b:User {userID: $userID}) \n" +
+"MERGE (a)-[:REFERS_TO]->(b)"
+'''
+
 
 
 ### Indexing ###
