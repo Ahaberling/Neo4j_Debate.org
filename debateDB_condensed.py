@@ -1,9 +1,6 @@
 from neo4j import GraphDatabase
-import json
-#import numpy as np                 # Needed for timeline relation approach that deemed unfeasible
-#from datetime import datetime      # Needed for timeline relation approach that deemed unfeasible
 from datetime import datetime
-
+import json
 
 #################
 ### Selection ###
@@ -50,7 +47,7 @@ comment_timeline_bool = True
 refers_to_bool = True
 
 ### sampling ###
-sample_bool = True
+sample_bool = False
 
 ### indexing ###
 index_bool = False
@@ -63,8 +60,9 @@ clearAll_bool = False
 ######################
 # Specifying Neo4j access, sample size and data input
 
-driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "abc"))
-sample = 10
+driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "123"))
+
+sample = 1000
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -81,6 +79,11 @@ if debates_data_bool == True:
 # All Neo4j edges and nodes are created by accessing the database via these write functions
 
 ### Nodes ###
+
+'''
+def add_user_reduc(tx, userID_list):
+    tx.run("CALL apoc.periodic.iterate(\"\",\"MERGE (a:User {userID: $userID})\", {batchSize:1000, iterateList:true, parallel:true})",userID_list=userID_list)
+'''
 
 def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, userEthni, userSex, friend_privacy, userInterest, userInc,
                     userJoin, userOn, userUpd, userLook, userParty, userPercentile, userPoli, userPresi, userRels, userReli,
@@ -102,7 +105,24 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     number_opinion_arg=number_opinion_arg, number_opinion_ques=number_opinion_ques, number_poll_topics=number_poll_topics, number_poll_votes=number_poll_votes,
                     number_voted_deb=number_voted_deb)
 
-                    # The following users.json entries are excluded from the User-node features, due to redundancy:
+'''
+    tx.run("""CALL apoc.periodic.commit("MERGE (a:User {userID: $userName}) with a limit $limit", {params: {limit: 1000}})""", userName=userName)
+'''
+
+# tx.run("CALL apoc.periodic.commit(\"MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, email: $userEmail, ethnicity: $userEthni, gender: $userSex, friend_privacy: $friend_privacy, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, religious_ideology: $userReli, url: $userURL, win_ratio: $userWinR, number_all_deb: $number_all_deb, number_lost_deb:$number_lost_deb, number_tied_deb: $number_tied_deb, number_won_deb: $number_won_deb, number_friends: $number_friends, number_opinion_arg: $number_opinion_arg, number_opinion_ques: $number_opinion_ques, number_poll_topics: $number_poll_topics, number_poll_votes: $number_poll_votes, number_voted_deb: $number_voted_deb}) with a limit $limit\",{limit:1000})",
+'''
+tx.run("CALL apoc.periodic.iterate(\"MATCH (x:Helper) RETURN x\", \"MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, email: $userEmail, ethnicity: $userEthni, gender: $userSex, friend_privacy: $friend_privacy, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, religious_ideology: $userReli, url: $userURL, win_ratio: $userWinR, number_all_deb: $number_all_deb, number_lost_deb:$number_lost_deb, number_tied_deb: $number_tied_deb, number_won_deb: $number_won_deb, number_friends: $number_friends, number_opinion_arg: $number_opinion_arg, number_opinion_ques: $number_opinion_ques, number_poll_topics: $number_poll_topics, number_poll_votes: $number_poll_votes, number_voted_deb: $number_voted_deb})\", {batchSize:1000, iterateList:true, parallel:true})",
+        userName = userName, userBirth = userBirth, userDescr = userDescr, userEduc = userEduc, userElo = userElo, userEmail = userEmail,
+        userEthni = userEthni, userSex = userSex, friend_privacy = friend_privacy, userInc = userInc, userInterest = userInterest, userJoin = userJoin, userOn = userOn, userUpd = userUpd, userLook = userLook,
+        userParty = userParty, userPercentile = userPercentile, userPoli = userPoli, userPresi = userPresi, userRels = userRels, userReli = userReli, userURL = userURL,
+        userWinR = userWinR,
+        number_all_deb = number_all_deb, number_lost_deb = number_lost_deb, number_tied_deb = number_tied_deb, number_won_deb = number_won_deb, number_friends = number_friends,
+        number_opinion_arg = number_opinion_arg, number_opinion_ques = number_opinion_ques, number_poll_topics = number_poll_topics, number_poll_votes = number_poll_votes,
+        number_voted_deb = number_voted_deb)
+'''
+
+
+    # The following users.json entries are excluded from the User-node features, due to redundancy:
                     # 'all_debates'
                     # 'lost_debates'
                     # 'opinion_arguments'
@@ -158,7 +178,11 @@ def add_debate(tx, debateName, debateUrl, debateCategory, debateTitle, start_dat
                     # 'number_of_votes'
 
 def add_comment(tx, commentID, commentTime, commentContent):
-    tx.run("MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})", commentID=commentID, commentTime=commentTime, commentContent=commentContent)
+    #tx.run("MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})", commentID=commentID, commentTime=commentTime, commentContent=commentContent)
+    tx.run(
+        "MERGE (a:Comment {commentID: $commentID, commentTime: $commentTime, content: $commentContent})",
+        commentID=commentID, commentTime=commentTime, commentContent=commentContent
+    )
 
 def add_argument(tx, argumentID, argumentContent):
     tx.run("MERGE (a:Argument {argumentID: $argumentID, argumentContent: $argumentContent})", argumentID=argumentID, argumentContent=argumentContent)
@@ -221,15 +245,23 @@ def add_friends_with(tx, userName, friendName):
 
 def add_debates_in(tx, userName, debateName, debateForfeit, debatePoints, debatePosition, debateWinning):
     tx.run(
-           '''
            "MATCH (a:User {userID: $userName}) \n" +
            "MATCH (b:Debate {debateID: $debateName}) \n" +
-           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)"
-           '''
-           
+           "MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)",
+           userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning
+           )
+
+    ''' 
+    tx.run(
            "CALL apoc.periodic.iterate(\"MATCH (a:User {userID: $userName}) MATCH (b:Debate {debateID: $debateName})\", \"MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)\", {batchSize:1000, iterateList:true, parallel:true})",
            userName=userName, debateName=debateName, debateForfeit=debateForfeit, debatePoints=debatePoints, debatePosition=debatePosition, debateWinning=debateWinning
            )
+    '''
+'''
+"MATCH (a:User {userID: $userName}) \n" +
+"MATCH (b:Debate {debateID: $debateName}) \n" +
+"MERGE (a)-[:DEBATES_IN {forfeit: $debateForfeit, debatePoints: $debatePoints, position: $debatePosition, winning: $debateWinning }]->(b)"
+'''
 
 
 def add_gives_comment(tx, userName, commentID):
@@ -243,17 +275,27 @@ def add_gives_argument(tx, userID, argumentID):
            "MERGE (a)-[:GIVES_ARGUMENT]->(b)", userID=userID, argumentID=argumentID)
 
 def add_gives_voteMap(tx, userID, votemapID):
-    #tx.run("MATCH (a:User {userID: $userID}) RETURN a",userID=userID)
-    tx.run(
-           "CALL apoc.periodic.commit(\"MATCH (a:User {userID: $userID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:GIVES_VOTEMAP]->(b)\",{limit:1000})",
-           userID=userID, votemapID=votemapID
-           )
+
+    tx.run("MATCH (a:User {userID: $userID}) \n" +
+           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
+           "MERGE (a)-[:GIVES_VOTEMAP]->(b)", userID=userID, votemapID=votemapID)
 
 '''
-"MATCH (a:User {userID: $userID}) \n" +
-"MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
-"MERGE (a)-[:GIVES_VOTEMAP]->(b)"
+    tx.run("""CALL apoc.periodic.iterate('MATCH (a:User {userID: $userID}) RETURN a', 'MATCH (b:VoteMap {votemapID: $votemapID}) MERGE (a)-[:GIVES_VOTEMAP]->(b)', {batchSize:1000, iterateList:true, parallel:true, params: {userID:$userID, votemapID:$votemapID}})""",
+           userID=userID, votemapID=votemapID)
 '''
+'''
+tx.run(
+    """CALL apoc.periodic.iterate('MATCH (a:User {userID: $userID}) MATCH (b:VoteMap {votemapID: $votemapID}) RETURN a,b', 'MERGE (a)-[:GIVES_VOTEMAP]->(b)', {batchSize:1000, iterateList:true, parallel:true, params: {userID:$userID, votemapID:$votemapID}})""",
+    userID=userID, votemapID=votemapID)
+'''
+#tx.run("""CALL apoc.periodic.commit('MATCH (a:User {userID: $userID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:GIVES_VOTEMAP]->(b)',{limit:1000})""",
+#userID = userID, votemapID = votemapID)
+
+
+
+
+
 
 def add_gives_opinion(tx, userID, opinionID, opinionText):
     tx.run("MATCH (a:User {userID: $userID}) \n" +
@@ -291,9 +333,12 @@ def add_has_comment(tx, debateName, commentID):
 
 def add_has_voteMap(tx, debateID, votemapID):
     tx.run(
-           "CALL apoc.periodic.commit(\"MATCH (a:Debate {debateID: $debateID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:HAS_VOTEMAP]->(b)\",{limit:1000})",
+           "MATCH (a:Debate {debateID: $debateID}) \n" +
+           "MATCH (b:VoteMap {votemapID: $votemapID}) \n" +
+           "MERGE (a)-[:HAS_VOTEMAP]->(b)",
            debateID=debateID, votemapID=votemapID
            )
+    #"CALL apoc.periodic.commit(\"MATCH (a:Debate {debateID: $debateID}) MATCH (b:VoteMap {votemapID: $votemapID}) with a limit $limit MERGE (a)-[:HAS_VOTEMAP]->(b)\",{limit:1000})",
 
 
 
@@ -335,15 +380,18 @@ def add_comment_timeline(tx, commentID, year):
 
 def add_refers_to(tx, votemapID, userID):
     tx.run(
-           "CALL apoc.periodic.commit(\"MATCH (a:VoteMap {votemapID: $votemapID}) MATCH (b:User {userID: $userID}) with a limit $limit MERGE (a)-[:REFERS_TO]->(b)\",{limit:1000})",
-           votemapID=votemapID, userID=userID
-           )
+            "MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
+            "MATCH (b:User {userID: $userID}) \n" +
+            "MERGE (a)-[:REFERS_TO]->(b)",
+            votemapID=votemapID, userID=userID
+            )
 
-'''
-"MATCH (a:VoteMap {votemapID: $votemapID}) \n" +
-"MATCH (b:User {userID: $userID}) \n" +
-"MERGE (a)-[:REFERS_TO]->(b)"
-'''
+
+#"CALL apoc.periodic.commit(\"MATCH (a:VoteMap {votemapID: $votemapID}) MATCH (b:User {userID: $userID}) with a limit $limit MERGE (a)-[:REFERS_TO]->(b)\",{limit:1000})",
+
+
+
+
 
 
 
@@ -584,10 +632,12 @@ with driver.session() as session:
     if clearAll_bool == True:
         session.write_transaction(delete_all)
 
-
     ###--------------------###
     ### Nodes - users_data ###
     ###--------------------###
+
+    #d1 = datetime.now()
+
 
     userList = []
     c = 0
@@ -660,6 +710,9 @@ with driver.session() as session:
         if sample_bool == True and c >= sample:
             print("-- Nodes - users_data done --")
             break
+
+    #d2 = datetime.now()
+    #print('Time-Delta: ', (d2 - d1))
 
     ###----------------------###
     ### Nodes - debates_data ###
@@ -829,14 +882,15 @@ with driver.session() as session:
     ### Edges - debates_data ###
     ###----------------------###
 
-    s0 = datetime.now()
-    print('iteration: start', 'Time: \t\t\t\t\t', s0.strftime("%H:%M:%S.%f"))
+    #s0 = datetime.now()
+    #print('iteration: start', 'Time: \t\t\t\t\t', s0.strftime("%H:%M:%S.%f"))
+    #d0 = datetime.now()
 
     c = 0
     for i in debates_data:
         c = c + 1
 
-        d0 = datetime.now()
+        #d0 = datetime.now()
 
         ### User Edges - debates_in ###
         if debates_in_bool == True:
@@ -865,8 +919,8 @@ with driver.session() as session:
                                           debates_data[i]['participant_2_points'],
                                           debates_data[i]['participant_2_position'],
                                           winning_bool2)  # todo check if there is inconsistency in participants and user.json
-            d1 = datetime.now()
-            print('iteration: ', c, ', debates_in, Time: \t\t', d1.strftime("%H:%M:%S.%f"), 'Delta: ', (d1-d0))
+            #d1 = datetime.now()
+            #print('iteration: ', c, ', debates_in, Time: \t\t', d1.strftime("%H:%M:%S.%f"), 'Delta: ', (d1-d0))
 
         ### User Edge - gives_comment ###
         if gives_comment_bool == True:
@@ -876,8 +930,8 @@ with driver.session() as session:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
                 session.write_transaction(add_gives_comment, k['user_name'], commentID)
-            d2 = datetime.now()
-            print('iteration: ', c, ', gives_comment, Time: \t', d2.strftime("%H:%M:%S.%f"), 'Delta: ', (d2-d1))
+            #d2 = datetime.now()
+            #print('iteration: ', c, ', gives_comment, Time: \t', d2.strftime("%H:%M:%S.%f"), 'Delta: ', (d2-d1))
 
         ### User Edge - gives_argument ###
         if gives_argument_bool == True:
@@ -893,12 +947,12 @@ with driver.session() as session:
                         UserID = debates_data[i]['participant_2_name']
                     session.write_transaction(add_gives_argument, UserID, argumentID)
 
-            d3 = datetime.now()
-            print('iteration: ', c, ', gives_argument, Time: \t', d3.strftime("%H:%M:%S.%f"), 'Delta: ', (d3-d2))
+            #d3 = datetime.now()
+            #print('iteration: ', c, ', gives_argument, Time: \t', d3.strftime("%H:%M:%S.%f"), 'Delta: ', (d3-d2))
 
         ### User Edge - gives_voteMap ###
         if gives_votemap_bool == True:
-
+            #d3 = datetime.now()
             c2 = 0
             for k in debates_data[i]['votes']:
                 c2 = c2 + 1
@@ -909,8 +963,8 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_gives_voteMap, k['user_name'], votemapID)
                     c3 = c3 + 1
-            d4 = datetime.now()
-            print('iteration: ', c, ', gives_votemap, Time: \t', d4.strftime("%H:%M:%S.%f"), 'Delta: ', (d4-d3))
+            #d4 = datetime.now()
+            #print('iteration: ', c, ', gives_votemap, Time: \t', d4.strftime("%H:%M:%S.%f"), 'Delta: ', (d4-d3))
 
         ### Debate Edge - has_comment ###
         if has_comment_bool == True:
@@ -920,8 +974,8 @@ with driver.session() as session:
                 c2 = c2 + 1
                 commentID = str(str(i) + '_Comment_' + str(c2))
                 session.write_transaction(add_has_comment, i, commentID)
-            d5 = datetime.now()
-            print('iteration: ', c, ', has_comment, Time: \t\t', d5.strftime("%H:%M:%S.%f"), 'Delta: ', (d5-d4))
+            #d5 = datetime.now()
+            #print('iteration: ', c, ', has_comment, Time: \t\t', d5.strftime("%H:%M:%S.%f"), 'Delta: ', (d5-d4))
 
         ### Debate Edge - has_votemap ###
         if has_votemap_bool == True:
@@ -936,8 +990,8 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_has_voteMap, i, votemapID)
                     c3 = c3 + 1
-            d6 = datetime.now()
-            print('iteration: ', c, ', has_votemap, Time: \t\t', d6.strftime("%H:%M:%S.%f"), 'Delta: ', (d6-d5))
+            #d6 = datetime.now()
+            #print('iteration: ', c, ', has_votemap, Time: \t\t', d6.strftime("%H:%M:%S.%f"), 'Delta: ', (d6-d5))
 
         ### Debate Edge - has_argument ###
         if has_argument_bool == True:
@@ -949,8 +1003,8 @@ with driver.session() as session:
                     UserID = ""
                     argumentID = str(str(i) + "_round_" + str(c2) + "_" + str(p['side']))
                     session.write_transaction(add_has_argument, i, argumentID)
-            d7 = datetime.now()
-            print('iteration: ', c, ', has_argument, Time: \t', d7.strftime("%H:%M:%S.%f"), 'Delta: ', (d7-d6))
+            #d7 = datetime.now()
+            #print('iteration: ', c, ', has_argument, Time: \t', d7.strftime("%H:%M:%S.%f"), 'Delta: ', (d7-d6))
 
         ### VoteMap Edge - refers_to ###
         if refers_to_bool == True:
@@ -965,15 +1019,15 @@ with driver.session() as session:
                     votemapID = str(str(i) + '_' + str(k['user_name']) + '_' + str(p))
                     session.write_transaction(add_refers_to, votemapID, p)
                     c3 = c3 + 1
-            d8 = datetime.now()
-            print('iteration: ', c, ', refers_to, Time: \t\t', d8.strftime("%H:%M:%S.%f"), 'Delta: ', (d8-d7))
+            #d8 = datetime.now()
+            #print('iteration: ', c, ', refers_to, Time: \t\t', d8.strftime("%H:%M:%S.%f"), 'Delta: ', (d8-d7))
 
         ### Debate Edge - debate_timeline ###
         if debate_timeline_bool == True:
             session.write_transaction(add_debate_timeline, i,
                                       int(debates_data[i]['start_date'][-4:]))  # -[IN_TIMELINE]->
-            d9 = datetime.now()
-            print('iteration: ', c, ', debate_timeline, Time:\t', d9.strftime("%H:%M:%S.%f"), 'Delta: ', (d9-d8))
+            #d9 = datetime.now()
+            #print('iteration: ', c, ', debate_timeline, Time:\t', d9.strftime("%H:%M:%S.%f"), 'Delta: ', (d9-d8))
 
         ### Debate Edge - comment_timeline ###
         if comment_timeline_bool == True:
@@ -992,15 +1046,16 @@ with driver.session() as session:
                     created_year = 2017
 
                 session.write_transaction(add_comment_timeline, commentID, created_year)  # -[IN_TIMELINE]->
-            d10 = datetime.now()
-            print('iteration: ', c, ', comment_timeline, Time:\t', d10.strftime("%H:%M:%S.%f"), 'Delta: ', (d10-d9))
+            #d10 = datetime.now()
+            #print('iteration: ', c, ', comment_timeline, Time:\t', d10.strftime("%H:%M:%S.%f"), 'Delta: ', (d10-d9))
 
         if c % 100 == 0:
             print('Edges - debates_data: ', c)
         if sample_bool == True and c >= sample:
             print("-- Edges - debates_data done --")
             break
-        print('iteration', c, 'Delta: ', (d1-d0)+(d2-d1)+(d3-d2)+(d4-d3)+(d5-d4)+(d6-d5)+(d7-d6)+(d8-d7)+(d9-d8)+(d10-d9))
+    #d1 = datetime.now()
+    #print('iteration', c, 'Delta: ', (d1-d0))
 
 
 
