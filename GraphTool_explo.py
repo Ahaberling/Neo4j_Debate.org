@@ -1,6 +1,8 @@
 import graph_tool.all as gt
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+from scipy import stats
 
 #from pylab import *
 
@@ -40,9 +42,9 @@ g.list_properties()
 
 
 
-###########################################
-### Descriptives of friendships network ###
-###########################################
+#################################################
+### Descriptives of whole friendships network ###
+#################################################
 
 #g_friendship = gt.load_graph('debate.org_test_mod.graphml', fmt='graphml')
 g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphml')
@@ -53,6 +55,13 @@ g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphm
 #g_friendship.list_properties()
 
 #print(g_friendship.vertex_properties.party[0])
+'''
+gt.graph_draw(g_friendship, pos=None, vertex_fill_color=None, # todo Why is this directed?
+              vertex_size=None,
+              vcmap=matplotlib.cm.gist_heat,
+              vorder=None, output="g_friendship.pdf")
+'''
+print(g_friendship)
 
 #-- density --#
 
@@ -86,20 +95,25 @@ avg_degree =  sum(degree_list) / len(degree_list)
 print("Avg Degree: ", avg_degree)
 
 
-#todo median degree
+print("Median Degree: ", np.median(degree_list))
+
+print("Mode Degree: ", stats.mode(degree_list)[0][0])
+#print("Mode Degree: ", stats.mode(degree_list, axis = None))
+
 
 #-- Degree Distribution --#
 
 degree_hist = gt.vertex_hist(g_friendship, "out") # 2d array with [frequency][degree]
 
-print(degree_hist[1]) # HERE THE MAX IS 257 WHYYY?
+print("Degree Distribution Frequency: ", degree_hist[0])
+print("Degree Distribution Values: ", degree_hist[1]) # HERE THE MAX IS 257 WHYYY?
+
+
+
+print(len(degree_hist[0]), len(degree_hist[1]))
 
 y = degree_hist[0]
-x = degree_hist[1][:-1]
-
-print(len(y), len(x))
-
-
+x = degree_hist[1][:-1] # very weird, manually excluded for now
 
 #ax.set_xscale('log')
 
@@ -111,7 +125,7 @@ plt.xlabel('Degree')
 plt.ylabel('Fequency')
 
 
-#plt.plot(x, y, 'o', color='black')
+plt.plot(x, y, 'o', color='black')
 #plt.savefig("degree_hist.png")
 
 """
@@ -121,15 +135,14 @@ plt.savefig("degree_dist", dpi=None, facecolor='w', edgecolor='w',
         frameon=None, metadata=None)
 """
 
+#-- Clustering Coefficiants global vs avg local --#
 
 
-#-- Closeness Distribution --#
+global_clus = gt.global_clustering(g_friendship)
+print('global CC', global_clus)
 
-#-- Betweenness Distribution --#
 
-#-- Eigenvector Distribution --#
 
-#-- Number of Components --#
 
 #v = g_friendship.vertex(10)
 
@@ -147,30 +160,103 @@ comp, hist = gt.label_components(g_friendship, vprop_comp, attractors=False)
 
 #print(g_friendship.vertex_properties.comp[8])
 
-print('comp array: ', comp.a) #  .a = .get_array()[:]
+print('comp id array: ', comp.a) #  .a = .get_array()[:]
+
 
 print(sum(comp.a), len(comp.a))
 
 
 
-print('hist array: ', hist)
+print('comp hist/frequency array: ', hist)
 print(sum(hist), len(hist)) # why does it say that last value of 256 is occuring 622 times? its not occuring once. 622 is the size of the com array. weird shit
 # larges component in lmited sample is labled 145 (300 times)
 
-#-- Largest Components --#
+print("Number of copmonents in whole Graph: ", len(hist))
+
+#-- number of components histogram --#
+
+
+
+x, y = np.unique(hist, return_counts=True)
+
+'''
+
+helper = []
+for i in np.unique(hist):
+    helper[i] =
+
+y = np.unique(comp.a)
+'''
+
+print('this is x: ', x)
+print('this is y: ', y)
+
+
+fig, ax = plt.subplots()
+plt.bar(x, y, color='grey')
+ax.set_yscale('log')
+ax.set_xscale('log')
+plt.xlabel('Component size')
+plt.ylabel('Fequency')
+
+
+#plt.plot(x, y, 'o', color='black')
+plt.savefig("component_number_hist.png")
+
+
+u_frin = gt.extract_largest_component(g_friendship)
+print('larges comp', u_frin)
+
+#diameter is obviously 0 because of the disconnectivity
+
+#################################################
+### Descriptives of larges component ###
+#################################################
+
+
+#-- density of LC--#
+
+density_compL = len(u_frin) / ((len(u_frin) * len(u_frin)) / 2 )
+
+print("Density of LC: ", density_compL)
+
+#-- (Pseudo-) Diameter --#
+dist, ends = gt.pseudo_diameter(u_frin)
+
+print('(Pseudo-) Diameter: ', dist)
+print('(Pseudo-) Diameter start:', ends[0], 'end:', ends[1])
+
+
+
+#-- Closeness Distribution --#
+'''
+closeness = gt.closeness(u_frin)
+gt.graph_draw(u_frin, pos=None, vertex_fill_color=closeness,
+              vertex_size=gt.prop_to_size(closeness, mi=5, ma=15),
+              vcmap=matplotlib.cm.gist_heat,
+              vorder=closeness, output="polblogs_closeness.pdf")
+'''
+
+#-- Betweenness Distribution --#
+
+#-- Eigenvector Distribution --#
+
 
 #vprop_compL = g_friendship.new_vertex_property("bool")
 
 #g_friendship.vp.compL = vprop_compL
 
-u_frin = gt.extract_largest_component(g_friendship)
-print('larges comp', u_frin)
+
 
 #for i in len(comp):
  #g_friendship.vp.vprop_comp[i] = comp[i]
 
 #print(comp, hist, )
 
+
+#################################################
+### Descriptives of second larges component ?###
+#################################################
 
 sec_compL = np.sort(hist)
 
@@ -189,22 +275,15 @@ sec_compL = gt.GraphView(g_friendship, vfilt= lambda v: g_friendship.vp.comp[v] 
 print(sec_compL)
 
 
-#-- (Pseudo-) Diameter --#
 
-dist, ends = gt.pseudo_diameter(u_frin)
 
-print('(Pseudo-) Diameter: ', dist)
-print('(Pseudo-) Diameter start:', ends[0], 'end:', ends[1])
+
+
 
 
 
 #-- paths ? --#
 
-#-- Clustering Coefficiants global vs avg local --#
-
-
-global_clus = gt.global_clustering(g_friendship)
-print('global CC', global_clus)
 
 
 #-- Size of Components --# ?
