@@ -47,12 +47,21 @@ g.list_properties()
 #################################################
 
 #g_friendship = gt.load_graph('debate.org_test_mod.graphml', fmt='graphml')
-g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphml')
+#g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphml')
+g_all = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
+
+#g_all.list_properties()
+
+#print("value: ", g_all.vertex_properties.party[70000])
+
+g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
+
+#g_friendship = gt.GraphView(g_all, vfilt= lambda v: g_friendship.vp.comp[v] == sec_compL_id)
 
 #print(g_friendship)
 #print(g.vertex_index[12])
 
-#g_friendship.list_properties()
+g_friendship.list_properties()
 
 #print(g_friendship.vertex_properties.party[0])
 '''
@@ -61,6 +70,7 @@ gt.graph_draw(g_friendship, pos=None, vertex_fill_color=None, # todo Why is this
               vcmap=matplotlib.cm.gist_heat,
               vorder=None, output="g_friendship.pdf")
 '''
+print(g_all)
 print(g_friendship)
 
 #-- density --#
