@@ -50,18 +50,69 @@ g.list_properties()
 #g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphml')
 g_all = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
 
+# create propertymap
+# get all nodes with userID != ""
+# for those nodes look for their neighboors wit h issuesID != ""
+# fill property map with the certain value of interest
+
+
+
 #g_all.list_properties()
 
 #print("value: ", g_all.vertex_properties.party[70000])
 
 g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
+g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
+
+
+
+
+print("get_vertices() below: ")
+print(g_friendship.get_vertices())
+print(g_issues.get_vertices())
+print("get_vertices() above: ")
+
+vprop_abor = g_all.new_vertex_property("string")
+g_all.vp.abor = vprop_abor
+
+#print("abortion value: ", g_all.vp.abortion[60000])
+print("abortion value: ", g_all.vp.abor[30000])
+
+c = 0
+for i in g_friendship.get_vertices():       # this approach works because there is only one issues node for each respective user node
+    abor = g_all.get_all_neighbors(i)
+    for j in abor:
+        if j not in g_friendship.get_vertices():
+            g_all.vp.abor[i] = g_all.vp.abortion[j]
+    if c % 1000 == 0:
+        print(c)
+    c = c+1
+print("abortion value: ", g_all.vp.abor[30000])
+
+g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
+
+print("abortion value: ", g_friendship.vp.abor[30000])
+
+#print(gt.assortativity(g_friendship, "abor"))
+print(gt.assortativity(g_friendship, g_friendship.vp.abor))
+#print(gt.assortativity(g_friendship, vprop_abor))
+
+
+h = gt.corr_hist(g_friendship, g_friendship.vp.abor, g_friendship.vp.abor)
+plt.clf()
+plt.xlabel("Source abortion")
+plt.ylabel("Target abortion")
+plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr.svg")
+
 
 #g_friendship = gt.GraphView(g_all, vfilt= lambda v: g_friendship.vp.comp[v] == sec_compL_id)
 
 #print(g_friendship)
 #print(g.vertex_index[12])
 
-g_friendship.list_properties()
+#g_friendship.list_properties()
 
 #print(g_friendship.vertex_properties.party[0])
 '''
