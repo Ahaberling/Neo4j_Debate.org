@@ -64,8 +64,10 @@ g_all = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
 g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 
+#g_issues.list_properties()
 
-
+print("PARTY UNIQUE VALUES?: ", g_all.vp.party.a)
+print("party value of node 30.000: ", g_all.vp.party[30000])
 
 print("get_vertices() below: ")
 print(g_friendship.get_vertices())
@@ -78,6 +80,7 @@ g_all.vp.abor = vprop_abor
 #print("abortion value: ", g_all.vp.abortion[60000])
 print("abortion value: ", g_all.vp.abor[30000])
 
+'''
 c = 0
 for i in g_friendship.get_vertices():       # this approach works because there is only one issues node for each respective user node
     abor = g_all.get_all_neighbors(i)
@@ -87,6 +90,9 @@ for i in g_friendship.get_vertices():       # this approach works because there 
     if c % 1000 == 0:
         print(c)
     c = c+1
+    '''
+
+
 print("abortion value: ", g_all.vp.abor[30000])
 
 g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
