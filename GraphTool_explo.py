@@ -66,7 +66,16 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 
 #g_issues.list_properties()
 
-print("PARTY UNIQUE VALUES?: ", g_all.vp.party.a)
+#print("PARTY UNIQUE VALUES?: ", g_all.vp.party.a)
+print("PARTY UNIQUE VALUES?: ")
+'''
+vals = np.array([])
+for v in g_friendship.vertices():
+    vals = np.append(vals, g_friendship.vp.party[v])
+
+print(vals)
+print(np.unique(vals))
+'''
 print("party value of node 30.000: ", g_all.vp.party[30000])
 
 print("get_vertices() below: ")
@@ -80,7 +89,10 @@ g_all.vp.abor = vprop_abor
 #print("abortion value: ", g_all.vp.abortion[60000])
 print("abortion value: ", g_all.vp.abor[30000])
 
-'''
+
+
+
+
 c = 0
 for i in g_friendship.get_vertices():       # this approach works because there is only one issues node for each respective user node
     abor = g_all.get_all_neighbors(i)
@@ -90,14 +102,51 @@ for i in g_friendship.get_vertices():       # this approach works because there 
     if c % 1000 == 0:
         print(c)
     c = c+1
-    '''
+
 
 
 print("abortion value: ", g_all.vp.abor[30000])
 
+c = 0
+vals = np.array([])
+for v in g_all.vertices():
+    vals = np.append(vals, g_all.vp.abor[v])
+    if c % 1000 == 0:
+        print(c)
+    c = c + 1
+
+print(vals)
+print(np.unique(vals))
+
 g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 
 print("abortion value: ", g_friendship.vp.abor[30000])
+
+#g_friendship_abor_ProCon = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == ("Pro" | "Con"))
+g_friendship_abor_ProCon = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == "Pro" or g_friendship.vp.abor[v] == "Con")
+#g_friendship_abor_ProConUnd = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == ("Pro" | "Con" | "Und"))
+g_friendship_abor_ProConUnd = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == "Pro" or g_friendship.vp.abor[v] == "Con" or g_friendship.vp.abor[v] == "Und")
+
+c = 0
+vals = np.array([])
+for v in g_friendship_abor_ProCon.vertices():
+    vals = np.append(vals, g_friendship_abor_ProCon.vp.abor[v])
+    if c % 1000 == 0:
+        print(c)
+    c = c + 1
+
+print('g_friendship_abor_ProCon: ', np.unique(vals))
+
+c = 0
+vals = np.array([])
+for v in g_friendship_abor_ProConUnd.vertices():
+    vals = np.append(vals, g_friendship_abor_ProConUnd.vp.abor[v])
+    if c % 1000 == 0:
+        print(c)
+    c = c + 1
+
+print('g_friendship_abor_ProConUnd', np.unique(vals))
+
 
 #print(gt.assortativity(g_friendship, "abor"))
 print(gt.assortativity(g_friendship, g_friendship.vp.abor))
