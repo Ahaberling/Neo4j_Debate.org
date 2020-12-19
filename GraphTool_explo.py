@@ -150,6 +150,8 @@ print('g_friendship_abor_ProConUnd', np.unique(vals))
 
 #print(gt.assortativity(g_friendship, "abor"))
 print(gt.assortativity(g_friendship, g_friendship.vp.abor))
+print(gt.assortativity(g_friendship_abor_ProCon, g_friendship_abor_ProCon.vp.abor))
+print(gt.assortativity(g_friendship_abor_ProConUnd, g_friendship_abor_ProConUnd.vp.abor))
 #print(gt.assortativity(g_friendship, vprop_abor))
 
 
