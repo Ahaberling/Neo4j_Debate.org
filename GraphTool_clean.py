@@ -2,6 +2,9 @@ import graph_tool.all as gt
 import numpy as np
 import matplotlib.pyplot as plt
 
+import sys
+np.set_printoptions(threshold=sys.maxsize)
+
 
 ######################
 ### Initialization ###
@@ -40,8 +43,10 @@ vprop_health = g_all.new_vertex_property("string")  # national_health_care
 
 vprop_socia = g_all.new_vertex_property("string")   # socialism
 
-vprop_prog = g_all.new_vertex_property("int")    # int value indicating conservatism  (-5) - progressiveness (+5)
+#vprop_prog = g_all.new_vertex_property("int16_t")    # int value indicating conservatism  (-5) - progressiveness (+5)
                                                     # (sum of stances regarding abortion, ..., health care
+vprop_prog = g_all.new_vertex_property("float")
+
 
 # not created, because it is already innate to User-nodes
 #vprop_party = g_all.new_vertex_property("string")   # party
@@ -150,8 +155,9 @@ print("Assortative Mixing coefficient & variance - Political Ideology: ", gt.ass
 
 #g_friendship_prop_filter1 = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 
-g_friendship_abor_ProConUnd = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.abor[v] == "Pro" or g_all.vp.abor[v] == "Con" or g_all.vp.abor[v] == "Und")
-g_friendship_abor_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == "Pro" or g_friendship_prop.vp.abor[v] == "Con" or g_friendship_prop.vp.abor[v] == "Und")
+# g_friendship_abor_ProConUnd1 == g_friendship_abor_ProConUnd1
+g_friendship_abor_ProConUnd1 = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.abor[v] == "Pro" or g_all.vp.abor[v] == "Con" or g_all.vp.abor[v] == "Und")
+g_friendship_abor_ProConUnd2 = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == "Pro" or g_friendship_prop.vp.abor[v] == "Con" or g_friendship_prop.vp.abor[v] == "Und")
 g_friendship_gay_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.gay[v] == "Pro" or g_friendship_prop.vp.gay[v] == "Con" or g_friendship_prop.vp.gay[v] == "Und")
 g_friendship_warm_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.warm[v] == "Pro" or g_friendship_prop.vp.warm[v] == "Con" or g_friendship_prop.vp.warm[v] == "Und")
 g_friendship_drug_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.drug[v] == "Pro" or g_friendship_prop.vp.drug[v] == "Con" or g_friendship_prop.vp.drug[v] == "Und")
@@ -162,7 +168,8 @@ g_friendship_socia_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g
 #g_friendship_party_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.party[v] == "Pro" or g_friendship_prop.vp.party[v] == "Con" or g_friendship_prop.vp.party[v] == "Und")
 g_friendship_ideo_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.political_ideology[v] == "Conservative" or g_friendship_prop.vp.political_ideology[v] == "Progressive" or g_friendship_prop.vp.political_ideology[v] == "Liberal")
 
-print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und): ", gt.assortativity(g_friendship_abor_ProConUnd, g_friendship_abor_ProConUnd.vp.abor))
+print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und)1: ", gt.assortativity(g_friendship_abor_ProConUnd1, g_friendship_abor_ProConUnd1.vp.abor))
+print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und)2: ", gt.assortativity(g_friendship_abor_ProConUnd2, g_friendship_abor_ProConUnd2.vp.abor))
 print("Assortative Mixing coefficient & variance - Gay Marriage (Pro/Con/Und): ", gt.assortativity(g_friendship_gay_ProConUnd, g_friendship_gay_ProConUnd.vp.gay))
 print("Assortative Mixing coefficient & variance - Global Warming Exists (Pro/Con/Und): ", gt.assortativity(g_friendship_warm_ProConUnd, g_friendship_warm_ProConUnd.vp.warm))
 print("Assortative Mixing coefficient & variance - Drug Legalization (Pro/Con/Und): ", gt.assortativity(g_friendship_drug_ProConUnd, g_friendship_drug_ProConUnd.vp.drug))
@@ -206,43 +213,48 @@ c_max = len(g_all.get_vertices())
 val1, val2, val3, val4, val5 = 0, 0, 0, 0, 0
 
 for i in g_all.vertices():
-    if g_all.vp.abor == "Pro":
+    if g_all.vp.abor[i] == "Pro":
         val1 = 1
-    elif g_all.vp.abor == "Con":
+    elif g_all.vp.abor[i] == "Con":
         val1 = -1
     else:
         val1 = 0
 
-    if g_all.vp.gay == "Pro":
+    if g_all.vp.gay[i] == "Pro":
         val2 = 1
-    elif g_all.vp.gay == "Con":
+    elif g_all.vp.gay[i] == "Con":
         val2 = -1
     else:
         val2 = 0
 
-    if g_all.vp.warm == "Pro":
+    if g_all.vp.warm[i] == "Pro":
         val3 = 1
-    elif g_all.vp.warm == "Con":
+    elif g_all.vp.warm[i] == "Con":
         val3 = -1
     else:
         val3 = 0
 
-    if g_all.vp.drug == "Pro":
+    if g_all.vp.drug[i] == "Pro":
         val4 = 1
-    elif g_all.vp.drug == "Con":
+    elif g_all.vp.drug[i] == "Con":
         val4 = -1
     else:
         val4 = 0
 
-    if g_all.vp.health == "Pro":
+    if g_all.vp.health[i] == "Pro":
         val5 = 1
-    elif g_all.vp.health == "Con":
+    elif g_all.vp.health[i] == "Con":
         val5 = -1
     else:
         val5 = 0
 
-    prog_score = val1+val2+val3+val4+val5
+    #print('g_all.vp.x values: ', g_all.vp.abor[i], g_all.vp.gay[i], g_all.vp.warm[i], g_all.vp.drug[i], g_all.vp.health[i])
+    #print('intermediate scores: ', val1, val2, val3, val4, val5)
+
+    #prog_score = val1+val2+val3+val4+val5+5
+    prog_score = ((val1+val2+val3+val4+val5)-(-5))/((5)-(-5))*10
     g_all.vp.prog[i] = prog_score
+    #print('prog_score: ', prog_score)
 
     if c % 1000 == 0:
         print("Creating Progressiveness Score", c, "/", c_max)
@@ -262,27 +274,50 @@ for v in g_all.vertices():
     c = c + 1
 print("Identifying values range of Progresiveness Score", c_max, "/", c_max)
 
+#print("Progresiveness Score value range: ",vals_prog)
 print("Progresiveness Score value range: ",np.unique(vals_prog))
 
-print("Assortative Mixing coefficient & variance (skalar) - Progessiveness Score  (-5/5): ", gt.scalar_assortativity(g_all, g_all.vp.prog))
-print("Assortative Mixing coefficient & variance (categorial) - Progessiveness Score  (-5/5): ", gt.assortativity(g_all, g_all.vp.prog))
 
+g_friendship_skalar = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
+print(g_friendship_skalar)
+
+g_friendship_skalar_mod = gt.GraphView(g_friendship_skalar, vfilt=lambda v: g_all.vp.abor[v] == ("Pro" or "Con") or g_all.vp.gay[v] == ("Pro" or "Con") or g_all.vp.warm[v] == ("Pro" or "Con") or g_all.vp.drug[v] == ("Pro" or "Con") or g_all.vp.health[v] == ("Pro" or "Con"))
+print(g_friendship_skalar_mod)
+
+
+print("Assortative Mixing coefficient & variance (skalar) - Progessiveness Score  (-5/5): ", gt.scalar_assortativity(g_friendship_skalar, g_friendship_skalar.vp.prog))
+print("Assortative Mixing coefficient & variance (categorial) - Progessiveness Score  (-5/5): ", gt.assortativity(g_friendship_skalar, g_friendship_skalar.vp.prog))
+#print("Assortative Mixing coefficient & variance (categorial) - Progessiveness Score  (-5/5): ", gt.assortativity(g_all, g_all.vp.prog))
+
+print("Assortative Mixing coefficient & variance (skalar) - Progessiveness Score  (-5/5): ", gt.scalar_assortativity(g_friendship_skalar_mod, g_friendship_skalar_mod.vp.prog))
+print("Assortative Mixing coefficient & variance (categorial) - Progessiveness Score  (-5/5): ", gt.assortativity(g_friendship_skalar_mod, g_friendship_skalar_mod.vp.prog))
 
 ### Assortative Mixing plots ###
 
-h = gt.corr_hist(g_all, g_all.vp.abor, g_all.vp.abor)
-
+#h = gt.corr_hist(g_all, g_all.vp.abor, g_all.vp.abor)
+h = gt.corr_hist(g_all, "out", "out")
 plt.clf()
-
-#plt.xlabel("Source out-degree")
-#plt.ylabel("Target out-degree")
-
+plt.xlabel("Source out-degree")
+plt.ylabel("Target out-degree")
 plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr_out.svg")
 
-#plt.colorbar()
+#print(h)
 
-plt.savefig("corr_abor.svg")
 
-# todo how many unique values does abortion & co have?
-# todo does the used assortativity measure work with multiple(?) categories? -> Is the measure correct?
-# todo investigate the problem with plotting
+h = gt.corr_hist(g_friendship_skalar, g_friendship_skalar.vp.prog, g_friendship_skalar.vp.prog)
+plt.clf()
+plt.xlabel("Source Progressiveness Score")
+plt.ylabel("Target Progressiveness Score")
+plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr_prog.svg")
+
+h = gt.corr_hist(g_friendship_skalar_mod, g_friendship_skalar_mod.vp.prog, g_friendship_skalar_mod.vp.prog)
+plt.clf()
+plt.xlabel("Source Progressiveness Score")
+plt.ylabel("Target Progressiveness Score")
+plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr_prog_mod.svg")
