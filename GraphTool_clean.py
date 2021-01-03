@@ -48,6 +48,15 @@ vprop_socia = g_all.new_vertex_property("string")   # socialism
 vprop_prog = g_all.new_vertex_property("float")
 
 
+vprop_abor_int = g_all.new_vertex_property("int")    # abortion
+vprop_gay_int = g_all.new_vertex_property("int")     # gay_marriage
+vprop_warm_int = g_all.new_vertex_property("int")    # global_warming
+vprop_drug_int = g_all.new_vertex_property("int")    # drug_legaliz
+vprop_health_int = g_all.new_vertex_property("int")  # national_health_care
+
+vprop_socia_int = g_all.new_vertex_property("int")   # socialism
+
+
 # not created, because it is already innate to User-nodes
 #vprop_party = g_all.new_vertex_property("string")   # party
 #vprop_ideo = g_all.new_vertex_property("string")    # political_ideology
@@ -66,6 +75,17 @@ g_all.vp.socia = vprop_socia
 g_all.vp.prog = vprop_prog
 
 
+g_all.vp.abor_int = vprop_abor_int
+g_all.vp.gay_int = vprop_gay_int
+g_all.vp.warm_int = vprop_warm_int
+g_all.vp.drug_int = vprop_drug_int
+g_all.vp.health_int = vprop_health_int
+
+g_all.vp.socia_int = vprop_socia_int
+
+
+
+
 ### Filling PropertyMaps ###
 
 c = 0
@@ -80,6 +100,60 @@ for i in g_friendship.get_vertices():       # this approach works because there 
             g_all.vp.drug[i] = g_all.vp.drug_legaliz[j]
             g_all.vp.health[i] = g_all.vp.national_health_care[j]
             g_all.vp.socia[i] = g_all.vp.socialism[j]
+
+            if g_all.vp.abortion[j] == "Pro":
+                g_all.vp.abor_int[i] = 1
+            elif g_all.vp.abortion[j] == "Und":
+                g_all.vp.abor_int[j] = 2
+            elif g_all.vp.abortion[j] == "Con":
+                g_all.vp.abor_int[j] = 0
+            else:
+                g_all.vp.abor_int[j] = 99
+
+            if g_all.vp.gay_marriage[j] == "Pro":
+                g_all.vp.gay_int[i] = 1
+            elif g_all.vp.gay_marriage[j] == "Und":
+                g_all.vp.gay_int[j] = 2
+            elif g_all.vp.gay_marriage[j] == "Con":
+                g_all.vp.gay_int[j] = 0
+            else:
+                g_all.vp.gay_int[j] = 99
+
+            if g_all.vp.global_warming[j] == "Pro":
+                g_all.vp.warm_int[i] = 1
+            elif g_all.vp.global_warming[j] == "Und":
+                g_all.vp.warm_int[j] = 2
+            elif g_all.vp.global_warming[j] == "Con":
+                g_all.vp.warm_int[j] = 0
+            else:
+                g_all.vp.warm_int[j] = 99
+
+            if g_all.vp.drug_legaliz[j] == "Pro":
+                g_all.vp.drug_int[i] = 1
+            elif g_all.vp.drug_legaliz[j] == "Und":
+                g_all.vp.drug_int[j] = 2
+            elif g_all.vp.drug_legaliz[j] == "Con":
+                g_all.vp.drug_int[j] = 0
+            else:
+                g_all.vp.drug_int[j] = 99
+
+            if g_all.vp.national_health_care[j] == "Pro":
+                g_all.vp.health_int[i] = 1
+            elif g_all.vp.national_health_care[j] == "Und":
+                g_all.vp.health_int[j] = 2
+            elif g_all.vp.national_health_care[j] == "Con":
+                g_all.vp.health_int[j] = 0
+            else:
+                g_all.vp.health_int[j] = 99
+
+            if g_all.vp.socialism[j] == "Pro":
+                g_all.vp.socia_int[i] = 1
+            elif g_all.vp.socialism[j] == "Und":
+                g_all.vp.socia_int[j] = 2
+            elif g_all.vp.socialism[j] == "Con":
+                g_all.vp.socia_int[j] = 0
+            else:
+                g_all.vp.socia_int[j] = 99
 
     if c % 1000 == 0:
         print("Filling PropertyMaps: ", c, "/", c_max)
@@ -100,7 +174,17 @@ vals_socia = np.array([])
 
 vals_party = np.array([])
 vals_ideo = np.array([])
-'''
+
+vals_abor_int = np.array([])
+vals_gay_int = np.array([])
+vals_warm_int = np.array([])
+vals_drug_int = np.array([])
+vals_health_int = np.array([])
+
+vals_socia_int = np.array([])
+
+
+
 for v in g_all.vertices():
     vals_abor = np.append(vals_abor, g_all.vp.abor[v])
     vals_gay = np.append(vals_gay, g_all.vp.gay[v])
@@ -113,11 +197,26 @@ for v in g_all.vertices():
     #vals_party = np.append(vals_party, g_all.vp.party[v]) # to many
     vals_ideo = np.append(vals_ideo, g_all.vp.political_ideology[v])
 
+    vals_abor_int = np.append(vals_abor_int, g_all.vp.abor_int[v])
+    vals_gay_int = np.append(vals_gay_int, g_all.vp.gay_int[v])
+    vals_warm_int = np.append(vals_warm_int, g_all.vp.warm_int[v])
+    vals_drug_int = np.append(vals_drug_int, g_all.vp.drug_int[v])
+    vals_health_int = np.append(vals_health_int, g_all.vp.health_int[v])
+
+    vals_socia_int = np.append(vals_socia_int, g_all.vp.socia_int[v])
+
+
     if c % 1000 == 0:
         print("Identifying values range of PropertyMaps", c, "/", c_max)
     c = c + 1
 print("Identifying values range of PropertyMaps", c_max, "/", c_max)
-'''
+
+print("range of vals_abor_int: ", np.unique(vals_abor_int))
+print("range of vals_gay_int: ", np.unique(vals_gay_int))
+print("range of vals_warm_int: ", np.unique(vals_warm_int))
+print("range of vals_drug_int: ", np.unique(vals_drug_int))
+print("range of vals_health_int: ", np.unique(vals_health_int))
+print("range of vals_socia_int: ", np.unique(vals_socia_int))
 
 ### Assortative Mixing Measure with all values ###
 
@@ -156,8 +255,8 @@ print("Assortative Mixing coefficient & variance - Political Ideology: ", gt.ass
 #g_friendship_prop_filter1 = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 
 # g_friendship_abor_ProConUnd1 == g_friendship_abor_ProConUnd1
-g_friendship_abor_ProConUnd1 = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.abor[v] == "Pro" or g_all.vp.abor[v] == "Con" or g_all.vp.abor[v] == "Und")
-g_friendship_abor_ProConUnd2 = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == "Pro" or g_friendship_prop.vp.abor[v] == "Con" or g_friendship_prop.vp.abor[v] == "Und")
+#g_friendship_abor_ProConUnd1 = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.abor[v] == "Pro" or g_all.vp.abor[v] == "Con" or g_all.vp.abor[v] == "Und")
+g_friendship_abor_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == "Pro" or g_friendship_prop.vp.abor[v] == "Con" or g_friendship_prop.vp.abor[v] == "Und")
 g_friendship_gay_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.gay[v] == "Pro" or g_friendship_prop.vp.gay[v] == "Con" or g_friendship_prop.vp.gay[v] == "Und")
 g_friendship_warm_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.warm[v] == "Pro" or g_friendship_prop.vp.warm[v] == "Con" or g_friendship_prop.vp.warm[v] == "Und")
 g_friendship_drug_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.drug[v] == "Pro" or g_friendship_prop.vp.drug[v] == "Con" or g_friendship_prop.vp.drug[v] == "Und")
@@ -168,8 +267,8 @@ g_friendship_socia_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g
 #g_friendship_party_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.party[v] == "Pro" or g_friendship_prop.vp.party[v] == "Con" or g_friendship_prop.vp.party[v] == "Und")
 g_friendship_ideo_ProConUnd = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.political_ideology[v] == "Conservative" or g_friendship_prop.vp.political_ideology[v] == "Progressive" or g_friendship_prop.vp.political_ideology[v] == "Liberal")
 
-print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und)1: ", gt.assortativity(g_friendship_abor_ProConUnd1, g_friendship_abor_ProConUnd1.vp.abor))
-print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und)2: ", gt.assortativity(g_friendship_abor_ProConUnd2, g_friendship_abor_ProConUnd2.vp.abor))
+#print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und)1: ", gt.assortativity(g_friendship_abor_ProConUnd1, g_friendship_abor_ProConUnd1.vp.abor))
+print("Assortative Mixing coefficient & variance - Abortion (Pro/Con/Und): ", gt.assortativity(g_friendship_abor_ProConUnd, g_friendship_abor_ProConUnd.vp.abor))
 print("Assortative Mixing coefficient & variance - Gay Marriage (Pro/Con/Und): ", gt.assortativity(g_friendship_gay_ProConUnd, g_friendship_gay_ProConUnd.vp.gay))
 print("Assortative Mixing coefficient & variance - Global Warming Exists (Pro/Con/Und): ", gt.assortativity(g_friendship_warm_ProConUnd, g_friendship_warm_ProConUnd.vp.warm))
 print("Assortative Mixing coefficient & variance - Drug Legalization (Pro/Con/Und): ", gt.assortativity(g_friendship_drug_ProConUnd, g_friendship_drug_ProConUnd.vp.drug))
@@ -293,7 +392,7 @@ print("Assortative Mixing coefficient & variance (skalar) - Progessiveness Score
 print("Assortative Mixing coefficient & variance (categorial) - Progessiveness Score  (-5/5): ", gt.assortativity(g_friendship_skalar_mod, g_friendship_skalar_mod.vp.prog))
 
 ### Assortative Mixing plots ###
-
+'''
 #h = gt.corr_hist(g_all, g_all.vp.abor, g_all.vp.abor)
 h = gt.corr_hist(g_all, "out", "out")
 plt.clf()
@@ -302,9 +401,8 @@ plt.ylabel("Target out-degree")
 plt.imshow(h[0].T, interpolation="nearest", origin="lower")
 plt.colorbar()
 plt.savefig("corr_out.svg")
-
 #print(h)
-
+'''
 
 h = gt.corr_hist(g_friendship_skalar, g_friendship_skalar.vp.prog, g_friendship_skalar.vp.prog)
 plt.clf()
@@ -321,3 +419,22 @@ plt.ylabel("Target Progressiveness Score")
 plt.imshow(h[0].T, interpolation="nearest", origin="lower")
 plt.colorbar()
 plt.savefig("corr_prog_mod.svg")
+
+g_friendship_abor_ProConUnd_int = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == 1 or g_friendship_prop.vp.abor[v] == 0 or g_friendship_prop.vp.abor[v] == 2)
+g_friendship_abor_ProCon_int  = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == 1 or g_friendship_prop.vp.abor[v] == 0)
+
+h = gt.corr_hist(g_friendship_abor_ProCon_int, g_friendship_abor_ProCon_int.vp.abor_int, g_friendship_abor_ProCon_int.vp.abor_int)
+plt.clf()
+plt.xlabel("Source Progressiveness Score")
+plt.ylabel("Target Progressiveness Score")
+plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr_abor.svg")
+
+h = gt.corr_hist(g_friendship_abor_ProConUnd_int, g_friendship_abor_ProConUnd_int.vp.abor_int, g_friendship_abor_ProConUnd_int.vp.abor_int)
+plt.clf()
+plt.xlabel("Source Progressiveness Score")
+plt.ylabel("Target Progressiveness Score")
+plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+plt.colorbar()
+plt.savefig("corr_abor_und.svg")

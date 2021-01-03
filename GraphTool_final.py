@@ -1,187 +1,41 @@
 import graph_tool.all as gt
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib
 from scipy import stats
 
-#from pylab import *
-
-'''
-    with open("Output.txt", "w") as text_file:
-    print("explo", file=text_file)
-'''
-
-'''
-g = graph_tool.Graph()
-v1 = g.add_vertex()
-v2 = g.add_vertex()
-e = g.add_edge(v1, v2)
-
-graph_draw(g, vertex_text=g.vertex_index, output="two-nodes.pdf")
-
-print(v1.out_degree())
-print(e.source(), e.target(), "hahaha lalala")
-print(e.source(), e.target())
-
-vlist = g.add_vertex(10)
-print(len(list(vlist)))
-
-print(g)
-
-v = g.add_vertex()
-print(g.vertex_index[v])
-
-print(int(v))
-'''
-
-'''
-eprop = g.new_edge_property("string")
-g.edge_properties["some name"] = eprop
-g.list_properties()
-'''
+import sys
+np.set_printoptions(threshold=sys.maxsize)
 
 
+######################
+### Initialization ###
+######################
 
-#################################################
-### Descriptives of whole friendships network ###
-#################################################
-
-#g_friendship = gt.load_graph('debate.org_test_mod.graphml', fmt='graphml')
-#g_friendship = gt.load_graph('debate.org_friends_limit_mod.graphml', fmt='graphml')
+# g_all contains nodes: User, Issues
+# g_all contains edges: FRIENDS_WITH, GIVES_ISSUES
 g_all = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
 
-# create propertymap
-# get all nodes with userID != ""
-# for those nodes look for their neighboors wit h issuesID != ""
-# fill property map with the certain value of interest
 
+### Subgraphs ###
 
-
-#g_all.list_properties()
-
-#print("value: ", g_all.vertex_properties.party[70000])
-
+# g_friendship contains User, FRIENDS_WITH
 g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
+
+# g_issues contains Issues, GIVES_ISSUES
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 
-#g_issues.list_properties()
 
-#print("PARTY UNIQUE VALUES?: ", g_all.vp.party.a)
-print("PARTY UNIQUE VALUES?: ")
-'''
-vals = np.array([])
-for v in g_friendship.vertices():
-    vals = np.append(vals, g_friendship.vp.party[v])
+####################
+### Deskriptives ###
+####################
 
-print(vals)
-print(np.unique(vals))
-'''
-print("party value of node 30.000: ", g_all.vp.party[30000])
-
-print("get_vertices() below: ")
-print(g_friendship.get_vertices())
-print(g_issues.get_vertices())
-print("get_vertices() above: ")
-
-vprop_abor = g_all.new_vertex_property("string")
-g_all.vp.abor = vprop_abor
-
-#print("abortion value: ", g_all.vp.abortion[60000])
-print("abortion value: ", g_all.vp.abor[10000])
-print("abortion value: ", g_all.vp.abor[20000])
-print("abortion value: ", g_all.vp.abor[30000])
+print("PARTY UNIQUE VALUES?: ", g_all.vp.party.a)
 
 
-
-
-
-c = 0
-for i in g_friendship.get_vertices():       # this approach works because there is only one issues node for each respective user node
-    abor = g_all.get_all_neighbors(i)
-    for j in abor:
-        if j not in g_friendship.get_vertices():
-            g_all.vp.abor[i] = g_all.vp.abortion[j]
-    if c % 1000 == 0:
-        print(c)
-    c = c+1
-
-
-
-print("abortion value: ", g_all.vp.abor[30000])
-'''
-c = 0
-vals = np.array([])
-for v in g_all.vertices():
-    vals = np.append(vals, g_all.vp.abor[v])
-    if c % 1000 == 0:
-        print(c)
-    c = c + 1
-
-print(vals)
-print(np.unique(vals))
-'''
-g_friendship = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
-
-print("abortion value: ", g_friendship.vp.abor[30000])
-
-#g_friendship_abor_ProCon = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == ("Pro" | "Con"))
-g_friendship_abor_ProCon = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == "Pro" or g_friendship.vp.abor[v] == "Con")
-#g_friendship_abor_ProConUnd = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == ("Pro" | "Con" | "Und"))
-g_friendship_abor_ProConUnd = gt.GraphView(g_friendship, vfilt=lambda v: g_friendship.vp.abor[v] == "Pro" or g_friendship.vp.abor[v] == "Con" or g_friendship.vp.abor[v] == "Und")
-'''
-c = 0
-vals = np.array([])
-for v in g_friendship_abor_ProCon.vertices():
-    vals = np.append(vals, g_friendship_abor_ProCon.vp.abor[v])
-    if c % 1000 == 0:
-        print(c)
-    c = c + 1
-
-print('g_friendship_abor_ProCon: ', np.unique(vals))
-
-c = 0
-vals = np.array([])
-for v in g_friendship_abor_ProConUnd.vertices():
-    vals = np.append(vals, g_friendship_abor_ProConUnd.vp.abor[v])
-    if c % 1000 == 0:
-        print(c)
-    c = c + 1
-
-print('g_friendship_abor_ProConUnd', np.unique(vals))
-'''
-
-#print(gt.assortativity(g_friendship, "abor"))
-print(gt.assortativity(g_friendship, g_friendship.vp.abor))
-print(gt.assortativity(g_friendship_abor_ProCon, g_friendship_abor_ProCon.vp.abor))
-print(gt.assortativity(g_friendship_abor_ProConUnd, g_friendship_abor_ProConUnd.vp.abor))
-#print(gt.assortativity(g_friendship, vprop_abor))
-
-'''
-h = gt.corr_hist(g_friendship, g_friendship.vp.abor, g_friendship.vp.abor)
-plt.clf()
-plt.xlabel("Source abortion")
-plt.ylabel("Target abortion")
-plt.imshow(h[0].T, interpolation="nearest", origin="lower")
-plt.colorbar()
-plt.savefig("corr.svg")
-'''
-
-#g_friendship = gt.GraphView(g_all, vfilt= lambda v: g_friendship.vp.comp[v] == sec_compL_id)
-
-#print(g_friendship)
-#print(g.vertex_index[12])
-
-#g_friendship.list_properties()
-
-#print(g_friendship.vertex_properties.party[0])
-'''
-gt.graph_draw(g_friendship, pos=None, vertex_fill_color=None, # todo Why is this directed?
-              vertex_size=None,
-              vcmap=matplotlib.cm.gist_heat,
-              vorder=None, output="g_friendship.pdf")
-'''
+### Number of nodes and edges #todo and other stuff? ###
 print(g_all)
 print(g_friendship)
+print(g_issues)
 
 #-- density --#
 
@@ -421,4 +275,3 @@ print(sec_compL)
 
 
 #graph_draw(g_friendship, vertex_text=g.vertex_index, output="g_friendship.pdf")
-
