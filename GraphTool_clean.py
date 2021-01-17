@@ -30,8 +30,8 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 
 # In the following User-nodes are enriched with information about their political stands. This is done via PropertyMaps.
 # This information is extracted from their respective Issues-node. Each User-node has exacly one corresponding Issues-node.
-# Technically all nodes are enriched with these PerpertyMaps, not only the user ones but only the user_nodes matter for
-# this analysis of assortative mixing
+# Technically all nodes are enriched with these PerpertyMaps, not only the user ones but only the user-nodes matter and are
+# considered for this analysis of assortative mixing
 
 ### Creating PropertyMaps ###
 
@@ -43,9 +43,12 @@ vprop_health = g_all.new_vertex_property("string")  # national_health_care
 
 vprop_socia = g_all.new_vertex_property("string")   # socialism
 
-#vprop_prog = g_all.new_vertex_property("int16_t")    # int value indicating conservatism  (-5) - progressiveness (+5)
-                                                    # (sum of stances regarding abortion, ..., health care
-vprop_prog = g_all.new_vertex_property("float")
+vprop_prog = g_all.new_vertex_property("float")     # float value indicating conservatism  (-5) - progressiveness (+5)
+                                                    # (sum of stances regarding abortion, ..., health care)
+                                                    # float because of the later used plotting function 
+#vprop_prog = g_all.new_vertex_property("int16_t")   
+                                                    
+
 
 
 vprop_abor_int = g_all.new_vertex_property("int")    # abortion
@@ -220,8 +223,8 @@ print("range of vals_socia_int: ", np.unique(vals_socia_int))
 
 ### Assortative Mixing Measure with all values ###
 
-g_friendship_prop = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")  # new subgraph of now enriched g_all. g_all could have been used too,
-                                                                                        # but this might be more efficient?
+g_friendship_prop = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")   # new subgraph of now enriched g_all. g_all could have been used too,
+                                                                                    # but this might be more efficient?
 
 print("Abortion value range:  ", np.unique(vals_abor))
 print("Assortative Mixing coefficient & variance - Abortion: ", gt.assortativity(g_friendship_prop, g_friendship_prop.vp.abor))
@@ -280,7 +283,7 @@ print("\n")
 print("Assortative Mixing coefficient & variance - Political Ideology (Conservative/Progressive/Liberal): ", gt.assortativity(g_friendship_ideo_ProConUnd, g_friendship_ideo_ProConUnd.vp.political_ideology))
 
 
-### Assortative Mixing Measure with Pro-, Con- Undecided-values ###
+### Assortative Mixing Measure with Pro-, Con-values ###
 
 g_friendship_abor_ProCon = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.abor[v] == "Pro" or g_friendship_prop.vp.abor[v] == "Con")
 g_friendship_gay_ProCon = gt.GraphView(g_friendship_prop, vfilt=lambda v: g_friendship_prop.vp.gay[v] == "Pro" or g_friendship_prop.vp.gay[v] == "Con")
@@ -305,7 +308,7 @@ print("\n")
 print("Assortative Mixing coefficient & variance - Political Ideology (Conservative/Progressive): ", gt.assortativity(g_friendship_ideo_ProCon, g_friendship_ideo_ProCon.vp.political_ideology))
 
 
-### Assortative Mixing Measure with skalar score ###
+### Assortative Mixing Measure with score ###
 
 c = 0
 c_max = len(g_all.get_vertices())
@@ -438,3 +441,4 @@ plt.ylabel("Target Progressiveness Score")
 plt.imshow(h[0].T, interpolation="nearest", origin="lower")
 plt.colorbar()
 plt.savefig("corr_abor_und.svg")
+
