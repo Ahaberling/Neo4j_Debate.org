@@ -22,15 +22,113 @@ g_raw = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
 ### Graph Preprocessing ###
 ###########################
 
-#--- Approach 1: g_ ---#
+# There are 3 kind of User nodes that are handled differently by each of the following approaches. Kind of User nodes in focus:
+#A: User nodes with friendship visibility setting on PRIVATE AND     being nominated as friend by any other User node (jusitfied unidirectional edge)
+#B: User nodes with friendship visibility setting on PRIVATE AND NOT being nominated as friend by any other User node (isolated)
+#C: User nodes with friendship visibility setting on PUBLIC  AND     being nominated as friend by any other User node
+#   AND and empty friends list (UNjusitfied unidirectional edge - faulty. These 331 nodes must not exist. I assume this is caused by faulty data crawling/scraping)
+
 
 # g_raw_friend contains User, FRIENDS_WITH
 g_raw_friend = gt.GraphView(g_raw, vfilt=lambda v: g_raw.vp.userID[v] != "")
-print("g_raw_friend nodes: ", len(g_raw_friend.get_vertices()))
+g_raw_issues = gt.GraphView(g_raw, vfilt=lambda v: g_raw.vp.issuesID[v] != "")
 
-#g_raw_friend_noPriv = gt.GraphView(g_raw_friend, vfilt=lambda v: g_raw.vp.friend_privacy[v] == False)  # 311 edges will be created (too much?)
-g_raw_friend_noPriv = gt.GraphView(g_raw_friend, vfilt=lambda v: g_raw.vp.friend_privacy[v] == True)    # this should be 44804 edges
-print("g_raw_friend_noPriv nodes: ", len(g_raw_friend_noPriv.get_vertices()))
+#--- Approach 1: Keep all User nodes AND make A & C bidirectional ---#
+
+
+#print("g_raw_friend nodes: ", len(g_raw_friend.get_vertices()))
+
+g_ap1 = g_raw
+
+tuplelist = list(map(tuple, g_raw_friend.get_edges()))
+
+print(len(g_ap1.get_edges())) # before creating edges:
+
+c = 0
+c_newE = 0
+new_edges = []
+
+for e in g_raw_friend.get_edges():
+    c = c + 1
+    source = e[0]
+    target = e[1]
+
+    if (target, source) not in tuplelist: # target and source switched to create the missing edge in the opposite direction
+        c_newE = c_newE + 1
+        g_ap1.add_edge(target, source)
+        #new_edges.append((target, source))
+
+    if c % 100 == 0:
+        print(c, "/", len(g_raw_friend.get_edges()))
+
+print(len(g_raw_friend.get_edges()), "/", len(g_raw_friend.get_edges()))
+
+print(c_newE)
+
+print(len(g_ap1.get_edges())) # after creating edges:
+
+
+g_ap1_friend = gt.GraphView(g_ap1, vfilt=lambda v: g_ap1.vp.userID[v] != "")
+g_ap1_issues = gt.GraphView(g_ap1, vfilt=lambda v: g_ap1.vp.issuesID[v] != "")
+
+#--- Approach 2: Remove B AND make A & C bidirectional ---#
+
+g_ap2 = g_ap1
+
+vprop_approach2 = g_ap2.new_vertex_property("bool")
+g_ap2.vp.approach2 = vprop_approach2
+
+for v in g_ap1_friend.get_vertices():
+    if g_ap1_friend.get_all_neighbors(v) == []:         # or false?
+        if g_ap1_friend.vp.friend_privacy[v] == True:
+            g_ap2.vp.approach2[v] = False
+        else:
+            g_ap2.vp.approach2[v] = True
+    else:
+        g_ap2.vp.approach2[v] = True
+
+
+g_ap2 = gt.GraphView(g_ap2, vfilt=lambda v: g_ap2.vp.approach2[v] == True)
+
+g_ap2_friend = gt.GraphView(g_ap2, vfilt=lambda v: g_ap2.vp.userID[v] != "")
+g_ap2_issues = gt.GraphView(g_ap2, vfilt=lambda v: g_ap2.vp.issuesID[v] != "")
+
+#--- Approach 3: Remove B & C AND make A bidirectional ---#
+
+g_ap3 = g_ap2
+
+vprop_approach3 = g_ap3.new_vertex_property("bool")
+g_ap3.vp.approach3 = vprop_approach3
+
+for v in g_ap3:
+    g_ap3.vp.approach3[v] = True
+
+g_raw_friend_noPriv = gt.GraphView(g_raw_friend, vfilt=lambda v: g_raw.vp.friend_privacy[v] == False)  # 311 edges will be created (too much?)
+tuplelist = list(map(tuple, g_raw_friend_noPriv.get_edges()))
+
+c = 0
+c_newE = 0
+new_edges = []
+
+for e in g_raw_friend_noPriv.get_edges():
+    c = c + 1
+    source = e[0]
+    target = e[1]
+
+    if (target, source) not in tuplelist:
+        c_newE = c_newE + 1
+        g_raw.vp.approach3[target] = False
+
+
+    if c % 100 == 0:
+        print(c)
+
+print(c_newE)
+
+g_ap3 = gt.GraphView(g_ap3, vfilt=lambda v: g_ap3.vp.approach3[v] == True)
+
+#g_raw_friend_noPriv = gt.GraphView(g_raw_friend, vfilt=lambda v: g_raw.vp.friend_privacy[v] == True)    # this should be 44804 edges
+#print("g_raw_friend_noPriv nodes: ", len(g_raw_friend_noPriv.get_vertices()))
 
 #x = np.array([[],[]])
 
