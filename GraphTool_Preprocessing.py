@@ -155,8 +155,9 @@ if approach3_bool == True:
 
         if (target, source) not in tuplelist:
             c_newE = c_newE + 1
-            g_ap3.vp.approach3[target] = False
-
+            g_ap3.vp.approach3[target] = False          # This results in 187 nodes labeled as False and later on exploded for the Graph image
+                                                        # Of the 311 identified invalide edges (c_newE) some regard the same "target". Some nodes are
+                                                        # Thereby labeled False multiple times
         if c % 10000 == 0:
             print(c, "/", c_max)
 
@@ -173,6 +174,8 @@ if approach3_bool == True:
     print("Number of edges (Friendship & Issues) before removing C: ", no_e_before)
     print("Number of nodes (User & Issues)       after removing C: ", len(g_ap3.get_vertices()))
     print("Number of edges (Friendship & Issues) after removing C: ", len(g_ap3.get_edges()))
+    # edges have been removed. 311 (unjustified unidirectional friendship) + 311 (made bidirectional in approach A) + 187 (gives Issues relation, since 197 nodes where removed)
+    # = 849
 
     g_ap3.save("Graph_Preprocessed_Approach3.graphml")
 
@@ -180,11 +183,17 @@ if approach3_bool == True:
     g_ap3_issues = gt.GraphView(g_ap3, vfilt=lambda v: g_ap3.vp.issuesID[v] != "")
 
 
+# Todo DELETE RESPECTIVE ISSUES NODES FROM USERS DELETED IN APPROACH B AND C
+
 #--- Summary ---#
 
 if approach1_bool == True:
 
     print("Summary")
+
+    print(g_ap1)
+    print(g_ap2)
+    print(g_ap3)
 
     print("\n AP1 - Number of nodes (User): ", len(g_ap1_friend.get_vertices()))
     print("AP1 - Number of edges (Friends): ", len(g_ap1_friend.get_edges()))
@@ -197,10 +206,10 @@ if approach1_bool == True:
 
 
     print("\n AP1 - Number of nodes (Issues): ", len(g_ap1_issues.get_vertices()))
-    print("AP1 - Number of edges (gives_Issues): ", len(g_ap1_issues.get_edges()))
+    print("AP1 - Number of edges (gives_Issues): ", len(g_ap1.get_edges())-len(g_ap1_friend.get_edges()))
 
     print("\n AP2 - Number of nodes (Issues): ", len(g_ap2_issues.get_vertices()))
-    print("AP2 - Number of edges (gives_Issues): ", len(g_ap2_issues.get_edges()))
+    print("AP2 - Number of edges (gives_Issues): ", len(g_ap2.get_edges())-len(g_ap2_friend.get_edges()))
 
     print("\n AP3 - Number of nodes (Issues): ", len(g_ap3_issues.get_vertices()))
-    print("AP3 - Number of edges (gives_Issues): ", len(g_ap3_issues.get_edges()))
+    print("AP3 - Number of edges (gives_Issues): ", len(g_ap3.get_edges())-len(g_ap3_friend.get_edges()))
