@@ -177,7 +177,7 @@ if approach3_bool == True:
 
 
 ####################
-### Deskriptives ###
+### Descriptives ###
 ####################
 
 ### Deskriptives Friendship Network ###
