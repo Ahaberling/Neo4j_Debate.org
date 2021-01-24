@@ -27,12 +27,12 @@ g_friend = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # g_raw_issues contains nodes: Users, Issues; edges: GIVES_ISSUES
 
-assortativePrePro_bool      = False
-uniqueVal_bool              = False
-load_assortativePrePro_bool = True
-assortAllValues             = True
-assortProConUnd             = True
-assortProCon                = True
+assortativePrePro_bool      = True
+uniqueVal_bool              = True
+load_assortativePrePro_bool = False
+assortAllValues             = False
+assortProConUnd             = False
+assortProCon                = False
 assortScore                 = False # in progress
 
 
@@ -64,7 +64,7 @@ if assortativePrePro_bool == True:
 
     #-- Progressiveness Score using Main Issues --#
 
-    vprop_prog = g_friend.new_vertex_property("float")  # float value indicating conservatism  (-5) - progressiveness (+5)
+    vprop_prog = g_friend.new_vertex_property("int")  # float value indicating conservatism  (-5) - progressiveness (+5)
     # (sum of stances regarding abortion, ..., health care)
     # float because of the later used plotting function
     # vprop_prog = g_all.new_vertex_property("int16_t")
@@ -175,10 +175,49 @@ if assortativePrePro_bool == True:
 
         if c % 1000 == 0:
             print("Filling PropertyMaps: ", c, "/", c_max)
-            #print(g_all.vp.abortion[j], g_all.vp.gay_marriage[j], g_all.vp.global_warming[j],
+
+        c = c + 1
+    print("Filling PropertyMaps: ", c_max, "/", c_max)
+
+    ### Filling prog_score PropertyMaps ###
+
+    g_friend_prog_ProCon= gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == ("Pro" or "Con") or
+                                                                 g_friend.vp.gay[v] == ("Pro" or "Con") or
+                                                                 g_friend.vp.warm[v] == ("Pro" or "Con") or
+                                                                 g_friend.vp.drug[v] == ("Pro" or "Con") or
+                                                                 g_friend.vp.health[v] == ("Pro" or "Con"))
+
+    g_friend_prog_ProConUnd= gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == ("Pro" or "Con" or "Und") or
+                                                                 g_friend.vp.gay[v] == ("Pro" or "Con" or "Und") or
+                                                                 g_friend.vp.warm[v] == ("Pro" or "Con" or "Und") or
+                                                                 g_friend.vp.drug[v] == ("Pro" or "Con" or "Und") or
+                                                                 g_friend.vp.health[v] == ("Pro" or "Con" or "Und"))
+
+
+
+    c = 0
+    c_max = len(g_friend.get_vertices())
+
+    for i in g_friend.get_vertices():
+
+        g_friend.vp.socia[i] = g_all.vp.socialism[j]
+
+        if g_all.vp.abortion[j] == "Pro":
+            g_friend.vp.abor_int[i] = 1
+        elif g_all.vp.abortion[j] == "Und":
+
+
+        prog_score = (g_friend.vp.abor_int[i] + g_friend.vp.gay_int[i] + g_friend.vp.warm_int[i] +
+                      g_friend.vp.drug_int[i] + g_friend.vp.health_int[i])  # - (-5)) / ((5) - (-5)) * 10
+        g_friend.vp.prog[i] = prog_score
+
+        if c % 1000 == 0:
+            print("Filling PropertyMaps: ", c, "/", c_max)
+            # print(g_all.vp.abortion[j], g_all.vp.gay_marriage[j], g_all.vp.global_warming[j],
             #      g_all.vp.drug_legaliz[j], g_all.vp.national_health_care[j], g_all.vp.socialism[j])
         c = c + 1
     print("Filling PropertyMaps: ", c_max, "/", c_max)
+
 
     g_friend.save("Graph_Preprocessed_Approach1+AssoPrePro.graphml")
 
@@ -205,6 +244,8 @@ if uniqueVal_bool == True:
     vals_party = np.array([])
     vals_ideo = np.array([])
 
+    vals_progScore = np.array([])
+
 
     c = 0
     c_max = len(g_friend.get_vertices())
@@ -229,6 +270,8 @@ if uniqueVal_bool == True:
         vals_party = np.append(vals_party, g_all.vp.party[v]) # to many
         vals_ideo = np.append(vals_ideo, g_friend.vp.political_ideology[v])
 
+        vals_progScore = np.append(vals_progScore, g_friend.vp.prog[v])
+
         if c % 1000 == 0:
             print("Identifying values range of PropertyMaps", c, "/", c_max)
         c = c + 1
@@ -252,6 +295,8 @@ if uniqueVal_bool == True:
     print("range of vals_ideo: ", np.unique(vals_ideo))             # ['Anarchist' 'Apathetic' 'Communist' 'Conservative' 'Green' 'Labor'
                                                                     # 'Liberal' 'Libertarian' 'Moderate' 'Not Saying' 'Other' 'Progressive'
                                                                     # 'Socialist' 'Undecided']
+    print("range of vals_progScore: ", np.unique(vals_progScore))
+
 
 ### Load Assortativity-Preprocessed Graph ###
 
@@ -366,6 +411,7 @@ if assortProCon == True:
 
 ### Assortative Mixing Measure with score ###
 
+
 if assortScore == True:
 
     c = 0
@@ -413,7 +459,7 @@ if assortScore == True:
         # print('intermediate scores: ', val1, val2, val3, val4, val5)
 
         # prog_score = val1+val2+val3+val4+val5+5
-        prog_score = ((val1 + val2 + val3 + val4 + val5) - (-5)) / ((5) - (-5)) * 10
+        prog_score = (val1 + val2 + val3 + val4 + val5) #- (-5)) / ((5) - (-5)) * 10
         g_all.vp.prog[i] = prog_score
         # print('prog_score: ', prog_score)
 
