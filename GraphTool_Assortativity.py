@@ -34,7 +34,7 @@ assortAllValues             = False
 assortProConUnd             = False
 assortProCon                = False
 assortScore                 = False
-assortPlot_abor             = True
+assortPlot                  = True
 
 
 ##########################
@@ -58,11 +58,16 @@ if assortativePrePro_bool == True:
     vprop_health = g_friend.new_vertex_property("string")  # national_health_care
 
     vprop_abor_int = g_friend.new_vertex_property("int")  # abortion
-    vprop_abor_int_mod = g_friend.new_vertex_property("int")
     vprop_gay_int = g_friend.new_vertex_property("int")  # gay_marriage
     vprop_warm_int = g_friend.new_vertex_property("int")  # global_warming
     vprop_drug_int = g_friend.new_vertex_property("int")  # drug_legaliz
     vprop_health_int = g_friend.new_vertex_property("int")  # national_health_care
+
+    vprop_abor_int_mod = g_friend.new_vertex_property("int")
+    vprop_gay_int_mod = g_friend.new_vertex_property("int")
+    vprop_warm_int_mod = g_friend.new_vertex_property("int")
+    vprop_drug_int_mod = g_friend.new_vertex_property("int")
+    vprop_health_int_mod = g_friend.new_vertex_property("int")
 
     #-- Progressiveness Score using Main Issues --#
 
@@ -87,18 +92,22 @@ if assortativePrePro_bool == True:
     ### Enriching g_all with empty PropertyMaps ###
 
     g_friend.vp.abor = vprop_abor
-    g_friend.vp.abor = vprop_abor
     g_friend.vp.gay = vprop_gay
     g_friend.vp.warm = vprop_warm
     g_friend.vp.drug = vprop_drug
     g_friend.vp.health = vprop_health
 
     g_friend.vp.abor_int = vprop_abor_int
-    g_friend.vp.abor_int_mod = vprop_abor_int_mod
     g_friend.vp.gay_int = vprop_gay_int
     g_friend.vp.warm_int = vprop_warm_int
     g_friend.vp.drug_int = vprop_drug_int
     g_friend.vp.health_int = vprop_health_int
+
+    g_friend.vp.abor_int_mod = vprop_abor_int_mod
+    g_friend.vp.gay_int_mod = vprop_gay_int_mod
+    g_friend.vp.warm_int_mod = vprop_warm_int_mod
+    g_friend.vp.drug_int_mod = vprop_drug_int_mod
+    g_friend.vp.health_int_mod = vprop_health_int_mod
 
     g_friend.vp.socia = vprop_socia
 
@@ -138,37 +147,45 @@ if assortativePrePro_bool == True:
 
                 if g_all.vp.gay_marriage[j] == "Pro":
                     g_friend.vp.gay_int[i] = 1
+                    g_friend.vp.gay_int_mod[i] = 2
                 elif g_all.vp.gay_marriage[j] == "Und":
                     g_friend.vp.gay_int[i] = 0
                 elif g_all.vp.gay_marriage[j] == "Con":
                     g_friend.vp.gay_int[i] = -1
+                    g_friend.vp.gay_int_mod[i] = 1
                 else:
                     g_friend.vp.gay_int[i] = -99
 
                 if g_all.vp.global_warming[j] == "Pro":
                     g_friend.vp.warm_int[i] = 1
+                    g_friend.vp.warm_int_mod[i] = 2
                 elif g_all.vp.global_warming[j] == "Und":
                     g_friend.vp.warm_int[i] = 0
                 elif g_all.vp.global_warming[j] == "Con":
                     g_friend.vp.warm_int[i] = -1
+                    g_friend.vp.warm_int_mod[i] = 1
                 else:
                     g_friend.vp.warm_int[i] = -99
 
                 if g_all.vp.drug_legaliz[j] == "Pro":
                     g_friend.vp.drug_int[i] = 1
+                    g_friend.vp.drug_int_mod[i] = 2
                 elif g_all.vp.drug_legaliz[j] == "Und":
                     g_friend.vp.drug_int[i] = 0
                 elif g_all.vp.drug_legaliz[j] == "Con":
                     g_friend.vp.drug_int[i] = -1
+                    g_friend.vp.drug_int_mod[i] = 1
                 else:
                     g_friend.vp.drug_int[i] = -99
 
                 if g_all.vp.national_health_care[j] == "Pro":
                     g_friend.vp.health_int[i] = 1
+                    g_friend.vp.health_int_mod[i] = 2
                 elif g_all.vp.national_health_care[j] == "Und":
                     g_friend.vp.health_int[i] = 0
                 elif g_all.vp.national_health_care[j] == "Con":
                     g_friend.vp.health_int[i] = -1
+                    g_friend.vp.health_int_mod[i] = 1
                 else:
                     g_friend.vp.health_int[i] = -99
 
@@ -437,107 +454,314 @@ if assortScore == True:
           gt.assortativity(g_friend, g_friend.vp.prog_mod))
 
 
-
 ### Assortative Mixing plots ###
 
-if assortPlot_abor == True:
+# The nature of debate.org friendship edges is bidrectional. Iff A is befriended with B, then B is also befriended with A. When visualizing
+# Assortativive Mixing these relations can be represented unidirectionally or bidirectionally. In the following visualization the unidirectional
+# approach is choosen. This is due to the until now used GraphTool convention of displaying a bidrectional edge as 2 reziproc unidirectional edges.
+# A blueprint for a bidirectional approach is resented as well (commented out with ""). Notice, the interpretation of the visualization then changes slightly.
 
-    #g_friendship_abor = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int[v] == 1 or g_friend.vp.abor_int[v] == -1)
+if assortPlot == True:
+
+    #-- Assortativity Abortion (unidirectional) --#
+    print("\n\n#-- Assortativity Abortion (unidirectional) --#\n")
+
     g_friendship_abor = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2 or g_friend.vp.abor_int_mod[v] == 1)
-    g_friendship_aborPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2)
-    g_friendship_aborCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 1)
+    #g_friendship_aborPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2)
+    #g_friendship_aborCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 1)
 
-    print("Number of pro user", g_friendship_aborPro)
-    print("Number of con user", g_friendship_aborCon)
+    print("Number of Users nodes and Friendship edges: ", g_friendship_abor)    # 13675 vertices, 84130 edges
+    #print("Number of pro user", g_friendship_aborPro)                          #  6877 vertices, 23464 edges
+    #print("Number of con user", g_friendship_aborCon)                          #  6798 vertices, 23654 edges
 
     h = gt.corr_hist(g_friendship_abor, g_friendship_abor.vp.abor_int_mod, g_friendship_abor.vp.abor_int_mod)
-    abor_hist = h[0][1:3, 1:3]
+    aborH_unidirec = h[0][1:3, 1:3]
+    aborH_unidirec_rel = aborH_unidirec / sum(sum(aborH_unidirec))
 
-    '''    
+    print("aborH_unidirec: ", aborH_unidirec)                           # [[23654. 18506.]
+                                                                        #  [18506. 23464.]]
+    print("sum of aborH_unidirec: ", sum(sum(aborH_unidirec)))          #   84130.0
+    print("aborH_unidirec_rel (in percent): ", aborH_unidirec_rel)      # [[0.28116011 0.2199691 ]
+                                                                        #  [0.2199691  0.2789017 ]]
+    # aborH_unidirec_rel = aborH_unidirec_rel.T
+
+    # 18506*2 unidrectional friendship relations are between nodes of different abortion values
+    # 23654   unidrectional are between nodes of abortion value "Con"
+    # 23464   unidrectional are between nodes of abortion value "Pro"
+
+    plt.clf()
+    plt.xlabel("Source Abortion Value (84130 total)")
+    plt.ylabel("Target Abortion Value")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.281% (23654)")
+    plt.text(-0.30, 1, "0.22% (18506)")
+    plt.text(0.70, 0, "0.22% (18506)")
+    plt.text(0.70, 1, "0.279% (23464)")
+    plt.imshow(aborH_unidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
+    plt.colorbar()
+    plt.savefig("corr_abor_unidirec.svg")
+
+    # -- Assortativity Abortion (bidirectional) --#
+
+    """
+    print("\n\n#-- Assortativity Abortion (bidirectional) --#\n")
+    
+    aborH_bidirec = aborH_unidirec
+    aborH_bidirec[0][0] = aborH_bidirec[0][0]/2
+    aborH_bidirec[1][1] = aborH_bidirec[1][1]/2
+    aborH_bidirec_rel = aborH_bidirec / (aborH_bidirec[0][0] + aborH_bidirec[0][1] + aborH_bidirec[1][1])
+    print("abor_hist_unidirec: ", aborH_bidirec)                        # [[11827. 18506.]
+                                                                        #  [18506. 11732.]]
+    print("sum of bidirectional relations (half of the unidrec above): ",
+          (aborH_bidirec[0][0] + aborH_bidirec[0][1] + aborH_bidirec[1][1]))
+                                                                        #   42065.0
+    print("aborH_bidirec_rel (in percent): ", aborH_bidirec_rel)        # [[0.28116011 0.43993819]
+                                                                        #  [0.43993819 0.2789017 ]]
+
+    # 18506   bidrectional friendship relations are between nodes of different abortion values
+    # 23654/2 bidrectional are between nodes of abortion value "Con"
+    # 23464/2 bidrectional are between nodes of abortion value "Pro"
+
     plt.clf()
     plt.xlabel("Source Abortion Value")
     plt.ylabel("Target Abortion Value")
-    #plt.xticks(ticks=[1,2], label=["Con", "Pro"], rotation=45, fontsize=6)
-    #plt.xlim([1, 2])
-    plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.281% (11827)")
+    plt.text(-0.30, 1, "0.44% (18506)")
+    plt.text(0.70, 0, "0.44% (18506)")
+    plt.text(0.70, 1, "0.279% (11732)")
+    plt.imshow(aborH_bidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_abor.svg")
+    plt.savefig("corr_abor_bidirec.svg")
+    """
+
+    # -- Assortativity Gay Marriage (unidirectional) --#
+
+    print("\n\n#-- Assortativity Gay Marriage (unidirectional) --#\n")
+
+    g_friendship_gay = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 2 or g_friend.vp.gay_int_mod[v] == 1)
+    #g_friendship_gayPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 2)
+    #g_friendship_gayCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 1)
+
+    print("Number of Users nodes and Friendship edges: ", g_friendship_gay)    # 12374 vertices and 81542 edges
+    #print("Number of pro user", g_friendship_gayPro)                          #  8756 vertices and 43298 edges
+    #print("Number of con user", g_friendship_gayCon)                          #  3618 vertices and  9044 edges
+
+    h = gt.corr_hist(g_friendship_gay, g_friendship_gay.vp.gay_int_mod, g_friendship_gay.vp.gay_int_mod)
+    gayH_unidirec = h[0][1:3, 1:3]
+    gayH_unidirec_rel = gayH_unidirec / sum(sum(gayH_unidirec))
+
+    print("gayH_unidirec: ", gayH_unidirec)                             # [[ 9044. 14600.]
+                                                                        #  [14600. 43298.]]
+    print("sum of gayH_unidirec: ", sum(sum(gayH_unidirec)))            #   81542.0
+    print("gayH_unidirec_rel (in percent): ", gayH_unidirec_rel)        # [[0.11091217 0.17904883]
+                                                                        #  [0.17904883 0.53099016]]
+
+    # 14600*2 unidrectional friendship relations are between nodes of different gay marriage values
+    #  9044   unidrectional are between nodes of gay marriage value "Con"
+    # 43298   unidrectional are between nodes of gay marriage value "Pro"
+
+    plt.clf()
+    plt.xlabel("Source Gay Marriage Value (81542 total)")
+    plt.ylabel("Target Gay Marriage Value")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.111% (9044)")
+    plt.text(-0.30, 1, "0.179% (14600)")
+    plt.text(0.70, 0, "0.179% (14600)")
+    plt.text(0.70, 1, "0.531% (43298)")
+    plt.imshow(gayH_unidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
+    plt.colorbar()
+    plt.savefig("corr_gay_unidirec.svg")
+
+
+
+    # -- Assortativity Global Warming (is real) (unidirectional) --#
+
+    print("\n\n#-- Assortativity Global Warming (is real) (unidirectional) --#\n")
+
+    g_friendship_warm = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 2 or g_friend.vp.warm_int_mod[v] == 1)
+    #g_friendship_warmPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 2)
+    #g_friendship_warmCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 1)
+
+    print("Number of Users nodes and Friendship edges: ", g_friendship_warm)   # 10729 vertices and 65486 edges
+    #print("Number of pro user", g_friendship_warmPro)                          #  7925 vertices and 39210 edges
+    #print("Number of con user", g_friendship_warmCon)                          #  2804 vertices and 4750 edges
+
+    h = gt.corr_hist(g_friendship_warm, g_friendship_warm.vp.warm_int_mod, g_friendship_warm.vp.warm_int_mod)
+    warmH_unidirec = h[0][1:3, 1:3]
+    warmH_unidirec_rel = warmH_unidirec / sum(sum(warmH_unidirec))
+
+    print("warmH_unidirec: ", warmH_unidirec)                           # [[ 4750. 10763.]
+                                                                        #  [10763. 39210.]]
+    print("sum of warmH_unidirec: ", sum(sum(warmH_unidirec)))          #   65486.0
+    print("warmH_unidirec_rel (in percent): ", warmH_unidirec_rel)      # [[0.07253459 0.16435574]
+                                                                        #  [0.16435574 0.59875393]]
+
+
+    # 10763*2 unidrectional friendship relations are between nodes of different abortion values
+    # 4750   unidrectional are between nodes of abortion value "Con"
+    # 39210   unidrectional are between nodes of abortion value "Pro"
+
+    plt.clf()
+    plt.xlabel("Source Global Warming (is real) Value (65486 total)")
+    plt.ylabel("Target Global Warming (is real) Value")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.073% (4750)")
+    plt.text(-0.30, 1, "0.164% (10763)")
+    plt.text(0.70, 0, "0.164% (10763)")
+    plt.text(0.70, 1, "0.588% (39210)")
+    plt.imshow(warmH_unidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
+    plt.colorbar()
+    plt.savefig("corr_warm_unidirec.svg")
+
+
+    # -- Assortativity Drug Legalization (unidirectional) --#
+
+    print("\n\n#-- Assortativity Drug Legalization (unidirectional) --#\n")
+
+    g_friendship_drug = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 2 or g_friend.vp.drug_int_mod[v] == 1)
+    #g_friendship_drugPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 2)
+    #g_friendship_drugCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 1)
+
+    print("Number of Users nodes and Friendship edges: ", g_friendship_drug)   # 12009 vertices and 76244 edges
+    #print("Number of pro user", g_friendship_drugPro)                          #  6207 vertices and 30226 edges
+    #print("Number of con user", g_friendship_drugCon)                          #  5802 vertices and 12100 edges
+
+    h = gt.corr_hist(g_friendship_drug, g_friendship_drug.vp.drug_int_mod, g_friendship_drug.vp.drug_int_mod)
+    drugH_unidirec = h[0][1:3, 1:3]
+    drugH_unidirec_rel = drugH_unidirec / sum(sum(drugH_unidirec))
+
+    print("drugH_unidirec: ", drugH_unidirec)                           # [[12100. 16959.]
+                                                                        #  [16959. 30226.]]
+    print("sum of drugH_unidirec: ", sum(sum(drugH_unidirec)))          #   76244.0
+    print("drugH_unidirec_rel (in percent): ", drugH_unidirec_rel)      # [[0.15870101 0.22243062]
+                                                                        #  [0.22243062 0.39643775]]
+
+    # 16959*2 unidrectional friendship relations are between nodes of different abortion values
+    # 12100   unidrectional are between nodes of abortion value "Con"
+    # 30226   unidrectional are between nodes of abortion value "Pro"
+
+    plt.clf()
+    plt.xlabel("Source Drug Legalization Value (76244 total)")
+    plt.ylabel("Target Drug Legalization Value")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.159% (12100)")
+    plt.text(-0.30, 1, "0.222% (16959)")
+    plt.text(0.70, 0, "0.222% (16959)")
+    plt.text(0.70, 1, "0.396% (30226)")
+    plt.imshow(drugH_unidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
+    plt.colorbar()
+    plt.savefig("corr_drug_unidirec.svg")
+
+
+    # -- Assortativity National Health Care (unidirectional) --#
+
+    print("\n\n#-- Assortativity National Health Care (unidirectional) --#\n")
+
+    g_friendship_health = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 2 or g_friend.vp.health_int_mod[v] == 1)
+    #g_friendship_healthPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 2)
+    #g_friendship_healthCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 1)
+
+    print("Number of Users nodes and Friendship edges: ", g_friendship_health)    # 9079 vertices and 59208 edges
+    #print("Number of pro user", g_friendship_healthPro)                          #  5873 vertices and 20926 edges
+    #print("Number of con user", g_friendship_healthCon)                          #  3206 vertices and 12218 edges
+
+    h = gt.corr_hist(g_friendship_health, g_friendship_health.vp.health_int_mod, g_friendship_health.vp.health_int_mod)
+    healthH_unidirec = h[0][1:3, 1:3]
+    healthH_unidirec_rel = healthH_unidirec / sum(sum(healthH_unidirec))
+
+    print("healthH_unidirec: ", healthH_unidirec)                           # [[12218. 13032.]
+                                                                            #  [13032. 20926.]]
+    print("sum of healthH_unidirec: ", sum(sum(healthH_unidirec)))          #   59208.0
+    print("healthH_unidirec_rel (in percent): ", healthH_unidirec_rel)      # [[0.20635725 0.22010539]
+                                                                            #  [0.22010539 0.35343197]]
+
+    # 18506*2 unidrectional friendship relations are between nodes of different abortion values
+    # 23654   unidrectional are between nodes of abortion value "Con"
+    # 23464   unidrectional are between nodes of abortion value "Pro"
+
+    plt.clf()
+    plt.xlabel("Source National Health Care Value (59208 total)")
+    plt.ylabel("Target National Health Care Value")
+    plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
+    plt.text(-0.30, 0, "0.206% (12218)")
+    plt.text(-0.30, 1, "0.22% (13032)")
+    plt.text(0.70, 0, "0.22% (13032)")
+    plt.text(0.70, 1, "0.353% (20926)")
+    plt.imshow(healthH_unidirec_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
+    plt.colorbar()
+    plt.savefig("corr_health_unidirec.svg")
+
+
+    # -- Assortativity Progressiveness Score ?(unidirectional)? --#
+
+    # todo histogram of progscore
+    # todo normalizing progscore assortative edge counts to obtain unbiased progscore assortativity plot
+
     '''
+    g_friend_prog_ProCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or
+                                                                  g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or
+                                                                  g_friend.vp.warm[v] == "Pro" or g_friend.vp.warm[v] == "Con" or
+                                                                  g_friend.vp.drug[v] == "Pro" or g_friend.vp.drug[v] == "Con" or
+                                                                  g_friend.vp.health[v] == "Pro" or g_friend.vp.health[v] == "Con")
 
-    print("h: \n", h)
-    print("h[0].T: \n", h[0].T)
-    print("h[0][1:3]: \n", h[0][1:3])
-    print("h[0][1:3, 1:3]: \n", h[0][1:3, 1:3])
-    print("abor_hist: \n", abor_hist)
-    print("abor_hist[0]: \n", abor_hist[0])
-    print("sum(abor_hist[0]): \n", sum(abor_hist[0]))
-    print("abor_hist/sum(abor_hist[0]): \n", abor_hist/sum(abor_hist[0]))
 
-    tuplelist = list(map(tuple, g_friendship_abor.get_edges()))
+    g_friendship_prog_mod_0 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 0)
+    g_friendship_prog_mod_1 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 1)
+    g_friendship_prog_mod_2 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 2)
+    g_friendship_prog_mod_3 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 3)
+    g_friendship_prog_mod_4 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 4)
+    g_friendship_prog_mod_5 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 5)
+    g_friendship_prog_mod_6 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 6)
+    g_friendship_prog_mod_7 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 7)
+    g_friendship_prog_mod_8 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 8)
+    g_friendship_prog_mod_9 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 9)
+    g_friendship_prog_mod_10 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 10)
 
-    c = 0
-    c_newE = 0
-    c_max = len(g_friendship_abor.get_edges())
 
-    for e in g_friendship_abor.get_edges():
-        c = c + 1
-        source = e[0]
-        target = e[1]
+    print("g_friend_prog_ProCon - all: ", g_friend_prog_ProCon)         # 16992 vertices and 118534 edges
 
-        if (target, source) not in tuplelist: # target and source switched to create the missing edge in the opposite direction
-            c_newE = c_newE + 1
-            print("target, source")
+    print("g_friendship_prog_mod - 0: ", g_friendship_prog_mod_0)       #   544 vertices and    262 edges
+    print("g_friendship_prog_mod - 1: ", g_friendship_prog_mod_1)       #   496 vertices and    278 edges
+    print("g_friendship_prog_mod - 2: ", g_friendship_prog_mod_2)       #  1017 vertices and    874 edges
+    print("g_friendship_prog_mod - 3: ", g_friendship_prog_mod_3)       #  1443 vertices and    708 edges
+    print("g_friendship_prog_mod - 4: ", g_friendship_prog_mod_4)       #  2335 vertices and   1966 edges
+    print("g_friendship_prog_mod - 5: ", g_friendship_prog_mod_5)       #  1546 vertices and    450 edges
+    print("g_friendship_prog_mod - 6: ", g_friendship_prog_mod_6)       #  2679 vertices and   2064 edges
+    print("g_friendship_prog_mod - 7: ", g_friendship_prog_mod_7)       #  1852 vertices and   1136 edges
+    print("g_friendship_prog_mod - 8: ", g_friendship_prog_mod_8)       #  2035 vertices and   2282 edges
+    print("g_friendship_prog_mod - 9: ", g_friendship_prog_mod_9)       #  1327 vertices and   1112 edges
+    print("g_friendship_prog_mod - 10: ", g_friendship_prog_mod_10)     #  1718 vertices and   3248 edges
 
-        if c % 10000 == 0:
-            print(c, "/", c_max)
+    h = gt.corr_hist(g_friend_prog_ProCon, g_friend.vp.prog_mod, g_friend.vp.prog_mod)
 
-    print(c_max, "/", c_max)
+    print("h: ", h)
 
-    print(c_newE)
+    print("sum(sum(h[0])):", sum(sum(h[0])))
 
-    ''' g_friendship_abor_ProConUnd_int = gt.GraphView(g_friendship_prop,
-                                                    vfilt=lambda v: g_friendship_prop.vp.abor[v] == 1 or
-                                                                    g_friendship_prop.vp.abor[v] == 0 or
-                                                                    g_friendship_prop.vp.abor[v] == 2)
-    '''
-    '''
-    h = gt.corr_hist(g_friendship_abor_ProConUnd_int, g_friendship_abor_ProConUnd_int.vp.abor_int,
-                     g_friendship_abor_ProConUnd_int.vp.abor_int)
+    progH_unidirec_rel = h[0] / sum(sum(h[0]))
+    print("progH_unidirec_rel: ", progH_unidirec_rel)
+    print("progH_unidirec_rel.T: ", progH_unidirec_rel.T)
+    print("progH_unidirec_rel.T == progH_unidirec_rel: ", progH_unidirec_rel.T == progH_unidirec_rel)
+    print("sum(sum(progH_unidirec_rel)): ", sum(sum(progH_unidirec_rel)))
+    print("max(progH_unidirec_rel): ", progH_unidirec_rel.max())
+
     plt.clf()
-    plt.xlabel("Source Progressiveness Score")
+    plt.xlabel("Source Progressiveness Score (x total)")
     plt.ylabel("Target Progressiveness Score")
-    plt.imshow(h[0].T, interpolation="nearest", origin="lower")
+    #plt.xticks(ticks=[0, 1], labels=('Con', 'Pro'))
+    #plt.yticks(ticks=[0, 1], labels=('Con', 'Pro'))
+    #plt.text(-0.30, 0, "0.281% (23654)")
+    #plt.text(-0.30, 1, "0.22% (18506)")
+    #plt.text(0.70, 0, "0.22% (18506)")
+    #plt.text(0.70, 1, "0.279% (23464)")
+    plt.imshow(progH_unidirec_rel.T, interpolation="nearest", origin="lower", vmin=0, vmax=0.03)
     plt.colorbar()
-    plt.savefig("corr_abor_und.svg")
-    
-    
-    
-    #h = gt.corr_hist(g_all, g_all.vp.abor, g_all.vp.abor)
-    h = gt.corr_hist(g_all, "out", "out")
-    plt.clf()
-    plt.xlabel("Source out-degree")
-    plt.ylabel("Target out-degree")
-    plt.imshow(h[0].T, interpolation="nearest", origin="lower")
-    plt.colorbar()
-    plt.savefig("corr_out.svg")
-    #print(h)
-
-    
-    h = gt.corr_hist(g_friendship_skalar, g_friendship_skalar.vp.prog, g_friendship_skalar.vp.prog)
-    plt.clf()
-    plt.xlabel("Source Progressiveness Score")
-    plt.ylabel("Target Progressiveness Score")
-    plt.imshow(h[0].T, interpolation="nearest", origin="lower")
-    plt.colorbar()
-    plt.savefig("corr_prog.svg")
-    
-    h = gt.corr_hist(g_friendship_skalar_mod, g_friendship_skalar_mod.vp.prog, g_friendship_skalar_mod.vp.prog)
-    plt.clf()
-    plt.xlabel("Source Progressiveness Score")
-    plt.ylabel("Target Progressiveness Score")
-    plt.imshow(h[0].T, interpolation="nearest", origin="lower")
-    plt.colorbar()
-    plt.savefig("corr_prog_mod.svg")
-    
-    
+    plt.savefig("corr_prog_unidirec.svg")
     '''
