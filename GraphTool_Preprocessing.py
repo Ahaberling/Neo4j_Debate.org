@@ -16,8 +16,8 @@ g_raw = gt.load_graph('debate.org_with_issues_mod.graphml', fmt='graphml')
 # g_raw contains edges: FRIENDS_WITH, GIVES_ISSUES
 
 approach1_bool = True
-approach2_bool = True
-approach3_bool = True
+approach2_bool = True           # relies on results from approach 1
+approach3_bool = True           # relies on results from approach 2
 summary_bool = True
 
 
@@ -25,11 +25,13 @@ summary_bool = True
 ### Graph Preprocessing ###
 ###########################
 
-# There are 3 kind of User nodes that are handled differently by each of the following approaches. Kind of User nodes in focus:
+# There are 3 kind of User nodes that are handled differently by each of the following approaches.
+# The kind of User nodes in focus:
 #A: User nodes with friendship visibility setting on PRIVATE AND     being nominated as friend by any other User node (jusitfied unidirectional edge)
-#B: User nodes with friendship visibility setting on PRIVATE AND NOT being nominated as friend by any other User node (isolated)
+#B: User nodes with friendship visibility setting on PRIVATE AND NOT being nominated as friend by any other User node (private isolated)
 #C: User nodes with friendship visibility setting on PUBLIC  AND     being nominated as friend by any other User node
-#   AND and empty friends list (UNjusitfied unidirectional edge - faulty. These 331 edges must not exist. I assume this is caused by faulty data crawling/scraping)
+#   AND and empty friends list (User contains UNJUSTIFIED unidirectional edge - this is faulty. These 331 edges must not exist. I assume this
+#                               is caused by faulty data crawling/scraping, see Report)
 
 g_raw_friend = gt.GraphView(g_raw, vfilt=lambda v: g_raw.vp.userID[v] != "")
 # g_raw_friend contains nodes: Users; edges: FRIENDS_WITH
@@ -42,15 +44,15 @@ g_raw_issues = gt.GraphView(g_raw, vfilt=lambda v: g_raw.vp.issuesID[v] != "")
 
 if approach1_bool == True:
 
-    print("Approach 1 - Keep all User nodes AND make A & C bidirectional")
+    print("\n\nApproach 1 - Keep all User nodes AND make A & C bidirectional\n")
 
     g_ap1 = g_raw
     tuplelist = list(map(tuple, g_raw_friend.get_edges()))
 
-    no_e_before = len(g_ap1.get_edges())
+    no_e_before = len(g_ap1.get_edges())        # Number of edges before applying approach 1
 
     c = 0
-    c_newE = 0
+    c_newE = 0                                  # Counter for number of edges created following approach 1
     c_max = len(g_raw_friend.get_edges())
 
     for e in g_raw_friend.get_edges():
@@ -58,7 +60,7 @@ if approach1_bool == True:
         source = e[0]
         target = e[1]
 
-        if (target, source) not in tuplelist: # target and source switched to create the missing edge in the opposite direction
+        if (target, source) not in tuplelist:   # target and source switched to create the missing edge in the opposite direction
             c_newE = c_newE + 1
             g_ap1.add_edge(target, source)
 
@@ -67,9 +69,9 @@ if approach1_bool == True:
 
     print(c_max, "/", c_max)
 
-    print("Unidirectional friend edges made bidirectional:", c_newE)
+    print("Unidirectional friend edges made bidirectional: ", c_newE)
     print("Number of edges (Friendship & Issues) before making A & C bidirectional: ", no_e_before)
-    print("Number of edges (Friendship & Issues) after making A & C bidirectional: ", len(g_ap1.get_edges()))
+    print("Number of edges (Friendship & Issues) after  making A & C bidirectional: ", len(g_ap1.get_edges()))
 
     g_ap1.save("Graph_Preprocessed_Approach1.graphml")
 
@@ -77,12 +79,11 @@ if approach1_bool == True:
     g_ap1_issues = gt.GraphView(g_ap1, vfilt=lambda v: g_ap1.vp.issuesID[v] != "")
 
 
-
 #--- Approach 2: Remove B AND make A & C bidirectional ---#
 
 if approach2_bool == True:
 
-    print("Approach 2 - Remove B AND make A & C bidirectional")
+    print("\n\nApproach 2 - Remove B AND make A & C bidirectional\n")
 
     g_ap2 = g_ap1
 
@@ -106,8 +107,8 @@ if approach2_bool == True:
 
     print(c_max, "/", c_max)
 
-    no_v_before = len(g_ap2.get_vertices())
-    no_e_before = len(g_ap2.get_edges())
+    no_v_before = len(g_ap2.get_vertices())                     # Number of vertices before applying approach 2 ontop if ap 2
+    no_e_before = len(g_ap2.get_edges())                        # Number of edges    before applying approach 2 ontop if ap 2
 
     g_ap2 = gt.GraphView(g_ap2, vfilt=lambda v: g_ap2.vp.approach2[v] == True)
 
@@ -128,7 +129,7 @@ if approach2_bool == True:
 
 if approach3_bool == True:
 
-    print("Approach 3 - Remove B & C AND make A bidirectional")
+    print("\n\nApproach 3 - Remove B & C AND make A bidirectional\n")
 
     g_ap3 = g_ap2
 
@@ -142,9 +143,8 @@ if approach3_bool == True:
     tuplelist = list(map(tuple, g_raw_friend_noPriv.get_edges()))
 
     c = 0
-    c_newE = 0
+    c_badE = 0                                          # Counter for number of faulty edges
     c_max = len(g_raw_friend_noPriv.get_edges())
-    new_edges = []
 
     for e in g_raw_friend_noPriv.get_edges():
         c = c + 1
@@ -152,16 +152,16 @@ if approach3_bool == True:
         target = e[1]
 
         if (target, source) not in tuplelist:
-            c_newE = c_newE + 1
-            g_ap3.vp.approach3[target] = False          # This results in 187 nodes labeled as False and later on exploded for the Graph image
-                                                        # Of the 311 identified invalide edges (c_newE) some regard the same "target". Some nodes are
-                                                        # Thereby labeled False multiple times
+            c_badE = c_badE + 1
+            g_ap3.vp.approach3[target] = False          # This results in 187 "faulty" nodes labeled as False and later on excluded in the Graphimage regarding approach 3.
+                                                        # Some the 311 identified invalide edges (c_badE) refere to the same "target", hence the number of
+                                                        # faulty nodes is < 311 (some nodes are labeled False multiple times)
         if c % 10000 == 0:
             print(c, "/", c_max)
 
     print(c_max, "/", c_max)
 
-    print("Number of nodes identified as C: ", c_newE)
+    print("Number of nodes identified as C: ", c_badE)
 
     no_v_before = len(g_ap3.get_vertices())
     no_e_before = len(g_ap3.get_edges())
@@ -172,16 +172,19 @@ if approach3_bool == True:
     print("Number of edges (Friendship & Issues) before removing C: ", no_e_before)
     print("Number of nodes (User & Issues)       after removing C: ", len(g_ap3.get_vertices()))
     print("Number of edges (Friendship & Issues) after removing C: ", len(g_ap3.get_edges()))
-    # edges have been removed. 311 (unjustified unidirectional friendship) + 311 (made bidirectional in approach A) + 187 (gives Issues relation, since 197 nodes where removed)
-    # = 849
+    # Why 849 edges removed?
+    #   311 (unjustified unidirectional friendship)
+    # + 311 (made bidirectional in approach A)
+    # + 187 (gives Issues relation, since 187 nodes where removed)
 
     g_ap3.save("Graph_Preprocessed_Approach3.graphml")
 
     g_ap3_friend = gt.GraphView(g_ap3, vfilt=lambda v: g_ap3.vp.userID[v] != "")
     g_ap3_issues = gt.GraphView(g_ap3, vfilt=lambda v: g_ap3.vp.issuesID[v] != "")
 
-
-# Todo DELETE RESPECTIVE ISSUES NODES FROM USERS DELETED IN APPROACH B AND C
+    # Issues nodes of respective user nodes deleted in approach B and C are still part of the saved Graphs
+    # Graph_Preprocessed_Approach2.graphml & Graph_Preprocessed_Approach3.graphml
+    # These Issue nodes are best handled by deleting them as well
 
 #--- Summary ---#
 
