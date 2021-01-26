@@ -31,11 +31,11 @@ assortativePrePro_bool      = False
 save_assortativePrePro_bool = False
 load_assortativePrePro_bool = True
 uniqueVal_bool              = False
-assortAllValues             = True
-assortProConUnd             = True
-assortProCon                = True
-assortProgScore             = True
-assort_Visual               = False
+assortAllValues             = False
+assortProConUnd             = False
+assortProCon                = False
+assortProgScore             = False
+assort_Visual               = True
 progScore_hist              = False
 progScore_Visual            = False
 
@@ -514,10 +514,11 @@ if assortProgScore == True:
 if assort_Visual == True:
     print("\nAssortative Mixing Visualization\n")
 
-# The nature of debate.org friendship edges is bidrectional. Iff A is befriended with B, then B is also befriended with A. When visualizing
-# Assortativive Mixing these relations can be represented unidirectionally or bidirectionally. In the following visualization the unidirectional
-# approach is choosen. This is due to the used GraphTool convention of displaying a bidrectional edge as 2 reziproc unidirectional edges.
-# A blueprint for a bidirectional approach is represented as well (commented out with ""). Notice, the interpretation of the visualization then changes.
+    # The nature of debate.org friendship edges is bidrectional. Iff A is befriended with B, then B is also befriended with A. When visualizing
+    # Assortativive Mixing these relations can be represented unidirectionally or bidirectionally. In the following visualization the unidirectional
+    # approach is choosen. This is due to the used GraphTool convention of displaying a bidrectional edge as 2 reziproc unidirectional edges.
+    # A blueprint for a bidirectional approach is represented as well (commented out with ""). Notice, the interpretation of the visualization then changes.
+
 
     #-- Assortativity Abortion --#
     print("Abortion Visualization\n")
@@ -552,7 +553,8 @@ if assort_Visual == True:
     print("Normalization of Edges Pro - Pro: ", h_abor[1][1]    /    len(g_friendship_aborPro.get_vertices()))
 
     plt.clf()
-    plt.xlabel("Source Abortion Value (84130 total)")
+    plt.title("Unidirectional Edges between Users \n Absolute and Relative (84130 total)")
+    plt.xlabel("Source Abortion Value")
     plt.ylabel("Target Abortion Value")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
@@ -562,7 +564,7 @@ if assort_Visual == True:
     plt.text(0.70, 1, "0.279% (23464)")
     plt.imshow(h_abor_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_abor_unidirec.svg")
+    plt.savefig("corr_abor.svg")
 
 
     #-- Assortativity Abortion (bidirectional) --#
@@ -633,7 +635,8 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.xlabel("Source Gay Marriage Value (81542 total)")
+    plt.title("Unidirectional Edges between Users \n Absolute and Relative (81542 total)")
+    plt.xlabel("Source Gay Marriage Value")
     plt.ylabel("Target Gay Marriage Value")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
@@ -643,11 +646,11 @@ if assort_Visual == True:
     plt.text(0.70, 1, "0.531% (43298)")
     plt.imshow(h_gay_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_gay_unidirec.svg")
+    plt.savefig("corr_gay.svg")
 
 
 
-    # -- Assortativity Global Warming (is real) (unidirectional) --#
+    # -- Assortativity Global Warming (is real) --#
 
     print("Global Warming (is real) Visualization\n")
 
@@ -681,7 +684,8 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.xlabel("Source Global Warming (is real) Value (65486 total)")
+    plt.title("Unidirectional Edges between Users \n Absolute and Relative (65486 total)")
+    plt.xlabel("Source Global Warming (is real) Value")
     plt.ylabel("Target Global Warming (is real) Value")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
@@ -691,10 +695,10 @@ if assort_Visual == True:
     plt.text(0.70, 1, "0.588% (39210)")
     plt.imshow(h_warm_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_warm_unidirec.svg")
+    plt.savefig("corr_warm.svg")
 
 
-    # -- Assortativity Drug Legalization (unidirectional) --#
+    # -- Assortativity Drug Legalization --#
 
     print("Drug Legalization Visualization\n")
 
@@ -728,7 +732,8 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.xlabel("Source Drug Legalization Value (76244 total)")
+    plt.title("Unidirectional Edges between Users \n Absolute and Relative (76244 total)")
+    plt.xlabel("Source Drug Legalization Value")
     plt.ylabel("Target Drug Legalization Value")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
@@ -738,10 +743,10 @@ if assort_Visual == True:
     plt.text(0.70, 1, "0.396% (30226)")
     plt.imshow(h_drug_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_drug_unidirec.svg")
+    plt.savefig("corr_drug.svg")
 
 
-    # -- Assortativity National Health Care (unidirectional) --#
+    # -- Assortativity National Health Care --#
 
     print("National Health Care Visualization\n")
 
@@ -775,7 +780,8 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.xlabel("Source National Health Care Value (59208 total)")
+    plt.title("Unidirectional Edges between Users \n Absolute and Relative (59208 total)")
+    plt.xlabel("Source National Health Care Value")
     plt.ylabel("Target National Health Care Value")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
@@ -785,16 +791,17 @@ if assort_Visual == True:
     plt.text(0.70, 1, "0.353% (20926)")
     plt.imshow(h_health_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_health_unidirec.svg")
+    plt.savefig("corr_health.svg")
 
     print("Assortative Mixing Visualization - done\n")
 
-### Assortative Mixing Visualization - Progressiveness Score ###
+
+
+### Progressiveness Score - Histogram ###
 
 if progScore_hist == True:
 
-    print("\nAssortative Mixing Visualization - Progressiveness Score\n")
-
+    print("\nProgressiveness Score - Histogram\n")
 
     g_friend_prog_ProCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or
                                                                  g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or
@@ -802,62 +809,44 @@ if progScore_hist == True:
                                                                  g_friend.vp.drug[v] == "Pro" or g_friend.vp.drug[v] == "Con" or
                                                                  g_friend.vp.health[v] == "Pro" or g_friend.vp.health[v] == "Con")
 
-    print(g_friend_prog_ProCon)                                 # 16992 vertices and 118534 edges
+    #print(g_friend_prog_ProCon)                                            # 16992 vertices and 118534 edges
 
-    #valid_progScore_id = np.array([])
     valid_progScore_id = []
     for v in g_friend.get_vertices():
         if g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or g_friend.vp.warm[v] == "Pro" or g_friend.vp.warm[v] ==  "Con" or g_friend.vp.drug[v] == "Pro" or g_friend.vp.drug[v] == "Con" or g_friend.vp.health[v] == "Pro" or g_friend.vp.health[v] == "Con":
-            #valid_progScore_id = np.append(valid_progScore_id, v)
             valid_progScore_id.append(v)
 
-    #print("valid_progScore_id: ", valid_progScore_id)
-    print("valid_progScore_id: ", len(valid_progScore_id))          # 16992
-
-    #print(valid_progScore_id)
+    #print("valid_progScore_id: ", len(valid_progScore_id))                 # 16992
 
     valid_progScore_val = g_friend_prog_ProCon.vp.prog_mod.a[valid_progScore_id]
 
-    #print("valid_progScore_val: ", valid_progScore_val)
-    print("len(valid_progScore_val): ", len(valid_progScore_val))   # 16992
+    #print("len(valid_progScore_val): ", len(valid_progScore_val))          # 16992
 
-    print("Max: ", max(valid_progScore_val), "Min: ", min(valid_progScore_val), "Avg: ", sum(valid_progScore_val) / len(valid_progScore_val))
-    # Max:  5 Min:  -5 Avg:  0.7891949152542372
+    print("Progressiveness Score maximum of nodes with valid value: ", max(valid_progScore_val))                                # 10
+    print("Progressiveness Score minimum of nodes with valid value: ", min(valid_progScore_val))                                #  0
+    print("Progressiveness Score average of nodes with valid value: ", sum(valid_progScore_val) / len(valid_progScore_val))     #
 
-    #print(g_friend_prog_ProCon.vp.prog.a)
-    #print(len(g_friend_prog_ProCon.vp.prog.a))                  # 90696
-    #print(len(g_friend.vp.prog.a))                              # 90696
-    #g_friend.vp.prog_mod =
+    #hist = np.histogram(valid_progScore_val)           # does some weird shit (adding the frequencies of the two highest values together and thereby
+                                                        # returning one frequency bucket too few
 
-    #print(valid_progScore_val)
+    #Alternative:
     x = np.unique(valid_progScore_val)
-
     y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     for i in valid_progScore_val:
         y[i] = y[i] +1
 
-    print(x)
-    print(y)
-    print("sum(y): ", sum(y))
-
-    #hist = np.histogram(valid_progScore_val)           # does some weird shit (adding the frequencies of the two highest values together and thereby
-                                                        # returning one frequency too few
-
-    #x = hist[1]
-    #y = hist[0]
-
-    #print(x)
-    #print(y)
-
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
-    #ax.set_yscale('log')
-    #ax.set_xscale('log')
+    plt.title('Histogram progressiveness Scores')
     plt.xlabel('Progressiveness Scores')
     plt.xticks(np.linspace(0, 10, 11))
     plt.ylabel('Frequency (16992 total)')
     plt.savefig("progScore_hist_ap1.png")
     plt.close()
+
+    print("\nProgressiveness Score - Histogram - done\n")
+
+### Assortative Mixing Visualization - Progressiveness Score ###
 
 if progScore_Visual == True:
 

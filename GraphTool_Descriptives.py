@@ -80,9 +80,9 @@ if descLC_bool == True:
 
 if descCompHist_bool == True:
 
-    x, y = np.unique(hist, return_counts=True)          #                            Approach 1  |
-    print(x)         # Size Category                    # 1    ,6,8,9,13,18,21,22,28,39,55,16382 |
-    print(y)         # Frequency                        # 28726,1,1,1, 1, 1, 2, 1, 1, 1, 1,    1 |
+    x, y = np.unique(hist, return_counts=True)
+    print(x)         # Size Category                    # 1    ,6,8,9,13,18,21,22,28,39,55,16382
+    print(y)         # Frequency                        # 28726,1,1,1, 1, 1, 2, 1, 1, 1, 1,    1
 
 
     fig, ax = plt.subplots()
@@ -103,33 +103,33 @@ if descCompHist_bool == True:
 
 if descBroad_bool == True:
 
-    print("\n\nDesciptives: Broad - print(Graph Object) style\n")                 # Approach 1 |
+    print("\n\nDesciptives: Broad - print(Graph Object) style\n")
 
     print("g_all, g_friend, g_issues\n")
-    print(g_all, "\n")                          # Vertices                         90696 |
-                                                # Edges                           234100 |
-                                                # Internal vertex properties          84 |
-                                                # Internal edge properties             2 |
+    print(g_all, "\n")                          # Vertices                         90696
+                                                # Edges                           234100
+                                                # Internal vertex properties          84
+                                                # Internal edge properties             2
 
-    print(g_friend, "\n")                       # Vertices                         45348 |
-                                                # Edges                           188752 |
-                                                # Internal vertex properties          84 |
-                                                # Internal edge properties             2 |
+    print(g_friend, "\n")                       # Vertices                         45348
+                                                # Edges                           188752
+                                                # Internal vertex properties          84
+                                                # Internal edge properties             2
 
-    print(g_issues, "\n")                       # Vertices                         45348 |
-                                                # Edges                                0 |
-                                                # Internal vertex properties          84 |
-                                                # Internal edge properties             2 |
+    print(g_issues, "\n")                       # Vertices                         45348
+                                                # Edges                                0
+                                                # Internal vertex properties          84
+                                                # Internal edge properties             2
 
-    print(g_friend_LC, "\n")                    # Vertices                         16382 |
-                                                # Edges                           187478 |
-                                                # Internal vertex properties          85 |
-                                                # Internal edge properties             2 |
+    print(g_friend_LC, "\n")                    # Vertices                         16382
+                                                # Edges                           187478
+                                                # Internal vertex properties          85
+                                                # Internal edge properties             2
 
 #-- Density of Friendship Network --#
 if descDens_bool == True:
 
-    print("\nDesciptives: Density - Friendship Network\n")                              #             Approach 1 |
+    print("\nDesciptives: Density - Friendship Network\n")
 
     v_friend = g_friend.get_vertices()
     e_friend = g_friend.get_edges()
@@ -139,9 +139,9 @@ if descDens_bool == True:
     e_friend_LC = g_friend_LC.get_edges()
     d_friend_LC = len(e_friend_LC) / ((len(v_friend_LC) * (len(v_friend_LC)-1))/2)
 
-    print("Number of Nodes (g_friend): ", len(v_friend))                                #                  45348 |
-    print("Number of Edges (g_friend): ", len(e_friend))                                #                 188752 |
-    print("Density (g_friend): ",         d_friend)                                     # 0.00018357555878947262 |
+    print("Number of Nodes (g_friend): ", len(v_friend))                                #                  45348
+    print("Number of Edges (g_friend): ", len(e_friend))                                #                 188752
+    print("Density (g_friend): ",         d_friend)                                     # 0.00018357555878947262
 
     print("\nDesciptives: Density - Friendship Network - Largest Component\n")
 
@@ -153,18 +153,18 @@ if descDens_bool == True:
 #-- Avg Degree --#
 if descAvgD_bool == True:
 
-    print("\n\nDesciptives: Avg Degree - Friendship Network\n")                                     #             Approach 1 |
+    print("\n\nDesciptives: Avg Degree - Friendship Network\n")
 
     degree_list = g_friend.get_in_degrees(g_friend.get_vertices())
     degree_list_LC = g_friend_LC.get_in_degrees(g_friend_LC.get_vertices())
 
-    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list))                            #               188752.0 |
-    print("Maximum of all Degrees: ",                  max(degree_list))                            #                 2025   |
-    print("Minimum of all Degrees: ",                  min(degree_list))                            #                    0   |
-    print("Length of Degree List / Number of Nodes: ", len(degree_list))                            #                45348   |
-    print("Avg Degree: ",                               sum(degree_list) / len(degree_list))        #      4.162300432213107 |
-    print("Median Degree: ",                            np.median(degree_list))                     #                    0.0 |
-    print("Mode Degree: ",                              stats.mode(degree_list)[0][0])              #                    0   |
+    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list))                            #               188752.0
+    print("Maximum of all Degrees: ",                  max(degree_list))                            #                 2025
+    print("Minimum of all Degrees: ",                  min(degree_list))                            #                    0
+    print("Length of Degree List / Number of Nodes: ", len(degree_list))                            #                45348
+    print("Avg Degree: ",                               sum(degree_list) / len(degree_list))        #      4.162300432213107
+    print("Median Degree: ",                            np.median(degree_list))                     #                    0.0
+    print("Mode Degree: ",                              stats.mode(degree_list)[0][0])              #                    0
 
     print("\n\nDesciptives: Avg Degree - Friendship Network - Largest Component\n")
 
@@ -229,10 +229,10 @@ if descDDist_bool == True:
 #-- Clustering Coefficiants - Global --#
 if descCCG_bool == True:
 
-    print("\nDesciptives: Global Clustering Coefficiants - Friendship Network\n")                           #                              Approach 1 |
-                                                                                                        #       coefficient,   standard deviation |
+    print("\nDesciptives: Global Clustering Coefficiants - Friendship Network\n")
+                                                                                                        #       coefficient,   standard deviation
 
-    print('Global Clustering Coefficiants: ', gt.global_clustering(g_friend))                           # 0.101803664507653, 0.013292495836611278 |
+    print('Global Clustering Coefficiants: ', gt.global_clustering(g_friend))                           # 0.101803664507653, 0.013292495836611278
 
 
 ### Deskriptives Friendship Network - Largest Component specific ###
