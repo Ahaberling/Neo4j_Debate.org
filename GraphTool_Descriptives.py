@@ -84,16 +84,17 @@ if descCompHist_bool == True:
     print(x)         # Size Category                    # 1    ,6,8,9,13,18,21,22,28,39,55,16382 |
     print(y)         # Frequency                        # 28726,1,1,1, 1, 1, 2, 1, 1, 1, 1,    1 |
 
-    '''
+
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
     plt.xlabel('Component size (log)')
     plt.ylabel('Fequency (log)')
-    plt.savefig("component_size_hist_ap1.png")
+    plt.savefig("component_size_hist_ap1.png")          # unofrtunately the components of size 55 and 16382 are not displayed.
+                                                        # This is due to the shrinking bar width with increase in x-axis
     plt.close()
-    '''
+
 
 
 ### Deskriptives Friendship Network ###
@@ -332,7 +333,6 @@ if descEV_bool == True:
 
 
     plt.hist(eigenVec_array_LC, bins=np.linspace(0, 0.18, 19), color='grey', log=True,)
-    #plt.hist(v_between_array_wo_0, color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.18, 19), rotation=45, fontsize=6)
     plt.xlabel('Eigenvector Values - Largest Component')
     plt.ylabel('Fequency (log) - Largest Component')

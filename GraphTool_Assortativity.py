@@ -35,7 +35,8 @@ assortProConUnd             = False
 assortProCon                = False
 assortScore                 = False
 assortPlot                  = True
-
+progScore_hist              = True
+progScore_Plot              = True
 
 ##########################
 ### Assortative Mixing ###
@@ -72,7 +73,7 @@ if assortativePrePro_bool == True:
     #-- Progressiveness Score using Main Issues --#
 
     vprop_prog = g_friend.new_vertex_property("int")  # float value indicating conservatism  (-5) - progressiveness (+5)
-    vprop_prog_mod = g_friend.new_vertex_property("int")  # float value indicating conservatism  (0) - progressiveness (+10)
+    vprop_prog_mod = g_friend.new_vertex_property("int")  # float value indicating conservatism  (1) - progressiveness (+11)
     # (sum of stances regarding abortion, ..., health care)
     # float because of the later used plotting function
     # vprop_prog = g_all.new_vertex_property("int16_t")
@@ -467,8 +468,8 @@ if assortPlot == True:
     print("\n\n#-- Assortativity Abortion (unidirectional) --#\n")
 
     g_friendship_abor = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2 or g_friend.vp.abor_int_mod[v] == 1)
-    #g_friendship_aborPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2)
-    #g_friendship_aborCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 1)
+    g_friendship_aborPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 2)
+    g_friendship_aborCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor_int_mod[v] == 1)
 
     print("Number of Users nodes and Friendship edges: ", g_friendship_abor)    # 13675 vertices, 84130 edges
     #print("Number of pro user", g_friendship_aborPro)                          #  6877 vertices, 23464 edges
@@ -488,6 +489,12 @@ if assortPlot == True:
     # 18506*2 unidrectional friendship relations are between nodes of different abortion values
     # 23654   unidrectional are between nodes of abortion value "Con"
     # 23464   unidrectional are between nodes of abortion value "Pro"
+
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges Con - Con: ", aborH_unidirec[0][0]), "/" , len(g_friendship_aborCon.get_vertices())
+    print("Normalization of Edges Con - Con: ", aborH_unidirec[0][0] / len(g_friendship_aborCon.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", aborH_unidirec[1][1]), "/" , len(g_friendship_aborPro.get_vertices())
+    print("Normalization of Edges Pro - Pro: ", aborH_unidirec[1][1] / len(g_friendship_aborPro.get_vertices()))
 
     plt.clf()
     plt.xlabel("Source Abortion Value (84130 total)")
@@ -542,8 +549,8 @@ if assortPlot == True:
     print("\n\n#-- Assortativity Gay Marriage (unidirectional) --#\n")
 
     g_friendship_gay = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 2 or g_friend.vp.gay_int_mod[v] == 1)
-    #g_friendship_gayPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 2)
-    #g_friendship_gayCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 1)
+    g_friendship_gayPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 2)
+    g_friendship_gayCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.gay_int_mod[v] == 1)
 
     print("Number of Users nodes and Friendship edges: ", g_friendship_gay)    # 12374 vertices and 81542 edges
     #print("Number of pro user", g_friendship_gayPro)                          #  8756 vertices and 43298 edges
@@ -562,6 +569,13 @@ if assortPlot == True:
     # 14600*2 unidrectional friendship relations are between nodes of different gay marriage values
     #  9044   unidrectional are between nodes of gay marriage value "Con"
     # 43298   unidrectional are between nodes of gay marriage value "Pro"
+
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges Con - Con: ", gayH_unidirec[0][0], "/" , len(g_friendship_gayCon.get_vertices()))
+    print("Normalization of Edges Con - Con: ", gayH_unidirec[0][0] / len(g_friendship_gayCon.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", gayH_unidirec[1][1], "/" , len(g_friendship_gayPro.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", gayH_unidirec[1][1] / len(g_friendship_gayPro.get_vertices()))
+
 
     plt.clf()
     plt.xlabel("Source Gay Marriage Value (81542 total)")
@@ -583,8 +597,8 @@ if assortPlot == True:
     print("\n\n#-- Assortativity Global Warming (is real) (unidirectional) --#\n")
 
     g_friendship_warm = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 2 or g_friend.vp.warm_int_mod[v] == 1)
-    #g_friendship_warmPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 2)
-    #g_friendship_warmCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 1)
+    g_friendship_warmPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 2)
+    g_friendship_warmCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.warm_int_mod[v] == 1)
 
     print("Number of Users nodes and Friendship edges: ", g_friendship_warm)   # 10729 vertices and 65486 edges
     #print("Number of pro user", g_friendship_warmPro)                          #  7925 vertices and 39210 edges
@@ -605,6 +619,13 @@ if assortPlot == True:
     # 4750   unidrectional are between nodes of abortion value "Con"
     # 39210   unidrectional are between nodes of abortion value "Pro"
 
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges Con - Con: ", warmH_unidirec[0][0], "/" , len(g_friendship_warmCon.get_vertices()))
+    print("Normalization of Edges Con - Con: ", warmH_unidirec[0][0] / len(g_friendship_warmCon.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", warmH_unidirec[1][1], "/" , len(g_friendship_warmPro.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", warmH_unidirec[1][1] / len(g_friendship_warmPro.get_vertices()))
+
+
     plt.clf()
     plt.xlabel("Source Global Warming (is real) Value (65486 total)")
     plt.ylabel("Target Global Warming (is real) Value")
@@ -624,10 +645,10 @@ if assortPlot == True:
     print("\n\n#-- Assortativity Drug Legalization (unidirectional) --#\n")
 
     g_friendship_drug = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 2 or g_friend.vp.drug_int_mod[v] == 1)
-    #g_friendship_drugPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 2)
-    #g_friendship_drugCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 1)
+    g_friendship_drugPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 2)
+    g_friendship_drugCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.drug_int_mod[v] == 1)
 
-    print("Number of Users nodes and Friendship edges: ", g_friendship_drug)   # 12009 vertices and 76244 edges
+    print("Number of Users nodes and Friendship edges: ", g_friendship_drug)    # 12009 vertices and 76244 edges
     #print("Number of pro user", g_friendship_drugPro)                          #  6207 vertices and 30226 edges
     #print("Number of con user", g_friendship_drugCon)                          #  5802 vertices and 12100 edges
 
@@ -644,6 +665,13 @@ if assortPlot == True:
     # 16959*2 unidrectional friendship relations are between nodes of different abortion values
     # 12100   unidrectional are between nodes of abortion value "Con"
     # 30226   unidrectional are between nodes of abortion value "Pro"
+
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges Con - Con: ", drugH_unidirec[0][0], "/" , len(g_friendship_drugCon.get_vertices()))
+    print("Normalization of Edges Con - Con: ", drugH_unidirec[0][0] / len(g_friendship_drugCon.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", drugH_unidirec[1][1], "/" , len(g_friendship_drugPro.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", drugH_unidirec[1][1] / len(g_friendship_drugPro.get_vertices()))
+
 
     plt.clf()
     plt.xlabel("Source Drug Legalization Value (76244 total)")
@@ -664,8 +692,8 @@ if assortPlot == True:
     print("\n\n#-- Assortativity National Health Care (unidirectional) --#\n")
 
     g_friendship_health = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 2 or g_friend.vp.health_int_mod[v] == 1)
-    #g_friendship_healthPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 2)
-    #g_friendship_healthCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 1)
+    g_friendship_healthPro = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 2)
+    g_friendship_healthCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.health_int_mod[v] == 1)
 
     print("Number of Users nodes and Friendship edges: ", g_friendship_health)    # 9079 vertices and 59208 edges
     #print("Number of pro user", g_friendship_healthPro)                          #  5873 vertices and 20926 edges
@@ -685,6 +713,13 @@ if assortPlot == True:
     # 23654   unidrectional are between nodes of abortion value "Con"
     # 23464   unidrectional are between nodes of abortion value "Pro"
 
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges Con - Con: ", healthH_unidirec[0][0], "/" , len(g_friendship_healthCon.get_vertices()))
+    print("Normalization of Edges Con - Con: ", healthH_unidirec[0][0] / len(g_friendship_healthCon.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", healthH_unidirec[1][1], "/" , len(g_friendship_healthPro.get_vertices()))
+    print("Normalization of Edges Pro - Pro: ", healthH_unidirec[1][1] / len(g_friendship_healthPro.get_vertices()))
+
+
     plt.clf()
     plt.xlabel("Source National Health Care Value (59208 total)")
     plt.ylabel("Target National Health Care Value")
@@ -701,10 +736,74 @@ if assortPlot == True:
 
     # -- Assortativity Progressiveness Score ?(unidirectional)? --#
 
-    # todo histogram of progscore
-    # todo normalizing progscore assortative edge counts to obtain unbiased progscore assortativity plot
+if progScore_hist == True:
 
-    '''
+    g_friend_prog_ProCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or
+                                                                 g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or
+                                                                 g_friend.vp.warm[v] == "Pro" or g_friend.vp.warm[v] ==  "Con" or
+                                                                 g_friend.vp.drug[v] == "Pro" or g_friend.vp.drug[v] == "Con" or
+                                                                 g_friend.vp.health[v] == "Pro" or g_friend.vp.health[v] == "Con")
+
+    print(g_friend_prog_ProCon)                                 # 16992 vertices and 118534 edges
+
+    #valid_progScore_id = np.array([])
+    valid_progScore_id = []
+    for v in g_friend.get_vertices():
+        if g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or g_friend.vp.warm[v] == "Pro" or g_friend.vp.warm[v] ==  "Con" or g_friend.vp.drug[v] == "Pro" or g_friend.vp.drug[v] == "Con" or g_friend.vp.health[v] == "Pro" or g_friend.vp.health[v] == "Con":
+            #valid_progScore_id = np.append(valid_progScore_id, v)
+            valid_progScore_id.append(v)
+
+    #print("valid_progScore_id: ", valid_progScore_id)
+    print("valid_progScore_id: ", len(valid_progScore_id))          # 16992
+
+    #print(valid_progScore_id)
+
+    valid_progScore_val = g_friend_prog_ProCon.vp.prog_mod.a[valid_progScore_id]
+
+    #print("valid_progScore_val: ", valid_progScore_val)
+    print("len(valid_progScore_val): ", len(valid_progScore_val))   # 16992
+
+    print("Max: ", max(valid_progScore_val), "Min: ", min(valid_progScore_val), "Avg: ", sum(valid_progScore_val) / len(valid_progScore_val))
+    # Max:  5 Min:  -5 Avg:  0.7891949152542372
+
+    #print(g_friend_prog_ProCon.vp.prog.a)
+    #print(len(g_friend_prog_ProCon.vp.prog.a))                  # 90696
+    #print(len(g_friend.vp.prog.a))                              # 90696
+    #g_friend.vp.prog_mod =
+
+    #print(valid_progScore_val)
+    x = np.unique(valid_progScore_val)
+
+    y = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    for i in valid_progScore_val:
+        y[i] = y[i] +1
+
+    print(x)
+    print(y)
+    print("sum(y): ", sum(y))
+
+    #hist = np.histogram(valid_progScore_val)           # does some weird shit (adding the frequencies of the two highest values together and thereby
+                                                        # returning one frequency too few
+
+    #x = hist[1]
+    #y = hist[0]
+
+    #print(x)
+    #print(y)
+
+    fig, ax = plt.subplots()
+    plt.bar(x, y, color='grey')
+    #ax.set_yscale('log')
+    #ax.set_xscale('log')
+    plt.xlabel('Progressiveness Scores')
+    plt.xticks(np.linspace(0, 10, 11))
+    plt.ylabel('Frequency (16992 total)')
+    plt.savefig("progScore_hist_ap1.png")
+    plt.close()
+
+if progScore_Plot == True:
+
+
     g_friend_prog_ProCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or
                                                                   g_friend.vp.gay[v] == "Pro" or g_friend.vp.gay[v] == "Con" or
                                                                   g_friend.vp.warm[v] == "Pro" or g_friend.vp.warm[v] == "Con" or
@@ -724,44 +823,87 @@ if assortPlot == True:
     g_friendship_prog_mod_9 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 9)
     g_friendship_prog_mod_10 = gt.GraphView(g_friend_prog_ProCon, vfilt=lambda v: g_friend.vp.prog_mod[v] == 10)
 
-
+    '''
     print("g_friend_prog_ProCon - all: ", g_friend_prog_ProCon)         # 16992 vertices and 118534 edges
-
     print("g_friendship_prog_mod - 0: ", g_friendship_prog_mod_0)       #   544 vertices and    262 edges
     print("g_friendship_prog_mod - 1: ", g_friendship_prog_mod_1)       #   496 vertices and    278 edges
     print("g_friendship_prog_mod - 2: ", g_friendship_prog_mod_2)       #  1017 vertices and    874 edges
     print("g_friendship_prog_mod - 3: ", g_friendship_prog_mod_3)       #  1443 vertices and    708 edges
-    print("g_friendship_prog_mod - 4: ", g_friendship_prog_mod_4)       #  2335 vertices and   1966 edges
+    print("g_friendship_prog_mod - 4: ", g_friendship_prog_mod_4)       #  2335 vertices and   1966 edges h
     print("g_friendship_prog_mod - 5: ", g_friendship_prog_mod_5)       #  1546 vertices and    450 edges
-    print("g_friendship_prog_mod - 6: ", g_friendship_prog_mod_6)       #  2679 vertices and   2064 edges
+    print("g_friendship_prog_mod - 6: ", g_friendship_prog_mod_6)       #  2679 vertices and   2064 edges h
     print("g_friendship_prog_mod - 7: ", g_friendship_prog_mod_7)       #  1852 vertices and   1136 edges
-    print("g_friendship_prog_mod - 8: ", g_friendship_prog_mod_8)       #  2035 vertices and   2282 edges
+    print("g_friendship_prog_mod - 8: ", g_friendship_prog_mod_8)       #  2035 vertices and   2282 edges h
     print("g_friendship_prog_mod - 9: ", g_friendship_prog_mod_9)       #  1327 vertices and   1112 edges
-    print("g_friendship_prog_mod - 10: ", g_friendship_prog_mod_10)     #  1718 vertices and   3248 edges
+    print("g_friendship_prog_mod - 10: ", g_friendship_prog_mod_10)     #  1718 vertices and   3248 edges h
+    '''
 
     h = gt.corr_hist(g_friend_prog_ProCon, g_friend.vp.prog_mod, g_friend.vp.prog_mod)
 
-    print("h: ", h)
+    #print("h[0]: ", h[0])  #[[ 262.,  245.,  445.,  375.,  537.,  255.,  438.,  302.,  401.,  272.,  445.],
+                            # [ 245.,  278.,  465.,  408.,  612.,  287.,  484.,  332.,  438.,  301.,  474.],
+                            # [ 445.,  465.,  874.,  771., 1309.,  579., 1119.,  747., 1054.,  641., 1093.],
+                            # [ 375.,  408.,  771.,  708., 1232.,  545.,  992.,  707.,  995.,  619.,  935.],
+                            # [ 537.,  612., 1309., 1232., 1966., 1026., 1911., 1322., 1844., 1189., 1948.],
+                            # [ 255.,  287.,  579.,  545., 1026.,  450.,  951.,  737.,  946.,  617., 1032.],
+                            # [ 438.,  484., 1119.,  992., 1911.,  951., 2064., 1474., 2028., 1384., 2325.],
+                            # [ 302.,  332.,  747.,  707., 1322.,  737., 1474., 1136., 1560., 1089., 1703.],
+                            # [ 401.,  438., 1054.,  995., 1844.,  946., 2028., 1560., 2282., 1531., 2688.],
+                            # [ 272.,  301.,  641.,  619., 1189.,  617., 1384., 1089., 1531., 1112., 1918.],
+                            # [ 445.,  474., 1093.,  935., 1948., 1032., 2325., 1703., 2688., 1918., 3248.]]
+
+    #print(h[0] == h[0].T)  # True
+
+
 
     print("sum(sum(h[0])):", sum(sum(h[0])))
 
-    progH_unidirec_rel = h[0] / sum(sum(h[0]))
-    print("progH_unidirec_rel: ", progH_unidirec_rel)
-    print("progH_unidirec_rel.T: ", progH_unidirec_rel.T)
-    print("progH_unidirec_rel.T == progH_unidirec_rel: ", progH_unidirec_rel.T == progH_unidirec_rel)
-    print("sum(sum(progH_unidirec_rel)): ", sum(sum(progH_unidirec_rel)))
-    print("max(progH_unidirec_rel): ", progH_unidirec_rel.max())
+    #print(h[0])
+
+    h_rel = h[0] / sum(sum(h[0]))
 
     plt.clf()
-    plt.xlabel("Source Progressiveness Score (x total)")
+    plt.xlabel("Source Progressiveness Score (118534 edges total)")
     plt.ylabel("Target Progressiveness Score")
-    #plt.xticks(ticks=[0, 1], labels=('Con', 'Pro'))
-    #plt.yticks(ticks=[0, 1], labels=('Con', 'Pro'))
-    #plt.text(-0.30, 0, "0.281% (23654)")
-    #plt.text(-0.30, 1, "0.22% (18506)")
-    #plt.text(0.70, 0, "0.22% (18506)")
-    #plt.text(0.70, 1, "0.279% (23464)")
-    plt.imshow(progH_unidirec_rel.T, interpolation="nearest", origin="lower", vmin=0, vmax=0.03)
+    plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    plt.imshow(h_rel, interpolation="nearest", origin="lower", vmin=0, vmax=0.03)
     plt.colorbar()
     plt.savefig("corr_prog_unidirec.svg")
-    '''
+
+
+    x = np.unique(valid_progScore_val)
+
+    y = [h[0][0][0] / len(g_friendship_prog_mod_0.get_vertices()),
+         h[0][1][1] / len(g_friendship_prog_mod_1.get_vertices()),
+         h[0][2][2] / len(g_friendship_prog_mod_2.get_vertices()),
+         h[0][3][3] / len(g_friendship_prog_mod_3.get_vertices()),
+         h[0][4][4] / len(g_friendship_prog_mod_4.get_vertices()),
+         h[0][5][5] / len(g_friendship_prog_mod_5.get_vertices()),
+         h[0][6][6] / len(g_friendship_prog_mod_6.get_vertices()),
+         h[0][7][7] / len(g_friendship_prog_mod_7.get_vertices()),
+         h[0][8][8] / len(g_friendship_prog_mod_8.get_vertices()),
+         h[0][9][9] / len(g_friendship_prog_mod_9.get_vertices()),
+         h[0][10][10] / len(g_friendship_prog_mod_10.get_vertices())]
+
+    print("Normailization by #Edges/#Nodes:")
+    print("Normalization of Edges 0 - 0: ", y[0])
+    print("Normalization of Edges 1 - 1: ", y[1])
+    print("Normalization of Edges 2 - 2: ", y[2])
+    print("Normalization of Edges 3 - 3: ", y[3])
+    print("Normalization of Edges 4 - 4: ", y[4])
+    print("Normalization of Edges 5 - 5: ", y[5])
+    print("Normalization of Edges 6 - 6: ", y[6])
+    print("Normalization of Edges 7 - 7: ", y[7])
+    print("Normalization of Edges 8 - 8: ", y[8])
+    print("Normalization of Edges 9 - 9: ", y[9])
+    print("Normalization of Edges 10 - 10: ", y[10])
+
+
+    fig, ax = plt.subplots()
+    plt.bar(x, y, color='grey')
+    plt.xlabel('Progressiveness Scores')
+    plt.xticks(np.linspace(0, 10, 11))
+    plt.ylabel('Number of Edges between nodes of the same progressiveness score, normalized by respective number of nodes ')
+    plt.savefig("progScore_edgeNom_hist_ap1.png")
+    plt.close()
