@@ -11,14 +11,12 @@ import sys
 
 np.set_printoptions(threshold=sys.maxsize)
 
-# DO NOT USE g_raw FOR ASSORTATIVITY ANALYSIS! It contains uni- and bilateral FRIENDS_WITH relations.
+# DO NOT USE AN UNPREPROCESSED GRAPHML FOR ASSORTATIVITY ANALYSIS! They contain uni- and bilateral FRIENDS_WITH relations.
 # This is intentional due to the optional privacy setting of friendships in debate.org. See report for details.
 # g_raw contains nodes: User, Issues
 # g_raw contains edges: FRIENDS_WITH, GIVES_ISSUES
 
 g_all = gt.load_graph('Graph_Preprocessed_Approach1.graphml', fmt='graphml')
-# Change file name in line 128 - Degree Distribution, when switching to another approach
-
 #g_all = gt.load_graph('Graph_Preprocessed_Approach2.graphml', fmt='graphml')
 #g_all = gt.load_graph('Graph_Preprocessed_Approach3.graphml', fmt='graphml')
 
@@ -29,20 +27,26 @@ g_friend = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # g_raw_issues contains nodes: Users, Issues; edges: GIVES_ISSUES
 
-descLC_bool = True
-descCompHist_bool = False
-descBroad_bool = True
-descDens_bool = True
-descAvgD_bool = True
-descDDist_bool = True
-descCCG_bool = True
-descDia_bool = True
-descClose_bool = True
-descClosePlot_bool = True
-descBetw_bool = True            # relies on result of descClose_bool
-descBetwPlot_bool = True
-descEV_bool = True              # relies on result of descClose_bool
-descEVPlot_bool = True
+
+# All descriptives are focused on the Friendship Network and its Largest Component
+
+descLC_bool = True              #-- Identifying Largest Component
+descCompHist_bool = True        #-- Distribution (Component Size)
+descBroad_bool = True           #-- Number of nodes, edges, node properties, edge properties
+descDens_bool = True            #-- Density
+descAvgD_bool = True            #-- Average Degree
+descDDist_bool = True           #-- Degree Distribution
+descCCG_bool = True             #-- Clustering Coefficiants (Global)
+descDia_bool = True             #-- (Pseudo-) Diameter
+descClose_bool = True           #-- Closeness Distribution
+descClosePlot_bool = False
+descBetw_bool = True            #-- Betweenness Distribution
+                                # relies on intermediate result of descClose_bool
+descBetwPlot_bool = False
+descEV_bool = True              #-- Eigenvector Distribution
+                                # relies on intermediate result of descClose_bool
+descEVPlot_bool = False
+
 
 ####################
 ### Descriptives ###
@@ -53,12 +57,12 @@ descEVPlot_bool = True
 #-- Identifying Largest Component --#
 
 if descLC_bool == True:
-
-    print("\n\n#-- Identifying Largest Component --#\n")
+    print("\n\nIdentifying Largest Component\n")
 
     vprop_Lcomp, hist = gt.label_components(g_friend, attractors=False)
     g_friend.vp.Lcomp = vprop_Lcomp
 
+                                                                                        # All results are based on preprocessing approach 1
     print("Number of unique components: ", max(vprop_Lcomp.a[:45348]))                  # 28737
     print("Id of largest component & size: ", stats.mode(vprop_Lcomp.a[:45348]))        # 8 & 16382
     print("Number of all nodes in friendship network: ",  len(vprop_Lcomp.a[:45348]))   # 45348
@@ -75,56 +79,59 @@ if descLC_bool == True:
 
     g_friend_LC = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.Lcomp[v] == LC_id)
 
+    print("\nIdentifying Largest Component - done\n")
 
 #-- Distribution - Component Size --#
 
 if descCompHist_bool == True:
+    print("\n\nDistribution - Component Size\n")
 
     x, y = np.unique(hist, return_counts=True)
-    print(x)         # Size Category                    # 1    ,6,8,9,13,18,21,22,28,39,55,16382
-    print(y)         # Frequency                        # 28726,1,1,1, 1, 1, 2, 1, 1, 1, 1,    1
+    print("Size categories of the components: ", x)     #     1,6,8,9,13,18,21,22,28,39,55,16382
+    print("Frequency of the size categories: ", y)      # 28726,1,1,1, 1, 1, 2, 1, 1, 1, 1,    1
 
 
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.xlabel('Component size (log)')
+    plt.title('Histogram of Component Size\nLast two Categories (Size: 55 & 16382) not visible (Count: 1)')
+    plt.xlabel('Component Size (log)')
     plt.ylabel('Fequency (log)')
     plt.savefig("component_size_hist_ap1.png")          # unofrtunately the components of size 55 and 16382 are not displayed.
                                                         # This is due to the shrinking bar width with increase in x-axis
     plt.close()
 
+    print("\nDistribution - Component Size -done\n")
 
-
-### Deskriptives Friendship Network ###
-
-#-- Number of nodes , edges, node properties, edge properties --#
+#-- Number of nodes, edges, node properties, edge properties --#
 
 if descBroad_bool == True:
 
     print("\n\nDesciptives: Broad - print(Graph Object) style\n")
 
-    print("g_all, g_friend, g_issues\n")
+    print("g_all")
     print(g_all, "\n")                          # Vertices                         90696
                                                 # Edges                           234100
                                                 # Internal vertex properties          84
                                                 # Internal edge properties             2
-
+    print("g_friend")
     print(g_friend, "\n")                       # Vertices                         45348
                                                 # Edges                           188752
                                                 # Internal vertex properties          84
                                                 # Internal edge properties             2
-
+    print("g_issues")
     print(g_issues, "\n")                       # Vertices                         45348
                                                 # Edges                                0
                                                 # Internal vertex properties          84
                                                 # Internal edge properties             2
-
+    print("g_friend_LC")
     print(g_friend_LC, "\n")                    # Vertices                         16382
                                                 # Edges                           187478
                                                 # Internal vertex properties          85
                                                 # Internal edge properties             2
+
+    print("\nDesciptives: Broad - print(Graph Object) style - done\n")
 
 #-- Density of Friendship Network --#
 if descDens_bool == True:
@@ -145,49 +152,50 @@ if descDens_bool == True:
 
     print("\nDesciptives: Density - Friendship Network - Largest Component\n")
 
-    print("Number of Nodes (g_friend): ", len(v_friend_LC))                             #                   | |
-    print("Number of Edges (g_friend): ", len(e_friend_LC))                             #                  | |
-    print("Density (g_friend): ",         d_friend_LC)                                  #  | |
+    print("Number of Nodes (g_friend): ", len(v_friend_LC))                             #                 16382
+    print("Number of Edges (g_friend): ", len(e_friend_LC))                             #                187478
+    print("Density (g_friend): ",         d_friend_LC)                                  # 0.0013972463236576174
 
+    print("\nDesciptives: Density - Friendship Network - done\n")
 
-#-- Avg Degree --#
+#-- Average Degree of Friendship Network --#
 if descAvgD_bool == True:
 
-    print("\n\nDesciptives: Avg Degree - Friendship Network\n")
+    print("\n\nDescriptives: Average Degree - Friendship Network\n")
 
     degree_list = g_friend.get_in_degrees(g_friend.get_vertices())
     degree_list_LC = g_friend_LC.get_in_degrees(g_friend_LC.get_vertices())
 
-    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list))                            #               188752.0
-    print("Maximum of all Degrees: ",                  max(degree_list))                            #                 2025
-    print("Minimum of all Degrees: ",                  min(degree_list))                            #                    0
-    print("Length of Degree List / Number of Nodes: ", len(degree_list))                            #                45348
+    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list))                            # 188752.0
+    print("Maximum of all Degrees: ",                  max(degree_list))                            #   2025
+    print("Minimum of all Degrees: ",                  min(degree_list))                            #      0
+    print("Length of Degree List / Number of Nodes: ", len(degree_list))                            #  45348
     print("Avg Degree: ",                               sum(degree_list) / len(degree_list))        #      4.162300432213107
-    print("Median Degree: ",                            np.median(degree_list))                     #                    0.0
-    print("Mode Degree: ",                              stats.mode(degree_list)[0][0])              #                    0
+    print("Median Degree: ",                            np.median(degree_list))                     #      0.0
+    print("Mode Degree: ",                              stats.mode(degree_list)[0][0])              #      0
 
-    print("\n\nDesciptives: Avg Degree - Friendship Network - Largest Component\n")
+    print("\nDesciptives: Avg Degree - Friendship Network - Largest Component\n")
 
-    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list_LC))                         #                | |
-    print("Maximum of all Degrees: ",                  max(degree_list_LC))                         #                    | |
-    print("Minimum of all Degrees: ",                  min(degree_list_LC))                         #                       | |
-    print("Length of Degree List / Number of Nodes: ", len(degree_list_LC))                         #                   | |
-    print("Avg Degree: ",                               sum(degree_list_LC) / len(degree_list_LC))  #       | |
-    print("Median Degree: ",                            np.median(degree_list_LC))                  #                     | |
-    print("Mode Degree: ",                              stats.mode(degree_list_LC)[0][0])           #                       | |
+    print("Sum of all Degrees / Number of Edges: ",    sum(degree_list_LC))                         # 187478.0
+    print("Maximum of all Degrees: ",                  max(degree_list_LC))                         #   2025
+    print("Minimum of all Degrees: ",                  min(degree_list_LC))                         #      1
+    print("Length of Degree List / Number of Nodes: ", len(degree_list_LC))                         #  16382
+    print("Avg Degree: ",                               sum(degree_list_LC) / len(degree_list_LC))  #     11.444146013917715
+    print("Median Degree: ",                            np.median(degree_list_LC))                  #      2.0
+    print("Mode Degree: ",                              stats.mode(degree_list_LC)[0][0])           #      1
+
+    print("\n\nDescriptives: Average Degree - done\n")
 
 
-#-- Degree Distribution --#
+#-- Degree Distribution of Friendship Network --#
 if descDDist_bool == True:
-
-    print("\n\nDesciptives: Degree Distribution - Friendship Network\n")
+    print("\n\nDesciptives: Degree Distribution - Friendship Network")
 
     degree_hist = gt.vertex_hist(g_friend, "out")
 
     #print("Degree Distribution Frequency: \n", degree_hist[0])
     #print("Degree Distribution Values: \n", degree_hist[1])
     #print(len(degree_hist[0]), len(degree_hist[1]))
-
 
     y = degree_hist[0]
     x = degree_hist[1][:-1]                                                 # gt.vertex_hist results in a 2d histogram array [[frequency][degree]]
@@ -196,16 +204,18 @@ if descDDist_bool == True:
                                                                             # The last value of [degree]is excluded manually for both diemnsions being
                                                                             # of same size. There is no theoretical explanation for why the last value
                                                                             # should be part of the array. Confusing, but not relevant for the following analysis
+
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
+    plt.title('Histogram of Degree Distribution')
     plt.xlabel('Degree (log)')
     plt.ylabel('Fequency (log)')
     plt.savefig("degree_hist_g_friend_ap1.png")
     plt.close()
 
-    print("\n\nDesciptives: Degree Distribution - Friendship Network - Largest Component\n")
+    print("Desciptives: Degree Distribution - Friendship Network - Largest Component\n")
 
     degree_hist_LC = gt.vertex_hist(g_friend_LC, "out")
 
@@ -220,13 +230,15 @@ if descDDist_bool == True:
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.xlabel('Degree (log) - Largest Component')
-    plt.ylabel('Fequency (log) - Largest Component')
+    plt.title('Histogram of Degree Distribution\nLargest Component')
+    plt.xlabel('Degree (log)')
+    plt.ylabel('Fequency (log)')
     plt.savefig("degree_hist_g_friend_LC_ap1.png")
     plt.close()
 
+    print("\n\nDesciptives: Degree Distribution - done \n")
 
-#-- Clustering Coefficiants - Global --#
+#-- Clustering Coefficiants (Global) - of Friendship Network--#
 if descCCG_bool == True:
 
     print("\nDesciptives: Global Clustering Coefficiants - Friendship Network\n")
@@ -234,10 +246,12 @@ if descCCG_bool == True:
 
     print('Global Clustering Coefficiants: ', gt.global_clustering(g_friend))                           # 0.101803664507653, 0.013292495836611278
 
+    print("\nDesciptives: Global Clustering Coefficiants - Friendship Network - done\n")
+
 
 ### Deskriptives Friendship Network - Largest Component specific ###
 
-#-- (Pseudo-) Diameter --#
+#-- (Pseudo-) Diameter of Largest Component --#
 
 if descDia_bool == True:
 
@@ -245,11 +259,12 @@ if descDia_bool == True:
 
     dist, ends = gt.pseudo_diameter(g_friend_LC)
 
-    print('(Pseudo-) Diameter: ', dist)
-    print('(Pseudo-) Diameter start:', ends[0], 'end:', ends[1])
+    print('(Pseudo-) Diameter: ', dist)                                         # 14.0
+    #print('(Pseudo-) Diameter start:', ends[0], 'end:', ends[1])                # start: 1275 end: 37966
 
+    print("\n\nDeskriptives Friendship Network - Largest Component specific - (Pseudo-) Diameter -done\n")
 
-#-- Closeness Distribution --#
+#-- Closeness Distribution of Largest Component --#
 
 if descClose_bool == True:
 
@@ -263,13 +278,14 @@ if descClose_bool == True:
     close_array_index_LC = np.where(close_array != 0)
     close_array_LC = close_array[close_array_index_LC]
 
-    print("Avg Closeness Centrality: ", sum(close_array_LC)/len(close_array_LC))
+    print("Avg Closeness Centrality: ", sum(close_array_LC)/len(close_array_LC))        # 0.2769106346214449
 
 
     plt.hist(close_array_LC, bins=np.linspace(0, 0.6, 13), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.6, 13), rotation=45, fontsize=6)
-    plt.xlabel('Closeness - Largest Component')
-    plt.ylabel('Fequency (log) - Largest Component')
+    plt.title('Histogram of Closeness Centrality\nLargest Component')
+    plt.xlabel('Closeness')
+    plt.ylabel('Fequency (log)')
     plt.savefig("closeness_hist_g_friend_LC_ap1.png")
     plt.close()
 
@@ -283,7 +299,7 @@ if descClosePlot_bool == True:
                   vorder=vprop_closeness, output="closeness_g_friend_LC_ap1.pdf")
 
 
-#-- Betweenness Distribution --#
+#-- Betweenness Distribution of Largest Component --#
 
 if descBetw_bool == True:
 
@@ -296,12 +312,13 @@ if descBetw_bool == True:
     v_between_array = np.array(vprop_betweenness.a)
     v_between_array_LC = v_between_array[close_array_index_LC]
 
-    print("Avg Vertex Betweenness Centrality: ", sum(v_between_array_LC) / len(v_between_array_LC))
+    print("Avg Vertex Betweenness Centrality: ", sum(v_between_array_LC) / len(v_between_array_LC))     # 0.000163803122932315
 
     plt.hist(v_between_array_LC, bins=np.linspace(0, 0.14, 15), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.14, 15), rotation=45, fontsize=6)
-    plt.xlabel('Vertex Betweeness - Largest Component')
-    plt.ylabel('Fequency (log) - Largest Component')
+    plt.title('Histogram of Betweeness Centrality\nLargest Component')
+    plt.xlabel('Vertex Betweeness')
+    plt.ylabel('Fequency (log)')
     plt.savefig("v_betweenness_hist_g_friend_LC_ap1.png")
     plt.close()
 
@@ -313,7 +330,7 @@ if descBetwPlot_bool == True:
                   vorder = vprop_betweenness, output = "betweenness_g_friend_LC_ap1.pdf")
 
 
-#-- Eigenvector Distribution --#
+#-- Eigenvector Distribution of Largest Component --#
 
 if descEV_bool == True:
 
@@ -326,16 +343,17 @@ if descEV_bool == True:
     eigenVec_array = np.array(x.a)
     eigenVec_array_LC = eigenVec_array[close_array_index_LC]
 
-    print("Eigenvalue of Largest Component: ", ee)
+    print("Eigenvalue of Largest Component: ", ee)                                          # 3028.056712035545
 
 
-    print("Avg Eigenvector Centrality: ", sum(eigenVec_array_LC)/len(eigenVec_array_LC))
+    print("Avg Eigenvector Centrality: ", sum(eigenVec_array_LC)/len(eigenVec_array_LC))    #    0.0023861077211674566
 
 
     plt.hist(eigenVec_array_LC, bins=np.linspace(0, 0.18, 19), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.18, 19), rotation=45, fontsize=6)
-    plt.xlabel('Eigenvector Values - Largest Component')
-    plt.ylabel('Fequency (log) - Largest Component')
+    plt.title('Histogram of Eigenvector Centrality\nLargest Component')
+    plt.xlabel('Eigenvector Values')
+    plt.ylabel('Fequency (log)')
     plt.savefig("eigenVector_hist_g_friend_LC_ap1.png")
     plt.close()
 
