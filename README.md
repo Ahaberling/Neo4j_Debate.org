@@ -2,13 +2,15 @@
 MMDS Individual Project 2020
 
 Data used: 		"http://www.cs.cornell.edu/~esindurmus/ddo.html" \
-Graph Database used: 	"https://neo4j.com
+Graph Database used: 	"https://neo4j.com Version 4.1.1 \
+Network Analysis tool used: "https://graph-tool.skewed.de" \
+Python version used: 3.7
 
 
 1. debateDB_Creation.py
 	Extractes data from the Jsons provided by "http://www.cs.cornell.edu/~esindurmus/ddo.html"
 
-2. Install APOC-Plugin for Neo4j "https://neo4j.com/developer/neo4j-apoc/" (used in debateDB_Exportation.py)
+2. Install APOC-Plugin for Neo4j "https://neo4j.com/developer/neo4j-apoc/" (4.1.0.2 used in debateDB_Exportation.py)
 
 3. debateDB_Exportation.py
 	Exports data as graphml
