@@ -16,8 +16,8 @@ Python version used: 3.7
 	Exports data as graphml
 
 4. Add following to the resulting graphml (by hand). This ensures a successful GraphTool import \
-		"<key id="labels" for="node" attr.name="labels" attr.type="string"/>"
-		"<key id="label" for="edge" attr.name="label" attr.type="string"/>"
+		\<key id="labels" for="node" attr.name="labels" attr.type="string"/> \
+		\<key id="label" for="edge" attr.name="label" attr.type="string"/>
 
 5. For Windows: Access GraphTool library via Docker "https://graph-tool.skewed.de" \
 		docker pull tiagopeixoto/graph-tool
