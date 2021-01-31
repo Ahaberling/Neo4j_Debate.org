@@ -31,19 +31,19 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # All descriptives are focused on the Friendship Network and its Largest Component
 
 descLC_bool = True              #-- Identifying Largest Component
-descCompHist_bool = True        #-- Distribution (Component Size)
-descBroad_bool = True           #-- Number of nodes, edges, node properties, edge properties
-descDens_bool = True            #-- Density
-descAvgD_bool = True            #-- Average Degree
-descDDist_bool = True           #-- Degree Distribution
+descCompHist_bool = False        #-- Distribution (Component Size)
+descBroad_bool = False           #-- Number of nodes, edges, node properties, edge properties
+descDens_bool = False            #-- Density
+descAvgD_bool = False            #-- Average Degree
+descDDist_bool = False           #-- Degree Distribution
 descCCG_bool = True             #-- Clustering Coefficiants (Global)
-descDia_bool = True             #-- (Pseudo-) Diameter
-descClose_bool = True           #-- Closeness Distribution
+descDia_bool = False             #-- (Pseudo-) Diameter
+descClose_bool = False           #-- Closeness Distribution
 descClosePlot_bool = False
-descBetw_bool = True            #-- Betweenness Distribution
+descBetw_bool = False            #-- Betweenness Distribution
                                 # relies on intermediate result of descClose_bool
 descBetwPlot_bool = False
-descEV_bool = True              #-- Eigenvector Distribution
+descEV_bool = False              #-- Eigenvector Distribution
                                 # relies on intermediate result of descClose_bool
 descEVPlot_bool = False
 
@@ -241,12 +241,13 @@ if descDDist_bool == True:
 #-- Clustering Coefficiants (Global) - of Friendship Network--#
 if descCCG_bool == True:
 
-    print("\nDesciptives: Global Clustering Coefficiants - Friendship Network\n")
+    print("\nDesciptives: Global Clustering Coefficiants \n")
                                                                                                         #       coefficient,   standard deviation
 
-    print('Global Clustering Coefficiants: ', gt.global_clustering(g_friend))                           # 0.101803664507653, 0.013292495836611278
+    print('Global Clustering Coefficiants - Friendship Network: ', gt.global_clustering(g_friend))      # 0.101803664507653, 0.013292495836611278
+    print('Global Clustering Coefficiants - Largest Component: ', gt.global_clustering(g_friend_LC))    # 0.10158343197387348, 0.013265280343602718
 
-    print("\nDesciptives: Global Clustering Coefficiants - Friendship Network - done\n")
+    print("\nDesciptives: Global Clustering Coefficiants - done\n")
 
 
 ### Deskriptives Friendship Network - Largest Component specific ###
