@@ -37,29 +37,29 @@ timeline_bool = False
 
 ### User Edges ###
 friends_with_bool = False
-debates_in_bool = True
-gives_comment_bool = True
-gives_argument_bool = True
-gives_votemap_bool = True
+debates_in_bool = False
+gives_comment_bool = False
+gives_argument_bool = False
+gives_votemap_bool = False
 gives_opinion_bool = False
 gives_pollvote_bool = False
 gives_issues_bool = False
 user_timeline_bool = False
 
 ### Debate Edges ###
-has_comment_bool = True
-has_votemap_bool = True
-has_argument_bool = True
-debate_timeline_bool = True
+has_comment_bool = False
+has_votemap_bool = False
+has_argument_bool = False
+debate_timeline_bool = False
 
 ### Comment Edges ###
-comment_timeline_bool = True
+comment_timeline_bool = False
 
 ### VoteMap Edges ###
-refers_to_bool = True
+refers_to_bool = False
 
 ### Sampling ###
-sample_bool = False
+sample_bool = True
 
 ### Indexing ###
 index_bool = False
@@ -72,9 +72,11 @@ clearAll_bool = False
 ######################
 # Specifying Neo4j access, sample size and data input
 
+print("Initialization")
+
 driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "123"))
 
-sample = 1000
+sample = 300
 
 if users_data_bool == True:
     f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
@@ -97,6 +99,7 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     userURL, userWinR,
                     number_all_deb, number_lost_deb, number_tied_deb, number_won_deb, number_friends, number_opinion_arg, number_opinion_ques, number_poll_topics,
                     number_poll_votes, number_voted_deb):
+    print("add_user function is called")
     tx.run("MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, " +
                     "email: $userEmail, ethnicity: $userEthni, gender: $userSex, friend_privacy: $friend_privacy, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, " +
                     "last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, " +
@@ -581,6 +584,8 @@ with driver.session() as session:
     if clearAll_bool == True:
         session.write_transaction(delete_all)
 
+        print("Cleaning - done")
+
 
     ###--------------------###
     ### Nodes - users_data ###
@@ -591,6 +596,7 @@ with driver.session() as session:
 
     for i in users_data:
         c = c + 1
+
 
         ### User Node ###
         if user_bool == True:
