@@ -21,48 +21,48 @@ import json
 # the final creation of the database
 
 ### Data ###
-users_data_bool = False
-debates_data_bool = False
+users_data_bool = True
+debates_data_bool = True
 
 ### Nodes ###
-user_bool = False
-debate_bool = False
-comment_bool = False
-argument_bool = False
-votemap_bool = False
-opinion_bool = False
-poll_bool = False
-issues_bool = False
-timeline_bool = False
+user_bool = True
+debate_bool = True
+comment_bool = True
+argument_bool = True
+votemap_bool = True
+opinion_bool = True
+poll_bool = True
+issues_bool = True
+timeline_bool = True
 
 ### User Edges ###
-friends_with_bool = False
-debates_in_bool = False
-gives_comment_bool = False
-gives_argument_bool = False
-gives_votemap_bool = False
-gives_opinion_bool = False
-gives_pollvote_bool = False
-gives_issues_bool = False
-user_timeline_bool = False
+friends_with_bool = True
+debates_in_bool = True
+gives_comment_bool = True
+gives_argument_bool = True
+gives_votemap_bool = True
+gives_opinion_bool = True
+gives_pollvote_bool = True
+gives_issues_bool = True
+user_timeline_bool = True
 
 ### Debate Edges ###
-has_comment_bool = False
-has_votemap_bool = False
-has_argument_bool = False
-debate_timeline_bool = False
+has_comment_bool = True
+has_votemap_bool = True
+has_argument_bool = True
+debate_timeline_bool = True
 
 ### Comment Edges ###
-comment_timeline_bool = False
+comment_timeline_bool = True
 
 ### VoteMap Edges ###
-refers_to_bool = False
+refers_to_bool = True
 
 ### Sampling ###
 sample_bool = False
 
 ### Indexing ###
-index_bool = False
+index_bool = True
 
 ### Clear all ###
 clearAll_bool = False
