@@ -11,7 +11,7 @@ import sys
 
 np.set_printoptions(threshold=sys.maxsize)
 
-# DO NOT USE an unpreprocessed graphml FOR ASSORTATIVITY ANALYSIS! THEY contain uni- and bilateral FRIENDS_WITH relations.
+# DO NOT USE AN UNPREPROCESSED GRAPHML FOR ASSORTATIVITY ANALYSIS! They contain uni- and bilateral FRIENDS_WITH relations.
 # This is intentional due to the optional privacy setting of friendships in debate.org. See report for details.
 # g_raw contains nodes: User, Issues
 # g_raw contains edges: FRIENDS_WITH, GIVES_ISSUES
@@ -27,17 +27,17 @@ g_friend = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # g_raw_issues contains nodes: Users, Issues; edges: GIVES_ISSUES
 
-assortativePrePro_bool      = False
-save_assortativePrePro_bool = False
-load_assortativePrePro_bool = True
-uniqueVal_bool              = False
-assortAllValues             = False
-assortProConUnd             = False
-assortProCon                = False
-assortProgScore             = False
-assort_Visual               = True
-progScore_hist              = False
-progScore_Visual            = False
+assortativePrePro_bool      = True         # Small preprocessing for assortativity analysis
+save_assortativePrePro_bool = True         # Saving preprocessed graphml
+load_assortativePrePro_bool = True         # Loading preprocessed graphml
+uniqueVal_bool              = True         # Identify value ranges of propertyMaps
+assortAllValues             = True         # Compute assortativity scores with all values
+assortProConUnd             = True         # Compute assortativity scores with Pro-, Con- and Undicided-values
+assortProCon                = True         # Compute assortativity scores with Pro-, Con-values
+assortProgScore             = True         # Compute assortativity scores of progressiveness score
+assort_Visual               = True         # Create visualization for assortativity
+progScore_hist              = True         # Create histogram of progressiveness score
+progScore_Visual            = True         # Create visualization for assortativity of progressiveness score
 
 ##########################
 ### Assortative Mixing ###
@@ -255,14 +255,14 @@ if assortativePrePro_bool == True:
             prog_score = prog_score + g_friend.vp.health_int[i]
 
         g_friend.vp.prog[i] = prog_score
-        g_friend.vp.prog_mod[i] = prog_score + 5                # GraphTool visualization only handles positie skalars
+        g_friend.vp.prog_mod[i] = prog_score + 5                # GraphTool visualization handles positive skalars only
 
         if c % 1000 == 0:
             print("Filling PropertyMaps - prog_score: ", c, "/", c_max)
 
         c = c + 1
     print("Filling PropertyMaps - prog_score: ", c_max, "/", c_max)
-    print("Filling PropertyMaps - done\n")
+    print("\nFilling PropertyMaps - done\n")
 
 
 ### Saving Assortativity-Preprocessed Graph ###
@@ -826,7 +826,7 @@ if progScore_hist == True:
 
     print("Progressiveness Score maximum of nodes with valid value: ", max(valid_progScore_val))                                # 10
     print("Progressiveness Score minimum of nodes with valid value: ", min(valid_progScore_val))                                #  0
-    print("Progressiveness Score average of nodes with valid value: ", sum(valid_progScore_val) / len(valid_progScore_val))     #
+    print("Progressiveness Score average of nodes with valid value: ", sum(valid_progScore_val) / len(valid_progScore_val))     #  5.789194915254237
 
     #hist = np.histogram(valid_progScore_val)           # does some weird shit (adding the frequencies of the two highest values together and thereby
                                                         # returning one frequency bucket too few
@@ -839,7 +839,7 @@ if progScore_hist == True:
 
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
-    plt.title('Histogram progressiveness Scores')
+    plt.title('Histogram Progressiveness Scores')
     plt.xlabel('Progressiveness Scores')
     plt.xticks(np.linspace(0, 10, 11))
     plt.ylabel('Frequency (16992 total)')
@@ -851,6 +851,9 @@ if progScore_hist == True:
 ### Assortative Mixing Visualization - Progressiveness Score ###
 
 if progScore_Visual == True:
+    print("\nAssortative Mixing Visualization - Progressiveness Score\n")
+
+    # -- Assortativity Visualization - Progressiveness Score --#
 
 
     g_friend_prog_ProCon = gt.GraphView(g_friend, vfilt=lambda v: g_friend.vp.abor[v] == "Pro" or g_friend.vp.abor[v] == "Con" or
@@ -878,13 +881,13 @@ if progScore_Visual == True:
     print("g_friendship_prog_mod - 1: ", g_friendship_prog_mod_1)       #   496 vertices and    278 edges
     print("g_friendship_prog_mod - 2: ", g_friendship_prog_mod_2)       #  1017 vertices and    874 edges
     print("g_friendship_prog_mod - 3: ", g_friendship_prog_mod_3)       #  1443 vertices and    708 edges
-    print("g_friendship_prog_mod - 4: ", g_friendship_prog_mod_4)       #  2335 vertices and   1966 edges h
+    print("g_friendship_prog_mod - 4: ", g_friendship_prog_mod_4)       #  2335 vertices and   1966 edges 
     print("g_friendship_prog_mod - 5: ", g_friendship_prog_mod_5)       #  1546 vertices and    450 edges
-    print("g_friendship_prog_mod - 6: ", g_friendship_prog_mod_6)       #  2679 vertices and   2064 edges h
+    print("g_friendship_prog_mod - 6: ", g_friendship_prog_mod_6)       #  2679 vertices and   2064 edges 
     print("g_friendship_prog_mod - 7: ", g_friendship_prog_mod_7)       #  1852 vertices and   1136 edges
-    print("g_friendship_prog_mod - 8: ", g_friendship_prog_mod_8)       #  2035 vertices and   2282 edges h
+    print("g_friendship_prog_mod - 8: ", g_friendship_prog_mod_8)       #  2035 vertices and   2282 edges 
     print("g_friendship_prog_mod - 9: ", g_friendship_prog_mod_9)       #  1327 vertices and   1112 edges
-    print("g_friendship_prog_mod - 10: ", g_friendship_prog_mod_10)     #  1718 vertices and   3248 edges h
+    print("g_friendship_prog_mod - 10: ", g_friendship_prog_mod_10)     #  1718 vertices and   3248 edges 
     '''
 
     h = gt.corr_hist(g_friend_prog_ProCon, g_friend.vp.prog_mod, g_friend.vp.prog_mod)
@@ -902,24 +905,22 @@ if progScore_Visual == True:
                             # [ 445.,  474., 1093.,  935., 1948., 1032., 2325., 1703., 2688., 1918., 3248.]]
 
     #print(h[0] == h[0].T)  # True
-
-
-
-    print("sum(sum(h[0])):", sum(sum(h[0])))
-
-    #print(h[0])
+    #print("sum(sum(h[0])):", sum(sum(h[0])))           # 118534.0
 
     h_rel = h[0] / sum(sum(h[0]))
 
     plt.clf()
-    plt.xlabel("Source Progressiveness Score (118534 edges total)")
+    plt.title('Unidirectional Edges between Users \n Absolute and Relative (118534 total)')
+    plt.xlabel("Source Progressiveness Score")
     plt.ylabel("Target Progressiveness Score")
     plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     plt.imshow(h_rel, interpolation="nearest", origin="lower", vmin=0, vmax=0.03)
     plt.colorbar()
-    plt.savefig("corr_prog_unidirec.svg")
+    plt.savefig("corr_prog.svg")
 
+
+    # -- Assortativity Visualization - partly "Normalized" Progressiveness Score Histogram --#
 
     x = np.unique(valid_progScore_val)
 
@@ -952,8 +953,11 @@ if progScore_Visual == True:
 
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
+    plt.title("Histogram Progressiveness Scores Edges \n Partly Normalized (by Nodes)")
     plt.xlabel('Progressiveness Scores')
     plt.xticks(np.linspace(0, 10, 11))
-    plt.ylabel('Number of Edges between nodes of the same progressiveness score, normalized by respective number of nodes ')
+    plt.ylabel('Number of Edges Between Nodes \n of the Same Progressiveness')
     plt.savefig("progScore_edgeNom_hist_ap1.png")
     plt.close()
+
+    print("Assortative Mixing Visualization - Progressiveness Score - done\n")
