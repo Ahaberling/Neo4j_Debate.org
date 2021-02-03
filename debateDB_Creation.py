@@ -65,7 +65,10 @@ sample_bool = False
 index_bool = True
 
 ### Clear all ###
-clearAll_bool = False
+clearAll_bool = True
+
+
+
 
 ######################
 ### Initialization ###
@@ -86,6 +89,7 @@ if debates_data_bool == True:
     g = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/debates.json', "r")
     debates_data = json.load(g)
 
+print("Initialization - done")
 
 #####################################
 ### Functions: Write Transactions ###
@@ -380,7 +384,7 @@ def delete_all(tx):
 ####################################
 ### Functions: Read Transactions ###
 ####################################
-# All Neo4j edges and nodes are read by accessing the database via these write functions
+# All Neo4j edges and nodes are read by accessing the database via these read functions
 
 ### Nodes ###
 
@@ -558,20 +562,24 @@ def read_all(tx):
     tx.run("MATCH (n) RETURN n")
 
 
+
 ########################
 ### Sessions - write ###
 ########################
-# All neo4j node and edges are created in one session. At first "users_data" and "debates_data" are accessed and looped
+# All neo4j nodes and edges are created in one session. At first "users_data" and "debates_data" are accessed and looped
 # over to extract all relevant information for node creation. At the same time the extracted information is feed via the
-# previously defined write-functions to the data base in order to create the respective node. Time line nodes
-# representing the year span of the dataset are generated as well.
+# previously defined write-functions to the database in order to create the respective nodes. Time line nodes
+# representing the year span of the data set are generated as well.
 # In a second step "users_data" and "debates_data" are traversed again to extract and feed edge relevant data. This way
 # neo4j edges are created as well (accessing the respective, previously defined write-functions)
 
 # tl;dr
-# 1. loop node creation
-# 2. loop edge creation
+# 1. loop: node creation - users_data
+# 2. loop: node creation - debates_data
+# 3. loop: edge creation - users_data
+# 4. loop: edge creation - debates_data
 
+print("Sessions - write")
 
 with driver.session() as session:
 
@@ -587,6 +595,7 @@ with driver.session() as session:
         print("Cleaning - done")
 
 
+    ###-------1. Loop------###
     ###--------------------###
     ### Nodes - users_data ###
     ###--------------------###
@@ -667,6 +676,7 @@ with driver.session() as session:
             break
 
 
+    ###--------2. Loop-------###
     ###----------------------###
     ### Nodes - debates_data ###
     ###----------------------###
@@ -751,7 +761,7 @@ with driver.session() as session:
 
     if timeline_bool == True:
         for i in range(2007, 2019):                     # Conflicting Information. "http://www.cs.cornell.edu/~esindurmus/ddo.html"
-                                                        # states a data collection up to November 2017. Yet, the Json contains users
+                                                        # states a data collection of up to November 2017. Yet, the Json contains users
                                                         # created in 2019. See Report for Details
             session.write_transaction(add_timeline, i)  # Neo4j cares about the data type that is submitted (here int)
         print("-- Nodes - Timeline done --")
@@ -773,6 +783,8 @@ with driver.session() as session:
         session.write_transaction(add_issues_index)
 
 
+
+    ###-------3. Loop------###
     ###--------------------###
     ### Edges - users_data ###
     ###--------------------###
@@ -813,9 +825,9 @@ with driver.session() as session:
 
 
         ### User Edge - user_timeline ###
-        ### Extraction on November 2017 "http://www.cs.cornell.edu/~esindurmus/ddo.html" ###
-        # Conflicting with data in Json (User created in 2019), see report.
-        # This timeline creation might need to be revisited
+        ### Extraction on November 2017 - "http://www.cs.cornell.edu/~esindurmus/ddo.html" ###
+        # Conflicting with data in Json (Users created in 2019), see report.
+        # -> This timeline creation might need to be revisited
 
         if user_timeline_bool == True:
 
@@ -825,7 +837,7 @@ with driver.session() as session:
                 else:
                     joined_year = 2017 - int(users_data[i]['joined'][0])
             else:
-                joined_year = 2017#
+                joined_year = 2017
             session.write_transaction(add_user_timeline, i, joined_year)  # -[IN_TIMELINE]->
 
 
@@ -837,6 +849,7 @@ with driver.session() as session:
 
 
 
+    ###--------4. Loop-------###
     ###----------------------###
     ### Edges - debates_data ###
     ###----------------------###
@@ -998,7 +1011,7 @@ with driver.session() as session:
             break
 
 
-    # Alternative timeline appoach - not used in final
+    # Alternative timeline appoaches - not used in final
     '''
     ###-----------------------###
     ### Timeline - users_data ###
@@ -1254,7 +1267,7 @@ with driver.session() as session:
     print("-- Timeline - debates_data Part2 done --")
     '''
 
-    print("-- write done --")
+    print("\n-- write done --\n")
 
 
     #######################
@@ -1292,7 +1305,9 @@ with driver.session() as session:
 
     # session.read_transaction(read_refers_to)
 
-    print("-- read done --")
+    print("\n-- read done --\n")
+
+    print("\n\ndebateDB_Creation.py - done\n")
 
 
 
