@@ -22,7 +22,7 @@ import json
 
 ### Data ###
 users_data_bool = True
-debates_data_bool = False
+debates_data_bool = True
 
 ### Nodes ###
 user_bool = False
@@ -36,33 +36,33 @@ issues_bool = False
 timeline_bool = False
 
 ### User Edges ###
-friends_with_bool = False
-debates_in_bool = False
-gives_comment_bool = False
-gives_argument_bool = False
-gives_votemap_bool = False
-gives_opinion_bool = False
-gives_pollvote_bool = False
-gives_issues_bool = False
-user_timeline_bool = False
+friends_with_bool = True
+debates_in_bool = True
+gives_comment_bool = True
+gives_argument_bool = True
+gives_votemap_bool = True
+gives_opinion_bool = True
+gives_pollvote_bool = True
+gives_issues_bool = True
+user_timeline_bool = True
 
 ### Debate Edges ###
-has_comment_bool = False
-has_votemap_bool = False
-has_argument_bool = False
-debate_timeline_bool = False
+has_comment_bool = True
+has_votemap_bool = True
+has_argument_bool = True
+debate_timeline_bool = True
 
 ### Comment Edges ###
-comment_timeline_bool = False
+comment_timeline_bool = True
 
 ### VoteMap Edges ###
-refers_to_bool = False
+refers_to_bool = True
 
 ### Sampling ###
-sample_bool = True
+sample_bool = False
 
 ### Indexing ###
-index_bool = False
+index_bool = True
 
 ### Clear all ###
 clearAll_bool = False
@@ -99,7 +99,7 @@ def add_user(tx, userName, userBirth, userDescr, userEduc, userElo, userEmail, u
                     userURL, userWinR,
                     number_all_deb, number_lost_deb, number_tied_deb, number_won_deb, number_friends, number_opinion_arg, number_opinion_ques, number_poll_topics,
                     number_poll_votes, number_voted_deb):
-    print("add_user function is called with parameter", userName, userBirth)
+    #print("add_user function is called with parameter", userName, userBirth)
     tx.run("MERGE (a:User {userID: $userName, birthday: $userBirth, description: $userDescr, education: $userEduc, elo_ranking: $userElo, " +
                     "email: $userEmail, ethnicity: $userEthni, gender: $userSex, friend_privacy: $friend_privacy, income: $userInc, interested: $userInterest, joined: $userJoin, last_online: $userOn, " +
                     "last_updated: $userUpd, looking: $userLook, party: $userParty, percentile: $userPercentile, political_ideology: $userPoli, president: $userPresi, relationship: $userRels, " +
@@ -616,7 +616,7 @@ with driver.session() as session:
                                       users_data[i]['number_of_won_debates'], users_data[i]['number_of_friends'], users_data[i]['number_of_opinion_arguments'],
                                       users_data[i]['number_of_opinion_questions'], users_data[i]['number_of_poll_topics'], users_data[i]['number_of_poll_votes'],
                                       users_data[i]['number_of_voted_debates'])
-            print("user information is extracted with value ", i, users_data[i]['birthday'])
+            #print("user information is extracted with value ", i, users_data[i]['birthday'])
 
 
         ### Opinion Nodes ###
