@@ -31,21 +31,21 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # All descriptives are focused on the Friendship Network and its Largest Component
 
 descLC_bool = True              #-- Identifying Largest Component
-descCompHist_bool = False        #-- Distribution (Component Size)
-descBroad_bool = False           #-- Number of nodes, edges, node properties, edge properties
-descDens_bool = False            #-- Density
-descAvgD_bool = False            #-- Average Degree
-descDDist_bool = False           #-- Degree Distribution
+descCompHist_bool = True        #-- Distribution (Component Size)
+descBroad_bool = True           #-- Number of nodes, edges, node properties, edge properties
+descDens_bool = True            #-- Density
+descAvgD_bool = True            #-- Average Degree
+descDDist_bool = True           #-- Degree Distribution
 descCCG_bool = True             #-- Clustering Coefficiants (Global)
-descDia_bool = False             #-- (Pseudo-) Diameter
-descClose_bool = False           #-- Closeness Distribution
-descClosePlot_bool = False
-descBetw_bool = False            #-- Betweenness Distribution
+descDia_bool = True             #-- (Pseudo-) Diameter
+descClose_bool = True           #-- Closeness Distribution
+descClosePlot_bool = True
+descBetw_bool = True            #-- Betweenness Distribution
                                 # relies on intermediate result of descClose_bool
-descBetwPlot_bool = False
-descEV_bool = False              #-- Eigenvector Distribution
+descBetwPlot_bool = True
+descEV_bool = True              #-- Eigenvector Distribution
                                 # relies on intermediate result of descClose_bool
-descEVPlot_bool = False
+descEVPlot_bool = True
 
 
 ####################
@@ -294,6 +294,7 @@ if descClose_bool == True:
 
 if descClosePlot_bool == True:
 
+    # Screenshot added to Github (less loading time)
     gt.graph_draw(g_friend_LC, pos=None, vertex_fill_color=vprop_closeness,
                   vertex_size=gt.prop_to_size(vprop_closeness, mi=5, ma=15),
                   vcmap=plt.cm.gist_heat,
@@ -325,6 +326,7 @@ if descBetw_bool == True:
 
 if descBetwPlot_bool == True:
 
+    # Screenshot added to Github (less loading time)
     gt.graph_draw(g_friend_LC, pos=None, vertex_fill_color=vprop_betweenness,
                   vertex_size = gt.prop_to_size(vprop_betweenness, mi=5, ma=15),
                   edge_pen_width = gt.prop_to_size(eprop_betweenness, mi=0.5, ma=5), vcmap = plt.cm.gist_heat,
@@ -361,6 +363,7 @@ if descEV_bool == True:
 
 if descEVPlot_bool == True:
 
+    # Screenshot added to Github (less loading time)
     gt.graph_draw(g_friend_LC, pos=None, vertex_fill_color=x,
                   vertex_size=gt.prop_to_size(x, mi=5, ma=15), vcmap=plt.cm.gist_heat,
                   vorder=x, output="eigenvetcor_g_friend_LC_ap1.pdf")
