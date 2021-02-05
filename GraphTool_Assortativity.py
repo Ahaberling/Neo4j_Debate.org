@@ -27,10 +27,10 @@ g_friend = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # g_raw_issues contains nodes: Users, Issues; edges: GIVES_ISSUES
 
-assortativePrePro_bool      = True         # Small preprocessing for assortativity analysis
-save_assortativePrePro_bool = True         # Saving preprocessed graphml
+assortativePrePro_bool      = False         # Small preprocessing for assortativity analysis
+save_assortativePrePro_bool = False         # Saving preprocessed graphml
 load_assortativePrePro_bool = True         # Loading preprocessed graphml
-uniqueVal_bool              = True         # Identify value ranges of propertyMaps
+uniqueVal_bool              = False         # Identify value ranges of propertyMaps
 assortAllValues             = True         # Compute assortativity scores with all values
 assortProConUnd             = True         # Compute assortativity scores with Pro-, Con- and Undicided-values
 assortProCon                = True         # Compute assortativity scores with Pro-, Con-values
@@ -553,18 +553,18 @@ if assort_Visual == True:
     print("Normalization of Edges Pro - Pro: ", h_abor[1][1]    /    len(g_friendship_aborPro.get_vertices()))  # 3.4119528864330375
 
     plt.clf()
-    plt.title("Unidirectional Edges between Users \n Absolute and Relative (84130 total)")
-    plt.xlabel("Source Abortion Value")
-    plt.ylabel("Target Abortion Value")
+    #plt.title("Unidirectional Edges between Users \n Absolute and Relative (84130 total)")
+    plt.xlabel("Edge Source - Abortion")
+    plt.ylabel("Edge Target - Abortion")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
-    plt.text(-0.30, 0, "0.281% (23654)")
-    plt.text(-0.30, 1, "0.22% (18506)")
-    plt.text(0.70, 0, "0.22% (18506)")
-    plt.text(0.70, 1, "0.279% (23464)")
+    plt.text(-0.30, 0, "28.12% (23654)")
+    plt.text(-0.30, 1, "22% (18506)")
+    plt.text(0.70, 0, "22% (18506)")
+    plt.text(0.70, 1, "27.89% (23464)")
     plt.imshow(h_abor_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_abor.svg")
+    plt.savefig("corr_abor.png")
 
 
     #-- Assortativity Abortion (bidirectional) --#
@@ -634,18 +634,18 @@ if assort_Visual == True:
     print("Normalization of Edges Pro - Pro: ", h_gay[1][1] / len(g_friendship_gayPro.get_vertices()))      # 4.944952032891732
 
     plt.clf()
-    plt.title("Unidirectional Edges between Users \n Absolute and Relative (81542 total)")
-    plt.xlabel("Source Gay Marriage Value")
-    plt.ylabel("Target Gay Marriage Value")
+    #plt.title("Unidirectional Edges between Users \n Absolute and Relative (81542 total)")
+    plt.xlabel("Edge Source - Gay Marriage")
+    plt.ylabel("Edge Target - Gay Marriage")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
-    plt.text(-0.30, 0, "0.111% (9044)")
-    plt.text(-0.30, 1, "0.179% (14600)")
-    plt.text(0.70, 0, "0.179% (14600)")
-    plt.text(0.70, 1, "0.531% (43298)")
+    plt.text(-0.30, 0, "11.09% (9044)")
+    plt.text(-0.30, 1, "17.9% (14600)")
+    plt.text(0.70, 0, "17.9% (14600)")
+    plt.text(0.70, 1, "53.1% (43298)")
     plt.imshow(h_gay_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_gay.svg")
+    plt.savefig("corr_gay.png")
 
 
 
@@ -682,18 +682,18 @@ if assort_Visual == True:
     print("Normalization of Edges Pro - Pro: ", h_warm[1][1] / len(g_friendship_warmPro.get_vertices()))        # 4.947634069400631
 
     plt.clf()
-    plt.title("Unidirectional Edges between Users \n Absolute and Relative (65486 total)")
-    plt.xlabel("Source Global Warming (is real) Value")
-    plt.ylabel("Target Global Warming (is real) Value")
+    #plt.title("Unidirectional Edges between Users \n Absolute and Relative (65486 total)")
+    plt.xlabel("Edge Source - Global Warming (is real)")
+    plt.ylabel("Edge Target - Global Warming (is real)")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
-    plt.text(-0.30, 0, "0.073% (4750)")
-    plt.text(-0.30, 1, "0.164% (10763)")
-    plt.text(0.70, 0, "0.164% (10763)")
-    plt.text(0.70, 1, "0.588% (39210)")
+    plt.text(-0.30, 0, "7.25% (4750)")
+    plt.text(-0.30, 1, "16.44% (10763)")
+    plt.text(0.70, 0, "16.44% (10763)")
+    plt.text(0.70, 1, "59.88% (39210)")
     plt.imshow(h_warm_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_warm.svg")
+    plt.savefig("corr_warm.png")
 
 
     # -- Assortativity Drug Legalization --#
@@ -730,18 +730,18 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.title("Unidirectional Edges between Users \n Absolute and Relative (76244 total)")
-    plt.xlabel("Source Drug Legalization Value")
-    plt.ylabel("Target Drug Legalization Value")
+    #plt.title("Unidirectional Edges between Users \n Absolute and Relative (76244 total)")
+    plt.xlabel("Edge Source - Drug Legalization")
+    plt.ylabel("Edge Target - Drug Legalization")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
-    plt.text(-0.30, 0, "0.159% (12100)")
-    plt.text(-0.30, 1, "0.222% (16959)")
-    plt.text(0.70, 0, "0.222% (16959)")
-    plt.text(0.70, 1, "0.396% (30226)")
+    plt.text(-0.30, 0, "15.87% (12100)")
+    plt.text(-0.30, 1, "22.24% (16959)")
+    plt.text(0.70, 0, "22.24% (16959)")
+    plt.text(0.70, 1, "39.64% (30226)")
     plt.imshow(h_drug_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_drug.svg")
+    plt.savefig("corr_drug.png")
 
 
     # -- Assortativity National Health Care --#
@@ -782,18 +782,18 @@ if assort_Visual == True:
 
 
     plt.clf()
-    plt.title("Unidirectional Edges between Users \n Absolute and Relative (59208 total)")
-    plt.xlabel("Source National Health Care Value")
-    plt.ylabel("Target National Health Care Value")
+    #plt.title("Unidirectional Edges between Users \n Absolute and Relative (59208 total)")
+    plt.xlabel("Edge Source - National Health Care")
+    plt.ylabel("Edge Target - National Health Care")
     plt.xticks(ticks=[0,1], labels=('Con', 'Pro'))
     plt.yticks(ticks=[0,1], labels=('Con', 'Pro'))
-    plt.text(-0.30, 0, "0.206% (12218)")
-    plt.text(-0.30, 1, "0.22% (13032)")
-    plt.text(0.70, 0, "0.22% (13032)")
-    plt.text(0.70, 1, "0.353% (20926)")
+    plt.text(-0.30, 0, "20.64% (12218)")
+    plt.text(-0.30, 1, "22.01% (13032)")
+    plt.text(0.70, 0, "22.01% (13032)")
+    plt.text(0.70, 1, "35.34% (20926)")
     plt.imshow(h_health_rel, interpolation="nearest", origin="lower", vmin=0, vmax=1)
     plt.colorbar()
-    plt.savefig("corr_health.svg")
+    plt.savefig("corr_health.png")
 
     print("Assortative Mixing Visualization - done\n")
 
@@ -839,7 +839,7 @@ if progScore_hist == True:
 
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
-    plt.title('Histogram Progressiveness Scores')
+    #plt.title('Histogram Progressiveness Scores')
     plt.xlabel('Progressiveness Scores')
     plt.xticks(np.linspace(0, 10, 11))
     plt.ylabel('Frequency (16992 total)')
@@ -910,14 +910,14 @@ if progScore_Visual == True:
     h_rel = h[0] / sum(sum(h[0]))
 
     plt.clf()
-    plt.title('Unidirectional Edges between Users \n Absolute and Relative (118534 total)')
-    plt.xlabel("Source Progressiveness Score")
-    plt.ylabel("Target Progressiveness Score")
+    #plt.title('Unidirectional Edges between Users \n Absolute and Relative (118534 total)')
+    plt.xlabel("Edge Source - Progressiveness Score")
+    plt.ylabel("Edge Target - Progressiveness Score")
     plt.xticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     plt.yticks(ticks=[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     plt.imshow(h_rel, interpolation="nearest", origin="lower", vmin=0, vmax=0.03)
     plt.colorbar()
-    plt.savefig("corr_prog.svg")
+    plt.savefig("corr_prog.png")
 
 
     # -- Assortativity Visualization - partly "Normalized" Progressiveness Score Histogram --#
@@ -937,26 +937,37 @@ if progScore_Visual == True:
          h[0][10][10] / len(g_friendship_prog_mod_10.get_vertices())]
 
     print("Normailization by #Edges/#Nodes:")
+    print(h[0][0][0], "/", len(g_friendship_prog_mod_0.get_vertices()))
     print("Normalization of Edges 0 - 0: ", y[0])
+    print(h[0][1][1], "/", len(g_friendship_prog_mod_1.get_vertices()))
     print("Normalization of Edges 1 - 1: ", y[1])
+    print(h[0][2][2], "/", len(g_friendship_prog_mod_2.get_vertices()))
     print("Normalization of Edges 2 - 2: ", y[2])
+    print(h[0][3][3], "/", len(g_friendship_prog_mod_3.get_vertices()))
     print("Normalization of Edges 3 - 3: ", y[3])
+    print(h[0][4][4], "/", len(g_friendship_prog_mod_4.get_vertices()))
     print("Normalization of Edges 4 - 4: ", y[4])
+    print(h[0][5][5], "/", len(g_friendship_prog_mod_5.get_vertices()))
     print("Normalization of Edges 5 - 5: ", y[5])
+    print(h[0][6][6], "/", len(g_friendship_prog_mod_6.get_vertices()))
     print("Normalization of Edges 6 - 6: ", y[6])
+    print(h[0][7][7], "/", len(g_friendship_prog_mod_7.get_vertices()))
     print("Normalization of Edges 7 - 7: ", y[7])
+    print(h[0][8][8], "/", len(g_friendship_prog_mod_8.get_vertices()))
     print("Normalization of Edges 8 - 8: ", y[8])
+    print(h[0][9][9], "/", len(g_friendship_prog_mod_9.get_vertices()))
     print("Normalization of Edges 9 - 9: ", y[9])
+    print(h[0][10][10], "/", len(g_friendship_prog_mod_10.get_vertices()))
     print("Normalization of Edges 10 - 10: ", y[10])
 
 
 
     fig, ax = plt.subplots()
     plt.bar(x, y, color='grey')
-    plt.title("Histogram Progressiveness Scores Edges \n Partly Normalized (by Nodes)")
+    #plt.title("Histogram Progressiveness Scores Edges \n Partly Normalized (by Nodes)")
     plt.xlabel('Progressiveness Scores')
     plt.xticks(np.linspace(0, 10, 11))
-    plt.ylabel('Number of Edges Between Nodes \n of the Same Progressiveness')
+    plt.ylabel('Normalized Score')
     plt.savefig("progScore_edgeNom_hist_ap1.png")
     plt.close()
 
