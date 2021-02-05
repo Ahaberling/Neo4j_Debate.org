@@ -31,7 +31,7 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # All descriptives are focused on the Friendship Network and its Largest Component
 
 descLC_bool = True              #-- Identifying Largest Component
-descCompHist_bool = True        #-- Distribution (Component Size)
+descCompHist_bool = False        #-- Distribution (Component Size)
 descBroad_bool = True           #-- Number of nodes, edges, node properties, edge properties
 descDens_bool = True            #-- Density
 descAvgD_bool = True            #-- Average Degree
@@ -39,13 +39,13 @@ descDDist_bool = True           #-- Degree Distribution
 descCCG_bool = True             #-- Clustering Coefficiants (Global)
 descDia_bool = True             #-- (Pseudo-) Diameter
 descClose_bool = True           #-- Closeness Distribution
-descClosePlot_bool = True
+descClosePlot_bool = False
 descBetw_bool = True            #-- Betweenness Distribution
                                 # relies on intermediate result of descClose_bool
-descBetwPlot_bool = True
+descBetwPlot_bool = False
 descEV_bool = True              #-- Eigenvector Distribution
                                 # relies on intermediate result of descClose_bool
-descEVPlot_bool = True
+descEVPlot_bool = False
 
 
 ####################
@@ -95,9 +95,9 @@ if descCompHist_bool == True:
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.title('Histogram of Component Size\nLast two Categories (Size: 55 & 16382) not visible (Count: 1)')
+    #plt.title('Histogram of Component Size\nLast two Categories (Size: 55 & 16382) not visible (Count: 1)')
     plt.xlabel('Component Size (log)')
-    plt.ylabel('Fequency (log)')
+    plt.ylabel('Frequency (log)')
     plt.savefig("component_size_hist_ap1.png")          # unofrtunately the components of size 55 and 16382 are not displayed.
                                                         # This is due to the shrinking bar width with increase in x-axis
     plt.close()
@@ -209,9 +209,9 @@ if descDDist_bool == True:
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.title('Histogram of Degree Distribution')
+    #plt.title('Histogram of Degree Distribution')
     plt.xlabel('Degree (log)')
-    plt.ylabel('Fequency (log)')
+    plt.ylabel('Frequency (log)')
     plt.savefig("degree_hist_g_friend_ap1.png")
     plt.close()
 
@@ -230,9 +230,9 @@ if descDDist_bool == True:
     plt.bar(x, y, color='grey')
     ax.set_yscale('log')
     ax.set_xscale('log')
-    plt.title('Histogram of Degree Distribution\nLargest Component')
+    #plt.title('Histogram of Degree Distribution\nLargest Component')
     plt.xlabel('Degree (log)')
-    plt.ylabel('Fequency (log)')
+    plt.ylabel('Frequency (log)')
     plt.savefig("degree_hist_g_friend_LC_ap1.png")
     plt.close()
 
@@ -280,13 +280,15 @@ if descClose_bool == True:
     close_array_LC = close_array[close_array_index_LC]
 
     print("Avg Closeness Centrality: ", sum(close_array_LC)/len(close_array_LC))        # 0.2769106346214449
+    print("Median Closeness Centrality: ", np.median(close_array_LC) )                  # 0.27148728827604496
+    print("Mode Closeness Centrality: ", stats.mode(close_array_LC))                 # 0.2712535187945024
 
 
     plt.hist(close_array_LC, bins=np.linspace(0, 0.6, 13), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.6, 13), rotation=45, fontsize=6)
-    plt.title('Histogram of Closeness Centrality\nLargest Component')
-    plt.xlabel('Closeness')
-    plt.ylabel('Fequency (log)')
+    #plt.title('Histogram of Closeness Centrality\nLargest Component')
+    plt.xlabel('Closeness Centrality')
+    plt.ylabel('Frequency (log)')
     plt.savefig("closeness_hist_g_friend_LC_ap1.png")
     plt.close()
 
@@ -315,12 +317,14 @@ if descBetw_bool == True:
     v_between_array_LC = v_between_array[close_array_index_LC]
 
     print("Avg Vertex Betweenness Centrality: ", sum(v_between_array_LC) / len(v_between_array_LC))     # 0.000163803122932315
+    print("Median Betweenness Centrality: ", np.median(v_between_array_LC))                             # 0.0
+    print("Mode Betweenness Centrality: ", stats.mode(v_between_array_LC))                           # 0.0
 
     plt.hist(v_between_array_LC, bins=np.linspace(0, 0.14, 15), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.14, 15), rotation=45, fontsize=6)
-    plt.title('Histogram of Betweeness Centrality\nLargest Component')
-    plt.xlabel('Vertex Betweeness')
-    plt.ylabel('Fequency (log)')
+    #plt.title('Histogram of Betweeness Centrality\nLargest Component')
+    plt.xlabel('Vertex Betweeness Centrality')
+    plt.ylabel('Frequency (log)')
     plt.savefig("v_betweenness_hist_g_friend_LC_ap1.png")
     plt.close()
 
@@ -350,13 +354,15 @@ if descEV_bool == True:
 
 
     print("Avg Eigenvector Centrality: ", sum(eigenVec_array_LC)/len(eigenVec_array_LC))    #    0.0023861077211674566
+    print("Median Eigenvector Centrality: ", np.median(eigenVec_array_LC))                  #    0.0002809208037315768
+    print("Mode Eigenvector Centrality: ", stats.mode(eigenVec_array_LC))                   #    5.780324396860505e-18
 
 
     plt.hist(eigenVec_array_LC, bins=np.linspace(0, 0.18, 19), color='grey', log=True,)
     plt.xticks(np.linspace(0, 0.18, 19), rotation=45, fontsize=6)
-    plt.title('Histogram of Eigenvector Centrality\nLargest Component')
-    plt.xlabel('Eigenvector Values')
-    plt.ylabel('Fequency (log)')
+    #plt.title('Histogram of Eigenvector Centrality\nLargest Component')
+    plt.xlabel('Eigenvector Centrality')
+    plt.ylabel('Frequency (log)')
     plt.savefig("eigenVector_hist_g_friend_LC_ap1.png")
     plt.close()
 
