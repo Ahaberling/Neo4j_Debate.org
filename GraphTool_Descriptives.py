@@ -31,7 +31,7 @@ g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # All descriptives are focused on the Friendship Network and its Largest Component
 
 descLC_bool = True              #-- Identifying Largest Component
-descCompHist_bool = False        #-- Distribution (Component Size)
+descCompHist_bool = True        #-- Distribution (Component Size)
 descBroad_bool = True           #-- Number of nodes, edges, node properties, edge properties
 descDens_bool = True            #-- Density
 descAvgD_bool = True            #-- Average Degree
@@ -39,13 +39,13 @@ descDDist_bool = True           #-- Degree Distribution
 descCCG_bool = True             #-- Clustering Coefficiants (Global)
 descDia_bool = True             #-- (Pseudo-) Diameter
 descClose_bool = True           #-- Closeness Distribution
-descClosePlot_bool = False
+descClosePlot_bool = True
 descBetw_bool = True            #-- Betweenness Distribution
                                 # relies on intermediate result of descClose_bool
-descBetwPlot_bool = False
+descBetwPlot_bool = True
 descEV_bool = True              #-- Eigenvector Distribution
                                 # relies on intermediate result of descClose_bool
-descEVPlot_bool = False
+descEVPlot_bool = True
 
 
 ####################
