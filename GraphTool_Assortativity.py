@@ -27,10 +27,10 @@ g_friend = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.userID[v] != "")
 g_issues = gt.GraphView(g_all, vfilt=lambda v: g_all.vp.issuesID[v] != "")
 # g_raw_issues contains nodes: Users, Issues; edges: GIVES_ISSUES
 
-assortativePrePro_bool      = False         # Small preprocessing for assortativity analysis
-save_assortativePrePro_bool = False         # Saving preprocessed graphml
-load_assortativePrePro_bool = True         # Loading preprocessed graphml
-uniqueVal_bool              = False         # Identify value ranges of propertyMaps
+assortativePrePro_bool      = True         # Small preprocessing for assortativity analysis
+save_assortativePrePro_bool = True         # Saving preprocessed graphml
+load_assortativePrePro_bool = False         # Loading preprocessed graphml
+uniqueVal_bool              = True         # Identify value ranges of propertyMaps
 assortAllValues             = True         # Compute assortativity scores with all values
 assortProConUnd             = True         # Compute assortativity scores with Pro-, Con- and Undicided-values
 assortProCon                = True         # Compute assortativity scores with Pro-, Con-values
