@@ -5,12 +5,12 @@ import json
 
 # This file is structured in the following manner.
 
-# 1. Selection                          ### Selection of data included in database
+# 1. Selection                          ### Selection of data to be included in the database
 # 2. Initialization                     ### Specifying Neo4j access, data input
 # 3. Functions: Write Transactions      ### Defining MERGE-queries in write functions. These functions are called in "sessions - write" to populate the database
 # 4. Functions: Read Transactions       ### Defining MATCH-queries in read  functions. These functions are called in "Sessions - read"  to read     the database
 # 5. Sessions - write                   ### Parse and extract data from Json. Call write functions to populate database
-# 6. Sessions - read                    ### Not necessary for Database creation and commented out. Formally used to double check population
+# 6. Sessions - read                    ### Not necessary for Database creation and commented out. Used to double check population
 
 
 
@@ -82,11 +82,11 @@ driver = GraphDatabase.driver("neo4j://localhost:7687", auth=("neo4j", "123"))
 sample = 1
 
 if users_data_bool == True:
-    f = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/users.json', "r")
+    f = open('D:/.../users.json', "r")
     users_data = json.load(f)
 
 if debates_data_bool == True:
-    g = open('D:/Universitaet Mannheim/MMDS 6. Semester/Individual Project/debates.json', "r")
+    g = open('D:/.../debates.json', "r")
     debates_data = json.load(g)
 
 print("Initialization - done")
@@ -568,7 +568,7 @@ def read_all(tx):
 ########################
 # All neo4j nodes and edges are created in one session. At first "users_data" and "debates_data" are accessed and looped
 # over to extract all relevant information for node creation. At the same time the extracted information is feed via the
-# previously defined write-functions to the database in order to create the respective nodes. Time line nodes
+# previously defined write-functions to the database in order to create the respective nodes. Extra time line nodes
 # representing the year span of the data set are generated as well.
 # In a second step "users_data" and "debates_data" are traversed again to extract and feed edge relevant data. This way
 # neo4j edges are created as well (accessing the respective, previously defined write-functions)
@@ -625,7 +625,6 @@ with driver.session() as session:
                                       users_data[i]['number_of_won_debates'], users_data[i]['number_of_friends'], users_data[i]['number_of_opinion_arguments'],
                                       users_data[i]['number_of_opinion_questions'], users_data[i]['number_of_poll_topics'], users_data[i]['number_of_poll_votes'],
                                       users_data[i]['number_of_voted_debates'])
-            #print("user information is extracted with value ", i, users_data[i]['birthday'])
 
 
         ### Opinion Nodes ###
