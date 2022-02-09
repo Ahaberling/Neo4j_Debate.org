@@ -33,5 +33,3 @@ MMDS Individual Project 2020/2021
 
 8. GraphTool_Assortativity.py \
 	Provides a brief assortativity analysis
-
-
