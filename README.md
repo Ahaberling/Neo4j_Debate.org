@@ -1,4 +1,4 @@
-# Neo4j_Debates.org
+# Neo4j_Debate.org
 MMDS Individual Project 2020/2021
 
 * Objective: Creating a *Neo4j* Graph Database containing a data sample of the online discourse platform *debate.org*. Additionally a brief Assortativity analysis of the collected user data. 
