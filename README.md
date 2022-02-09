@@ -1,7 +1,7 @@
 # Neo4j_Debate.org
 MMDS Individual Project 2020/2021
 
-* Objective: Creating a *Neo4j* Graph Database containing a data sample of the online discourse platform *debate.org*. Additionally conducting a brief Assortativity analysis of the collected user data. 
+* Objective: Creating a *Neo4j* Graph Database containing a data sample of the online discourse platform *debate.org*. Additionally, conducting a brief Assortativity analysis of the collected user data. 
 * Data used: http://www.cs.cornell.edu/~esindurmus/ddo.html
 * Graph Database used: https://neo4j.com Version 4.1.1
 * Network Analysis tool used: https://graph-tool.skewed.de
