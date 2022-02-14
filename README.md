@@ -1,11 +1,11 @@
-# Neo4j_Debate.org
+# Graph database creation and Assortativity analysis in the context of online discourse
 MMDS Individual Project 2020/2021
 
 * Second project
 * Objective: Creating a *Neo4j* Graph Database containing a data sample of the online discourse platform *debate.org*. Additionally, conducting a brief Assortativity analysis of the collected user data. 
 * Data used: http://www.cs.cornell.edu/~esindurmus/ddo.html
-* Graph Database used: https://neo4j.com Version 4.1.1
-* Network Analysis tool used: https://graph-tool.skewed.de
+* Graph Database used: Neo4j https://neo4j.com Version 4.1.1
+* Network Analysis tool used: graph-tool https://graph-tool.skewed.de
 * Python version used: 3.7
 * Further details: *\'Alexander_Haberling_Individual_Project.pdf\'*
 
